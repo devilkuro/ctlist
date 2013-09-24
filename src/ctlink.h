@@ -45,6 +45,7 @@ private:
 	CTTack* tack;
 	unsigned int iCurrentTack; //pCurrentTack stands for the tack num that include current time. current ->[tack).
 	unsigned int iCurrentTime; //stands for current time.
+	unsigned int iMaxResource; //stands for the max available resource.
 private:
 	CTNode* accept(Request r); //to judge whether the request r can be accecpted or not
 };
