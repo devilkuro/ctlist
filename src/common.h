@@ -9,10 +9,12 @@
 #define _COMMON_H_
 
 #include "utils.h"
-//#define DEBUG FALSE
+#include "stdafx.h"
+//#define DEBUG false
+#define GN_DEBUG
 
 #define MAX 4000
 #define MAX_REQUEST_NUM 2000000
 
 
-#endif /* COMMON_H_ */
+#endif /* _COMMON_H_ */

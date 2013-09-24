@@ -8,7 +8,6 @@
 #ifndef _GENERATOR_H_
 #define _GENERATOR_H_
 
-#include "stdafx.h"
 #include "helper.h"
 #include "common.h"
 

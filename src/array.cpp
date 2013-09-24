@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "array.h"
 
 int Array::sumA = 0;

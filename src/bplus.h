@@ -51,6 +51,4 @@ public:
 	static int sumB;
 };
 
-
-
-#endif /* BPLUS_H_ */
+#endif /* _BPLUS_H_ */

@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "bplus.h"
 
 int Bplus::sumB = 0;
