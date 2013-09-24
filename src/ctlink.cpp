@@ -29,10 +29,10 @@ CTNode* CTLink::accept(Request r) {
 
 	tackLoc = getTackLoc(st);
 	// TODO need to add temp tack node maintain here. 2013-9-24
+	// TODO add index maintain here. 2013-9-24
 	if(et>iCurrentTime+CT_MAX_RESERVE_TIME) //request r is out of range.
 		return NULL;
 	if(tack[getTackLoc(st)].indexed){
-		// TODO add index maintain here. 2013-9-24
 		indexLoc = getIndexLoc(st);
 		temp=tack[tackLoc].index[indexLoc];
 	}else{
@@ -43,13 +43,7 @@ CTNode* CTLink::accept(Request r) {
 	while(temp->t<=st){
 		temp=temp->next;
 	}
-	if(temp->pre->t==st){
-		//if temp->pre is the node, use it.
-		result = temp->pre;
-	}else{
-		// TODO fix this part. 2013-9-24
-		result = new CTNode();
-	}
+	result = temp; //use result to store this start point. if request r is accepted, this node will be used to create returned result node.
 	// judge whether this request can be accepted.
 	// since the judge process will use the data before et and the judge process just use the node before node temp
 	// so the end point is the first node not before et. need ) then )+] = );
@@ -74,6 +68,7 @@ CTLink::CTLink() {
 		//initial each tack.
 		tack[i].num = 0;
 		tack[i].indexed = false; //new tack has no index
+		tack[i].iIndexMask = 0;
 		tack[i].index = NULL;
 		tack[i].node = new CTNode();
 		if (iCurrentTack % CT_TACK_ARRAY_SIZE == i) { //the first tack dose not have the pre tack.

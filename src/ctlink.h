@@ -28,6 +28,7 @@ struct CTTack{
 	unsigned int num; //the number of the nodes which are fixed by this tack. Used to decide when to build the index.
 	bool indexed; //be true, if the nodes after this tack have been indexed.
 				  //To improve the performance, it can be replaced by several bits in one int type.
+	unsigned int iIndexMask; //help maintain the index.
 	CTNode* node; //point to the first node after this tack.
 	CTNode** index; //this will point to the index of this tack if there is one, else this will be null.
 };
