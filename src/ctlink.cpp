@@ -28,8 +28,8 @@ CTNode* CTLink::accept(Request r) {
 	et = st+r.td;
 
 	tackLoc = getTackLoc(st);
-	// TODO need to add temp tack node maintain here. 2013-9-24
-	// TODO add index maintain here. 2013-9-24
+	// TODO need to add temp tack node maintain here. 2013-9-24 1.build index if necessary;
+	// TODO add index maintain here. 2013-9-24 1.fix the index before inserted node.
 	if(et>iCurrentTime+CT_MAX_RESERVE_TIME) //request r is out of range.
 		return NULL;
 	if(tack[getTackLoc(st)].indexed){
@@ -53,9 +53,9 @@ CTNode* CTLink::accept(Request r) {
 			return NULL;
 		}
 		temp=temp->next;
-
 	}
-
+	//judge process finished and request r is accepted.
+	// TODO maybe, the insert operation should be moved into function Insert().
 	return NULL;
 }
 
