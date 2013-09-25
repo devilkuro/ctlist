@@ -4,6 +4,7 @@
  *  Created on: 2013-9-18
  *      Author: Fanjing
  */
+
 #include "ctlink.h"
 
 unsigned int getTackLoc(unsigned int t){
@@ -16,10 +17,26 @@ unsigned int getIndexLoc(unsigned int t){
 	return (t%CT_TACK_INTERVAL)/CT_INDEX_INTERVAL;
 }
 
+CTNode* CTLink::insertNode(CTNode target, CTNode* loc) {
+	// TODO fix this function. 2013-9-25
+	// this function should have these function
+	// 1. maintain the index, redirect the pointer.
+	// 2. maintain the tack->num,iIndexMask, pointer and other.
+	// 3. if target is a new node, insert it ,and return it. else, modify this exist node, and return it.
+	// situation 1: this tack has just one temporary node.then replace this temporary node with target node.
+	unsigned int tackLoc = getTackLoc(target.t);
+	if(tack[tackLoc].num == 0){
+		loc->pre->t = target.t;
+		tack[tackLoc].num++;
+	}else if(tack [tackLoc].num < CT_INDEX_NUM)
+
+	return false;
+}
+
 CTNode* CTLink::accept(Request r) {
-	// TODO fix this function. 2013-9-23
-	// if request r can be accepted return the start node which is at the start time
-	// if there is already a node, return it, else insert one, and return it.
+	// update at 1309251613: this function has been changed into following function.
+	// if request r can be accepted return the start node which is the first node after the start time
+	// to avoid point to NULL, the tack array size should be two more than the tack number. one to record the start resource, one to record end point.
 	// else if request r can not be accepted then return NULL.
 	unsigned int st,et; // st stands for the start time of this request, et stands for the end time.
 	CTNode* result,* temp; //result is used to store the result node. temp is used as temp node to mark the search start.
@@ -28,8 +45,6 @@ CTNode* CTLink::accept(Request r) {
 	et = st+r.td;
 
 	tackLoc = getTackLoc(st);
-	// TODO need to add temp tack node maintain here. 2013-9-24 1.build index if necessary;
-	// TODO add index maintain here. 2013-9-24 1.fix the index before inserted node.
 	if(et>iCurrentTime+CT_MAX_RESERVE_TIME) //request r is out of range.
 		return NULL;
 	if(tack[getTackLoc(st)].indexed){
@@ -55,8 +70,7 @@ CTNode* CTLink::accept(Request r) {
 		temp=temp->next;
 	}
 	//judge process finished and request r is accepted.
-	// TODO maybe, the insert operation should be moved into function Insert().
-	return NULL;
+	return result;
 }
 
 CTLink::CTLink() {
