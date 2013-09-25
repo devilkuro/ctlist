@@ -7,12 +7,12 @@
 
 #include "ctlink.h"
 
-unsigned int getTackLoc(unsigned int t){
+unsigned int CTLink::getTackLoc(unsigned int t){
 	//get the tack index of the time t.
 	return (t/CT_TACK_INTERVAL)%CT_TACK_ARRAY_SIZE;
 }
 
-unsigned int getIndexLoc(unsigned int t){
+unsigned int CTLink::getIndexLoc(unsigned int t){
 	//get the index num of the time t.
 	return (t%CT_TACK_INTERVAL)/CT_INDEX_INTERVAL;
 }
@@ -28,9 +28,11 @@ CTNode* CTLink::insertNode(CTNode target, CTNode* loc) {
 	if(tack[tackLoc].num == 0){
 		loc->pre->t = target.t;
 		tack[tackLoc].num++;
-	}else if(tack [tackLoc].num < CT_INDEX_NUM)
+	}else if(tack [tackLoc].num < CT_INDEX_NUM){
+		//TODO fix this part. 2013-9-25
+	}
 
-	return false;
+	return NULL;
 }
 
 CTNode* CTLink::accept(Request r) {
@@ -74,6 +76,13 @@ CTNode* CTLink::accept(Request r) {
 }
 
 CTLink::CTLink() {
+	CT_TACK_NUM = 64;
+	CT_INDEX_NUM = 8;
+	CT_INDEX_THRESHOLD = (unsigned int) log2(CT_TACK_NUM);
+	CT_MAX_RESERVE_TIME = 4096; //64*8*8=4096
+	CT_TACK_ARRAY_SIZE = CT_TACK_NUM+2;
+	CT_TACK_INTERVAL = (CT_MAX_RESERVE_TIME+CT_TACK_NUM-1)/CT_TACK_NUM;
+	CT_INDEX_INTERVAL = (CT_TACK_INTERVAL+CT_INDEX_NUM-1)/CT_INDEX_NUM;
 	iCurrentTack = 0;
 	iCurrentTime = 0;
 	iMaxResource = MAX;

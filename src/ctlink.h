@@ -32,17 +32,17 @@ public:
 	~CTLink();
 public:
 	// add public member variable here
+	unsigned int CT_TACK_NUM;
+	unsigned int CT_INDEX_NUM;
+	unsigned int CT_INDEX_THRESHOLD;
+	unsigned int CT_MAX_RESERVE_TIME;
+	unsigned int CT_TACK_ARRAY_SIZE;
+	unsigned int CT_TACK_INTERVAL; //decide the interval between two tacks.
+	unsigned int CT_INDEX_INTERVAL; //decide the interval between two indexes.
 public:
 	bool Insert(Request r); //return true if success.
 	bool SetTime(unsigned int t); //set the current time.
 private:
-	const static unsigned int CT_TACK_NUM = 64;
-	const static unsigned int CT_INDEX_NUM = 8;
-	const static unsigned int CT_INDEX_THRESHOLD = (unsigned int) log2(CT_TACK_NUM);
-	const static unsigned int CT_MAX_RESERVE_TIME = 4096; //64*8*8=4096
-	const static unsigned int CT_TACK_ARRAY_SIZE = CT_TACK_NUM+2;
-	const static unsigned int CT_TACK_INTERVAL = (CT_MAX_RESERVE_TIME+CT_TACK_NUM-1)/CT_TACK_NUM; //decide the interval between two tacks.
-	const static unsigned int CT_INDEX_INTERVAL = (CT_TACK_INTERVAL+CT_INDEX_NUM-1)/CT_INDEX_NUM; //decide the interval between two indexes.
 
 	CTTack* tack;
 	unsigned int iCurrentTack; //pCurrentTack stands for the tack num that include current time. current ->[tack).
@@ -51,6 +51,8 @@ private:
 private:
 	CTNode* insertNode(CTNode target, CTNode* loc); //insert target node into the link list, node loc stands for the first node after target node.
 	CTNode* accept(Request r); //to judge whether the request r can be accecpted or not
+	unsigned int getTackLoc(unsigned int t);
+	unsigned int getIndexLoc(unsigned int t);
 };
 
 

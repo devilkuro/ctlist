@@ -45,7 +45,6 @@ int main() {
 			cout << "read:: Request(" << rq->bw << " , " << rq->ts << " , "
 			<< rq->td << " ):" << *interval << "+" << *z + 0 << endl;
 		}
-
 	}
 	file.close();
 

@@ -1,8 +1,9 @@
 /*
  * helper.h
  *
- *  Created on: 2013-9-15
- *      Author: Fanjing
+ *  Edited on: 2013-9-15
+ *      Author: Dangping
+ *      Edited by Fanjing on 2013-9-15
  */
 
 #ifndef _HELPER_H_
