@@ -49,7 +49,7 @@ private:
 	unsigned int iCurrentTime; //stands for current time.
 	unsigned int iMaxResource; //stands for the max available resource.
 private:
-	CTNode* insertNode(CTNode target, CTNode* loc); //insert target node into the link list, node loc stands for the first node after target node.
+	CTNode* insertNode(unsigned int t, CTNode* loc); //insert target node into the link list, node loc stands for the first node after target node.
 	CTNode* accept(Request r); //to judge whether the request r can be accecpted or not
 	unsigned int getTackLoc(unsigned int t);
 	unsigned int getIndexLoc(unsigned int t);

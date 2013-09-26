@@ -8,11 +8,11 @@
 #include "Generator.h"
 
 Generator::Generator() {
-	// TODO initialize the parameters here.
+	// there is nothing to do here at now.
 }
 
 Generator::~Generator() {
-	// TODO Auto-generated destructor stub
+	// there is nothing to do here at now.
 }
 
 bool Generator::output(const char* fileName, unsigned int t) {

@@ -17,19 +17,43 @@ unsigned int CTLink::getIndexLoc(unsigned int t){
 	return (t%CT_TACK_INTERVAL)/CT_INDEX_INTERVAL;
 }
 
-CTNode* CTLink::insertNode(CTNode target, CTNode* loc) {
+CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
 	// TODO fix this function. 2013-9-25
 	// this function should have these function
 	// 1. maintain the index, redirect the pointer.
 	// 2. maintain the tack->num,iIndexMask, pointer and other.
 	// 3. if target is a new node, insert it ,and return it. else, modify this exist node, and return it.
-	// situation 1: this tack has just one temporary node.then replace this temporary node with target node.
-	unsigned int tackLoc = getTackLoc(target.t);
+
+	CTNode* result;
+	CTNode* pre = loc->pre;
+	unsigned int tackLoc = getTackLoc(t);
 	if(tack[tackLoc].num == 0){
-		loc->pre->t = target.t;
+		// situation 1: this tack has just one temporary node. then replace this temporary node with target node.
+		result = pre;
+		result->t = t;
 		tack[tackLoc].num++;
-	}else if(tack [tackLoc].num < CT_INDEX_NUM){
+	}else if(tack[tackLoc].num < CT_INDEX_THRESHOLD){
 		//TODO fix this part. 2013-9-25
+		// situation 2: this tack already has at last one normal node. so insert node before loc node.
+		// in this insert operation, if the node at time t has already exist, just return it.
+		// else, insert new one, and return the new node.
+		// and after insert operation, if tack[tackLoc].node == loc , then change tack[tackLoc].node to this new node.
+		if(pre->t == t){
+			result = pre;
+		}else {
+			result = new CTNode();
+			result->t = t;
+			result->pre = pre;
+			result->next = loc;
+			pre->next = result;
+			loc->pre = result;
+			if(tack[tackLoc].node == loc){
+				tack[tackLoc].node = result;
+			}
+			tack[tackLoc].num++;
+		}
+	}else if (tack[tackLoc].num == CT_INDEX_THRESHOLD){
+		//
 	}
 
 	return NULL;
