@@ -7,14 +7,14 @@
 
 #include "ctlink.h"
 
-unsigned int CTLink::getTackLoc(unsigned int t){
+unsigned int CTLink::getTackLoc(unsigned int t) {
 	//get the tack index of the time t.
-	return (t/CT_TACK_INTERVAL)%CT_TACK_ARRAY_SIZE;
+	return (t / CT_TACK_INTERVAL) % CT_TACK_ARRAY_SIZE;
 }
 
-unsigned int CTLink::getIndexLoc(unsigned int t){
+unsigned int CTLink::getIndexLoc(unsigned int t) {
 	//get the index num of the time t.
-	return (t%CT_TACK_INTERVAL)/CT_INDEX_INTERVAL;
+	return (t % CT_TACK_INTERVAL) / CT_INDEX_INTERVAL;
 }
 
 CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
@@ -26,34 +26,36 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
 
 	CTNode* result;
 	CTNode* pre = loc->pre;
-	unsigned int tackLoc = getTackLoc(t);
-	if(tack[tackLoc].num == 0){
-		// situation 1: this tack has just one temporary node. then replace this temporary node with target node.
+	// in this insert operation, if the node at time t has already exist, just return it.
+	// else, insert new one, and return the new node.
+	if (pre->t == t) {
 		result = pre;
-		result->t = t;
-		tack[tackLoc].num++;
-	}else if(tack[tackLoc].num < CT_INDEX_THRESHOLD){
-		//TODO fix this part. 2013-9-25
-		// situation 2: this tack already has at last one normal node. so insert node before loc node.
-		// in this insert operation, if the node at time t has already exist, just return it.
-		// else, insert new one, and return the new node.
-		// and after insert operation, if tack[tackLoc].node == loc , then change tack[tackLoc].node to this new node.
-		if(pre->t == t){
+	} else {
+		unsigned int tackLoc = getTackLoc(t);
+		CTTack* theTack = tack[tackLoc];
+		if (theTack->num == 0) {
+			// situation 1: this tack has just one temporary node. then replace this temporary node with target node.
 			result = pre;
-		}else {
+			result->t = t;
+			theTack->num++;
+		} else if (theTack->num < CT_INDEX_THRESHOLD) {
+			// situation 2: this tack already has at last one normal node. so insert node before loc node.
+			// and after insert operation, if theTack->node == loc , then change theTack->node to this new node.
 			result = new CTNode();
 			result->t = t;
 			result->pre = pre;
 			result->next = loc;
 			pre->next = result;
 			loc->pre = result;
-			if(tack[tackLoc].node == loc){
-				tack[tackLoc].node = result;
+			if (theTack->node == loc) {
+				theTack->node = result;
 			}
-			tack[tackLoc].num++;
+			theTack->num++;
+		} else if (theTack->num == CT_INDEX_THRESHOLD) {
+			// TODO fix this part. 2013-9-26
+			// situation 3: in this situation, a index should be built in this tack.
+			// step 1: maybe this step can be merged into situation 2.
 		}
-	}else if (tack[tackLoc].num == CT_INDEX_THRESHOLD){
-		//
 	}
 
 	return NULL;
@@ -64,36 +66,36 @@ CTNode* CTLink::accept(Request r) {
 	// if request r can be accepted return the start node which is the first node after the start time
 	// to avoid point to NULL, the tack array size should be two more than the tack number. one to record the start resource, one to record end point.
 	// else if request r can not be accepted then return NULL.
-	unsigned int st,et; // st stands for the start time of this request, et stands for the end time.
-	CTNode* result,* temp; //result is used to store the result node. temp is used as temp node to mark the search start.
+	unsigned int st, et; // st stands for the start time of this request, et stands for the end time.
+	CTNode* result, *temp; //result is used to store the result node. temp is used as temp node to mark the search start.
 	unsigned int tackLoc, indexLoc; //used to store the loc of tack and index, if there is an index.
 	st = iCurrentTime + r.ts;
-	et = st+r.td;
+	et = st + r.td;
 
 	tackLoc = getTackLoc(st);
-	if(et>iCurrentTime+CT_MAX_RESERVE_TIME) //request r is out of range.
+	if (et > iCurrentTime + CT_MAX_RESERVE_TIME) //request r is out of range.
 		return NULL;
-	if(tack[getTackLoc(st)].indexed){
+	if (tack[getTackLoc(st)].indexed) {
 		indexLoc = getIndexLoc(st);
-		temp=tack[tackLoc].index[indexLoc];
-	}else{
-		temp=tack[tackLoc].node;
+		temp = tack[tackLoc].index[indexLoc];
+	} else {
+		temp = tack[tackLoc].node;
 	} //select start point to search. st->[temp->t,NULL)
-	// select start point to judge. the result needs sp.t->[st,next), next node is the first node after sp.
-	// since the judge process needs to use the node before start point, so start point is the first node after st.
-	while(temp->t<=st){
-		temp=temp->next;
+	  // select start point to judge. the result needs sp.t->[st,next), next node is the first node after sp.
+	  // since the judge process needs to use the node before start point, so start point is the first node after st.
+	while (temp->t <= st) {
+		temp = temp->next;
 	}
 	result = temp; //use result to store this start point. if request r is accepted, this node will be used to create returned result node.
 	// judge whether this request can be accepted.
 	// since the judge process will use the data before et and the judge process just use the node before node temp
 	// so the end point is the first node not before et. need ) then )+] = );
 	// pseudo-code: judge: if temp->pre->rs + r.bw > iMaxResource RETURN NULL;
-	while(temp->t<et){
-		if(temp->pre->rs + r.bw > iMaxResource){
+	while (temp->t < et) {
+		if (temp->pre->rs + r.bw > iMaxResource) {
 			return NULL;
 		}
-		temp=temp->next;
+		temp = temp->next;
 	}
 	//judge process finished and request r is accepted.
 	return result;
@@ -104,9 +106,9 @@ CTLink::CTLink() {
 	CT_INDEX_NUM = 8;
 	CT_INDEX_THRESHOLD = (unsigned int) log2(CT_TACK_NUM);
 	CT_MAX_RESERVE_TIME = 4096; //64*8*8=4096
-	CT_TACK_ARRAY_SIZE = CT_TACK_NUM+2;
-	CT_TACK_INTERVAL = (CT_MAX_RESERVE_TIME+CT_TACK_NUM-1)/CT_TACK_NUM;
-	CT_INDEX_INTERVAL = (CT_TACK_INTERVAL+CT_INDEX_NUM-1)/CT_INDEX_NUM;
+	CT_TACK_ARRAY_SIZE = CT_TACK_NUM + 2;
+	CT_TACK_INTERVAL = (CT_MAX_RESERVE_TIME + CT_TACK_NUM - 1) / CT_TACK_NUM;
+	CT_INDEX_INTERVAL = (CT_TACK_INTERVAL + CT_INDEX_NUM - 1) / CT_INDEX_NUM;
 	iCurrentTack = 0;
 	iCurrentTime = 0;
 	iMaxResource = MAX;
@@ -128,7 +130,8 @@ CTLink::CTLink() {
 			tack[i].node->pre = tack[(i - 1) % CT_TACK_ARRAY_SIZE].node;
 			tack[i].node->next = tack[(i + 1) % CT_TACK_ARRAY_SIZE].node;
 		}
-		tack[i].node->t = ((i+CT_TACK_ARRAY_SIZE-iCurrentTack)%CT_TACK_ARRAY_SIZE)*CT_TACK_INTERVAL;
+		tack[i].node->t = ((i + CT_TACK_ARRAY_SIZE - iCurrentTack)
+				% CT_TACK_ARRAY_SIZE) * CT_TACK_INTERVAL;
 		tack[i].node->rs = 0;
 	}
 }
@@ -161,5 +164,4 @@ bool CTLink::SetTime(unsigned int t) {
 	//manage the current time and maintain memory.
 	return false;
 }
-
 
