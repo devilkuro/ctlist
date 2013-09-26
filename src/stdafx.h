@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <tchar.h>
+#include <limits.h>
 
 
 #include <time.h>

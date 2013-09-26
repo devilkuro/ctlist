@@ -26,7 +26,7 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
 
 	CTNode* result;
 	CTNode* pre = loc->pre;
-	// in this insert operation, if the node at time t has already exist, just return it.
+	// situation 0: in this insert operation, if the node at time t has already exist, just return it.
 	// else, insert new one, and return the new node.
 	if (pre->t == t) {
 		result = pre;
@@ -38,7 +38,7 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
 			result = pre;
 			result->t = t;
 			theTack->num++;
-		} else if (theTack->num < CT_INDEX_THRESHOLD) {
+		} else {
 			// situation 2: this tack already has at last one normal node. so insert node before loc node.
 			// and after insert operation, if theTack->node == loc , then change theTack->node to this new node.
 			result = new CTNode();
@@ -51,10 +51,27 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
 				theTack->node = result;
 			}
 			theTack->num++;
-		} else if (theTack->num == CT_INDEX_THRESHOLD) {
-			// TODO fix this part. 2013-9-26
-			// situation 3: in this situation, a index should be built in this tack.
-			// step 1: maybe this step can be merged into situation 2.
+			if(theTack->num == CT_INDEX_THRESHOLD){
+				// TODO fix this part. 2013-9-26
+				// situation 3: if after insert this new node, the theTack->num is bigger than CT_INDEX_THERSHOLD, then a index needs to be built in this tack.
+				// step 1: initial the index array and index mask.
+				theTack->index = new CTNode*[CT_INDEX_NUM];
+				theTack->iIndexMask = UINT_MAX<<CT_INDEX_NUM;
+				// step 2: put node in certain index point.
+				CTNode* temp = theTack->node;
+				for(unsigned int i=0;i<CT_INDEX_NUM;i++){
+
+/*					if(getIndexLoc(temp->t)<i){
+						temp=temp->next;
+						if(getTackLoc(temp->t)!=tackLoc){ // if
+							break;
+						}
+					}else if(getIndexLoc(temp->t)>=i){
+						theTack->index[i]=temp;
+						continue;
+					}*/
+				}
+			}
 		}
 	}
 
@@ -67,13 +84,13 @@ CTNode* CTLink::accept(Request r) {
 	// to avoid point to NULL, the tack array size should be two more than the tack number. one to record the start resource, one to record end point.
 	// else if request r can not be accepted then return NULL.
 	unsigned int st, et; // st stands for the start time of this request, et stands for the end time.
-	CTNode* result, *temp; //result is used to store the result node. temp is used as temp node to mark the search start.
-	unsigned int tackLoc, indexLoc; //used to store the loc of tack and index, if there is an index.
+	CTNode* result, *temp; // result is used to store the result node. temp is used as temp node to mark the search start.
+	unsigned int tackLoc, indexLoc; // used to store the loc of tack and index, if there is an index.
 	st = iCurrentTime + r.ts;
 	et = st + r.td;
 
 	tackLoc = getTackLoc(st);
-	if (et > iCurrentTime + CT_MAX_RESERVE_TIME) //request r is out of range.
+	if (et > iCurrentTime + CT_MAX_RESERVE_TIME) // request r is out of range.
 		return NULL;
 	if (tack[getTackLoc(st)].indexed) {
 		indexLoc = getIndexLoc(st);
