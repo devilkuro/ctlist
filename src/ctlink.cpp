@@ -32,7 +32,7 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
 		result = pre;
 	} else {
 		unsigned int tackLoc = getTackLoc(t);
-		CTTack* theTack = tack[tackLoc];
+		CTTack* theTack = &tack[tackLoc];
 		if (theTack->num == 0) {
 			// situation 1: this tack has just one temporary node. then replace this temporary node with target node.
 			result = pre;
@@ -43,6 +43,7 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
 			// and after insert operation, if theTack->node == loc , then change theTack->node to this new node.
 			result = new CTNode();
 			result->t = t;
+			result->rs = result->pre->rs;
 			result->pre = pre;
 			result->next = loc;
 			pre->next = result;
@@ -52,25 +53,37 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
 			}
 			theTack->num++;
 			if(theTack->num == CT_INDEX_THRESHOLD){
-				// TODO fix this part. 2013-9-26
-				// situation 3: if after insert this new node, the theTack->num is bigger than CT_INDEX_THERSHOLD, then a index needs to be built in this tack.
+				// situation 3: if after insert this new node, the theTack->num is equal to CT_INDEX_THERSHOLD, then an index needs to be built in this tack.
 				// step 1: initial the index array and index mask.
 				theTack->index = new CTNode*[CT_INDEX_NUM];
 				theTack->iIndexMask = UINT_MAX<<CT_INDEX_NUM;
+				theTack->indexed = true;
 				// step 2: put node in certain index point.
-				CTNode* temp = theTack->node;
+				CTNode* tempNode = theTack->node;
+				bool outFlag = false;
 				for(unsigned int i=0;i<CT_INDEX_NUM;i++){
-
-/*					if(getIndexLoc(temp->t)<i){
-						temp=temp->next;
-						if(getTackLoc(temp->t)!=tackLoc){ // if
-							break;
-						}
-					}else if(getIndexLoc(temp->t)>=i){
-						theTack->index[i]=temp;
+					// if tempNode is out of the tack, point index[i] to this node.
+					if(outFlag){
+						theTack->index[i] = tempNode;
 						continue;
-					}*/
-				}
+					}else {
+						//find the start of next index.
+						while (getIndexLoc(tempNode->t) < i) {
+							tempNode = tempNode->next;
+							if (getTackLoc(tempNode->t) != tackLoc) {
+								outFlag = true;
+								break;
+							}
+						}
+						theTack->index[i] = tempNode;
+						//if tempNode is in the index[i], modify the index mask. make sure the tempNode is in the range of this tack before judgment.
+						if(!outFlag&&getIndexLoc(tempNode->t)==i){
+							theTack->iIndexMask |= 1<<i;
+						}
+					}
+				} // end of the initialization of the index.
+			} else if(theTack->indexed){
+				// TODO fix this part. 2013-9-27
 			}
 		}
 	}
@@ -178,7 +191,7 @@ bool CTLink::Insert(Request r) {
 
 bool CTLink::SetTime(unsigned int t) {
 	// TODO fix this function. 2013-9-24
-	//manage the current time and maintain memory.
+	//maintain the current time and memory.
 	return false;
 }
 
