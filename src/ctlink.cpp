@@ -14,7 +14,21 @@ unsigned int CTLink::getTackLoc(unsigned int t) {
 
 bool CTLink::clearTack(unsigned int n) {
 	// TODO finish this function. 2013-9-28
-
+	// this function will clear this tack, and link this tack to last usable tack.
+	// 1. clear all tack; 2. link this tack to the last tack.
+	unsigned int loc = n%CT_TACK_ARRAY_SIZE;
+	unsigned int pre = (n-1)%CT_TACK_ARRAY_SIZE;
+	unsigned int next = (n+1)%CT_TACK_ARRAY_SIZE;
+	// clear this tack.
+	// 1st. delete the node.
+	unsigned int et = tack[next].node->t;
+	for(CTNode* temp = tack[loc].node;temp->t<et;){
+		temp = temp->next;
+		delete(temp->pre);
+	}
+	tack[next].node->pre = NULL;
+	// TODO Important!! there is a big problem in this function. It is necessary to keep a live tack before current tack to record the start resource.
+	// TODO FIX THIS PROBLEM TOMMOROW!!
 	return false;
 }
 
@@ -198,9 +212,7 @@ CTLink::~CTLink() {
 	delete (ptrNode);
 	for (unsigned int i = 0; i < CT_TACK_ARRAY_SIZE; i++) {
 		if (tack[i].indexed) {
-			for (unsigned int j = 0; j < CT_INDEX_NUM; j++) {
-				delete (tack[i].index[j]);
-			}
+			delete (tack[i].index);
 		}
 	} //delete all indexes
 	delete (tack); //delete the tacks
