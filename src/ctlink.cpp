@@ -24,7 +24,7 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
 	// 2. maintain the tack->num,iIndexMask, pointer and other.
 	// 3. if target is a new node, insert it ,and return it. else, modify this exist node, and return it.
 
-	CTNode* result;
+	CTNode* result = NULL;
 	CTNode* pre = loc->pre;
 	// situation 0: in this insert operation, if the node at time t has already exist, just return it.
 	// else, insert new one, and return the new node.
@@ -83,12 +83,30 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
 					}
 				} // end of the initialization of the index.
 			} else if(theTack->indexed){
-				// TODO fix this part. 2013-9-27
+				// situation 4: if this tack has index, should maintain the index.
+				unsigned int indexLoc = getIndexLoc(t);
+				// if the node after result node is the index node, point the index to result node.
+				if(theTack->index[indexLoc]==loc){
+					theTack->index[indexLoc] = result;
+					// after change the index, the index before time t needs to be maintained, and the iIndexMask needs to be modified.
+					if(theTack->iIndexMask != UINT_MAX){
+						// 1st. modify the mask of indexLoc.
+						theTack->iIndexMask |= 1<<indexLoc;
+						// 2nd. modify the before index mask if necessary.
+						for(int i = indexLoc-1;i>=0;i--){
+							if(theTack->index[i]==loc){
+								theTack->index[i]=result;
+							}else{
+								break;
+							}
+						} // end of before index maintain loop.
+					}
+				} //end of all index maintenance.
 			}
-		}
-	}
+		}// end of insert new node.
+	} // end of insertion.
 
-	return NULL;
+	return result;
 }
 
 CTNode* CTLink::accept(Request r) {
