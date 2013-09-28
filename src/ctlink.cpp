@@ -18,7 +18,6 @@ unsigned int CTLink::getIndexLoc(unsigned int t) {
 }
 
 CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
-	// TODO fix this function. 2013-9-25
 	// this function should have these function
 	// 1. maintain the index, redirect the pointer.
 	// 2. maintain the tack->num,iIndexMask, pointer and other.
@@ -209,7 +208,7 @@ bool CTLink::Insert(Request r) {
 
 bool CTLink::SetTime(unsigned int t) {
 	// TODO fix this function. 2013-9-24
-	//maintain the current time and memory.
+	// maintain the current time and memory.
 	return false;
 }
 
