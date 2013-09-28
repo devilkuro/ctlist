@@ -12,6 +12,12 @@ unsigned int CTLink::getTackLoc(unsigned int t) {
 	return (t / CT_TACK_INTERVAL) % CT_TACK_ARRAY_SIZE;
 }
 
+bool CTLink::clearTack(unsigned int n) {
+	// TODO finish this function. 2013-9-28
+
+	return false;
+}
+
 unsigned int CTLink::getIndexLoc(unsigned int t) {
 	//get the index num of the time t.
 	return (t % CT_TACK_INTERVAL) / CT_INDEX_INTERVAL;
@@ -201,14 +207,37 @@ CTLink::~CTLink() {
 }
 
 bool CTLink::Insert(Request r) {
-	//TODO fix this function. 2013-9-21
-
-	return false;
+	// accept judgment.
+	CTNode* loc = accept(r);
+	if(loc == NULL){
+		// if not accepted, return FALSE.
+		return false;
+	}else{
+		// if accepted, modify the resource of each node.
+		unsigned int st = iCurrentTime+r.ts;
+		unsigned int et = st+r.td;
+		// select the start point.
+		CTNode* temp = insertNode(st,loc);
+		// change the resource before the node before et.
+		// Since the node before et should be modify after node et has been insert.(to keep the rs is unmodified.)
+		while(temp->next->t<et){
+			temp->rs = temp->rs+r.bw;
+			temp = temp->next;
+		}
+		// if there is no node at et, insert one.
+		if(temp->next->t > et){
+			insertNode(et, temp->next);
+		}
+		// after insertion of the node et, the node before et can be modified.
+		temp->rs = temp->rs+r.bw;
+	}
+	return true;
 }
 
 bool CTLink::SetTime(unsigned int t) {
 	// TODO fix this function. 2013-9-24
 	// maintain the current time and memory.
+
 	return false;
 }
 

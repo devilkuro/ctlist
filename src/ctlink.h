@@ -51,6 +51,7 @@ private:
 private:
 	CTNode* insertNode(unsigned int t, CTNode* loc); //insert target node into the link list, node loc stands for the first node after target node.
 	CTNode* accept(Request r); //to judge whether the request r can be accecpted or not
+	bool clearTack(unsigned int n); // to clear tack n.
 	unsigned int getTackLoc(unsigned int t);
 	unsigned int getIndexLoc(unsigned int t);
 };
