@@ -27,8 +27,8 @@ bool CTLink::clearTack(unsigned int n) {
 		delete(temp->pre);
 	}
 	tack[next].node->pre = NULL;
-	// TODO Important!! there is a big problem in this function. It is necessary to keep a live tack before current tack to record the start resource.
-	// TODO FIX THIS PROBLEM TOMMOROW!!
+	// Important!! there is a big problem in this function. It is necessary to keep a live tack before current tack to record the start resource.
+	// THIS HAS BEEN FIXED AT 1309291826.
 	return false;
 }
 
@@ -173,7 +173,7 @@ CTLink::CTLink() {
 	CT_INDEX_NUM = 8;
 	CT_INDEX_THRESHOLD = (unsigned int) log2(CT_TACK_NUM);
 	CT_MAX_RESERVE_TIME = 4096; //64*8*8=4096
-	CT_TACK_ARRAY_SIZE = CT_TACK_NUM + 2;
+	CT_TACK_ARRAY_SIZE = CT_TACK_NUM + 3; // one to keep all alive node in range; one to record start node; one to record end node.
 	CT_TACK_INTERVAL = (CT_MAX_RESERVE_TIME + CT_TACK_NUM - 1) / CT_TACK_NUM;
 	CT_INDEX_INTERVAL = (CT_TACK_INTERVAL + CT_INDEX_NUM - 1) / CT_INDEX_NUM;
 	iCurrentTack = 0;
@@ -190,6 +190,9 @@ CTLink::CTLink() {
 		if (iCurrentTack % CT_TACK_ARRAY_SIZE == i) { //the first tack dose not have the pre tack.
 			tack[i].node->pre = NULL;
 			tack[i].node->next = tack[(i + 1) % CT_TACK_ARRAY_SIZE].node;
+			if(iCurrentTack == 0){
+				tack[i].num = 1; // if the current tack is the 0 tack, make the start node at time 0 to a normal node. To fix the NULL point bug.
+			}
 		} else if (iCurrentTack % CT_TACK_ARRAY_SIZE - 1 == i) { //the last tack dose not have the next tack.
 			tack[i].node->pre = tack[(i - 1) % CT_TACK_ARRAY_SIZE].node;
 			tack[i].node->next = NULL;
