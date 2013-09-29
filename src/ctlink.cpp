@@ -13,7 +13,7 @@ unsigned int CTLink::getTackLoc(unsigned int t) {
 }
 
 bool CTLink::clearTack(unsigned int n) {
-	// this function will clear this tack, and link this tack to last usable tack.
+	// this function will clear this tack, and link this tack to last usable tack. n stands for the tack number.
 	// 1. clear all tack; 2. link this tack to the last tack.
 	unsigned int loc = n%CT_TACK_ARRAY_SIZE;
 	unsigned int pre = (n-1)%CT_TACK_ARRAY_SIZE;
@@ -196,6 +196,7 @@ CTLink::CTLink() {
 	CT_TACK_ARRAY_SIZE = CT_TACK_NUM + 3; // one to keep all alive node in range; one to record start node; one to record end node.
 	CT_TACK_INTERVAL = (CT_MAX_RESERVE_TIME + CT_TACK_NUM - 1) / CT_TACK_NUM; // to make sure that CT_TACK_INTERVAL * CT_TACK_NUM >= CT_MAX_RESERVE_TIME.
 	CT_INDEX_INTERVAL = (CT_TACK_INTERVAL + CT_INDEX_NUM - 1) / CT_INDEX_NUM;
+	iStartTack = 0;
 	iCurrentTack = 0;
 	iCurrentTime = 0;
 	iMaxResource = MAX;
@@ -207,13 +208,13 @@ CTLink::CTLink() {
 		tack[i].iIndexMask = 0;
 		tack[i].index = NULL;
 		tack[i].node = new CTNode();
-		if (iCurrentTack % CT_TACK_ARRAY_SIZE == i) { //the first tack dose not have the pre tack.
+		if (iStartTack % CT_TACK_ARRAY_SIZE == i) { //the first tack dose not have the pre tack.
 			tack[i].node->pre = NULL;
 			tack[i].node->next = tack[(i + 1) % CT_TACK_ARRAY_SIZE].node;
-			if(iCurrentTack == 0){
+			if(iStartTack == 0){
 				tack[i].num = 1; // if the current tack is the 0 tack, make the start node at time 0 to a normal node. To fix the NULL point bug.
 			}
-		} else if (iCurrentTack % CT_TACK_ARRAY_SIZE - 1 == i) { //the last tack dose not have the next tack.
+		} else if (iStartTack % CT_TACK_ARRAY_SIZE - 1 == i) { //the last tack dose not have the next tack.
 			tack[i].node->pre = tack[(i - 1) % CT_TACK_ARRAY_SIZE].node;
 			tack[i].node->next = NULL;
 		} else { //the middle tacks have both pre tack and next tack.
@@ -221,8 +222,8 @@ CTLink::CTLink() {
 			tack[i].node->next = tack[(i + 1) % CT_TACK_ARRAY_SIZE].node;
 		}
 		tack[i].node->t = (((i + CT_TACK_ARRAY_SIZE
-				- (iCurrentTack % CT_TACK_ARRAY_SIZE)) % CT_TACK_ARRAY_SIZE)
-				+ iCurrentTack) * CT_TACK_INTERVAL;
+				- (iStartTack % CT_TACK_ARRAY_SIZE)) % CT_TACK_ARRAY_SIZE)
+				+ iStartTack) * CT_TACK_INTERVAL;
 		tack[i].node->rs = 0;
 	}
 }
@@ -271,9 +272,13 @@ bool CTLink::Insert(Request r) {
 }
 
 bool CTLink::SetTime(unsigned int t) {
-	// TODO fix this function. 2013-9-24
 	// maintain the current time and memory.
-
-	return false;
+	iCurrentTime = t;
+	iCurrentTack = getTackLoc(iCurrentTime);
+	// the tack is 1 smaller than iCurrentTack is to store the start resource, so if a node is 2 or more smaller than iCurrentTack, it needs to be cleared.
+	for(;iStartTack < iCurrentTack-1;iStartTack++){
+		clearTack(iStartTack);
+	}
+	// only return true.
+	return true;
 }
-

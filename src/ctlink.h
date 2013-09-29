@@ -45,6 +45,7 @@ public:
 private:
 
 	CTTack* tack;
+	unsigned int iStartTack; // to mark the start tack.
 	unsigned int iCurrentTack; //pCurrentTack stands for the tack num that include current time. current ->[tack).
 	unsigned int iCurrentTime; //stands for current time.
 	unsigned int iMaxResource; //stands for the max available resource.
