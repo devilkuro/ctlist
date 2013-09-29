@@ -13,7 +13,6 @@ unsigned int CTLink::getTackLoc(unsigned int t) {
 }
 
 bool CTLink::clearTack(unsigned int n) {
-	// TODO finish this function. 2013-9-28
 	// this function will clear this tack, and link this tack to last usable tack.
 	// 1. clear all tack; 2. link this tack to the last tack.
 	unsigned int loc = n%CT_TACK_ARRAY_SIZE;
@@ -26,10 +25,31 @@ bool CTLink::clearTack(unsigned int n) {
 		temp = temp->next;
 		delete(temp->pre);
 	}
+	// fix the node next to this tack.
 	tack[next].node->pre = NULL;
 	// Important!! there is a big problem in this function. It is necessary to keep a live tack before current tack to record the start resource.
 	// THIS HAS BEEN FIXED AT 1309291826.
-	return false;
+	// 2nd. delete the index if necessary.
+	if(tack[loc].indexed){
+		delete(tack[loc].index);
+	}
+	// link this tack to the last tack.
+	// since the last tack is used to store the end point, it has only one node which stands for the end time.
+	// so just initialize this tack and link it to the the start node of previous tack.
+	// 1st. initial this tack.
+	tack[loc].num = 0;
+	tack[loc].indexed = false; //new tack has no index
+	tack[loc].iIndexMask = 0;
+	tack[loc].index = NULL;
+	tack[loc].node = new CTNode();
+	tack[loc].node->rs = 0;
+	tack[loc].node->t = tack[pre].node->t + CT_TACK_INTERVAL;
+	// 2nd. link this tack to previous one.
+	tack[loc].node->next = NULL;
+	tack[loc].node->pre = tack[pre].node; // since last tack just has one node, the first node of it is the last one.
+
+	// return true. there is no other result in normal.
+	return true;
 }
 
 unsigned int CTLink::getIndexLoc(unsigned int t) {
@@ -174,7 +194,7 @@ CTLink::CTLink() {
 	CT_INDEX_THRESHOLD = (unsigned int) log2(CT_TACK_NUM);
 	CT_MAX_RESERVE_TIME = 4096; //64*8*8=4096
 	CT_TACK_ARRAY_SIZE = CT_TACK_NUM + 3; // one to keep all alive node in range; one to record start node; one to record end node.
-	CT_TACK_INTERVAL = (CT_MAX_RESERVE_TIME + CT_TACK_NUM - 1) / CT_TACK_NUM;
+	CT_TACK_INTERVAL = (CT_MAX_RESERVE_TIME + CT_TACK_NUM - 1) / CT_TACK_NUM; // to make sure that CT_TACK_INTERVAL * CT_TACK_NUM >= CT_MAX_RESERVE_TIME.
 	CT_INDEX_INTERVAL = (CT_TACK_INTERVAL + CT_INDEX_NUM - 1) / CT_INDEX_NUM;
 	iCurrentTack = 0;
 	iCurrentTime = 0;
@@ -200,8 +220,9 @@ CTLink::CTLink() {
 			tack[i].node->pre = tack[(i - 1) % CT_TACK_ARRAY_SIZE].node;
 			tack[i].node->next = tack[(i + 1) % CT_TACK_ARRAY_SIZE].node;
 		}
-		tack[i].node->t = ((i + CT_TACK_ARRAY_SIZE - iCurrentTack)
-				% CT_TACK_ARRAY_SIZE) * CT_TACK_INTERVAL;
+		tack[i].node->t = (((i + CT_TACK_ARRAY_SIZE
+				- (iCurrentTack % CT_TACK_ARRAY_SIZE)) % CT_TACK_ARRAY_SIZE)
+				+ iCurrentTack) * CT_TACK_INTERVAL;
 		tack[i].node->rs = 0;
 	}
 }
