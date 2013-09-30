@@ -38,7 +38,7 @@ int main() {
 		start = start+t1;//ms
 
 		nowtime = start - ps;
-		//cout<<"nowtime£º"<<nowtime<<endl;
+		//cout<<"nowtime:"<<nowtime<<endl;
 		x.bw = H.U_Randint(100,1000);
 		x.ts = H.U_Randint(20,50);
 		x.td = (int)H.E_Rand(0.01)%100;
