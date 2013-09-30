@@ -27,22 +27,25 @@ int main() {
 	//HANDLE hThread3 = CreateThread(NULL, 0, Fun3, &A, 0, NULL);
 	//CloseHandle(hThread3);
 
-	ps = clock();
-	start = clock();//∫¡√Î
+	ps = 0;
+	start = 0;//∫¡√Î
 	while(1)
 	{
 		sum++;
 
 		t1 = H.P_Rand(100);
-		while(clock() - start < t1);
-		start = clock();//∫¡√Î
+		cout<<t1<<endl;
+		start = start+t1;//∫¡√Î
 
-		nowtime = clock() - ps;
+		nowtime = start - ps;
 		//cout<<"µ±«∞ ±º‰£∫"<<nowtime<<endl;
 		x.bw = H.U_Randint(100,1000);
 		x.ts = H.U_Randint(20,50);
 		x.td = (int)H.E_Rand(0.01)%100;
 		C.SetTime(nowtime);
+		if(sum == 27){
+			sum = 27;
+		}
 		bool flag = C.Insert(x);
 		x.ts = nowtime + x.ts;
 		if(flag!= B.Insert(x)){

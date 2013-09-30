@@ -120,7 +120,7 @@ CTNode* CTLink::accept(Request r) {
 	tackLoc = getTackLoc(st);
 	if (et > iCurrentTime + CT_MAX_RESERVE_TIME) // request r is out of range.
 		return NULL;
-	if (tack[getTackLoc(st)].indexed) {
+	if (tack[tackLoc].indexed) {
 		indexLoc = getIndexLoc(st);
 		temp = tack[tackLoc].index[indexLoc];
 	} else {
@@ -136,6 +136,7 @@ CTNode* CTLink::accept(Request r) {
 	// since the judge process will use the data before et and the judge process just use the node before node temp
 	// so the end point is the first node not before et. need ) then )+] = );
 	// pseudo-code: judge: if temp->pre->rs + r.bw > iMaxResource RETURN NULL;
+	// TODO add one situation: the r.td is very small, the et is close to st, and the node next to the st is later than et.
 	while (temp->t < et) {
 		if (temp->pre->rs + r.bw > iMaxResource) {
 			return NULL;
