@@ -43,8 +43,8 @@ int main() {
 		x.ts = H.U_Randint(20,50);
 		x.td = (int)H.E_Rand(0.01)%100;
 		C.SetTime(nowtime);
-		if(sum == 27){
-			sum = 27;
+		if(nowtime == 4198){
+			nowtime = 4198;
 		}
 		bool flag = C.Insert(x);
 		x.ts = nowtime + x.ts;

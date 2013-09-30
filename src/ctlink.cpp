@@ -273,7 +273,8 @@ bool CTLink::clearTack(unsigned int n) {
 	// 2nd. link this tack to previous one.
 	tack[loc].node->next = NULL;
 	tack[loc].node->pre = tack[pre].node; // since last tack just has one node, the first node of it is the last one.
-
+	// 3rd. link previous tack to this one.
+	tack[pre].node->next = tack[loc].node;
 	// return true. there is no other result in normal.
 	return true;
 }
