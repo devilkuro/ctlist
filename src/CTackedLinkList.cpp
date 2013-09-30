@@ -28,17 +28,17 @@ int main() {
 	//CloseHandle(hThread3);
 
 	ps = 0;
-	start = 0;//毫秒
+	start = 0;//ms
 	while(1)
 	{
 		sum++;
 
 		t1 = H.P_Rand(100);
 		cout<<t1<<endl;
-		start = start+t1;//毫秒
+		start = start+t1;//ms
 
 		nowtime = start - ps;
-		//cout<<"当前时间："<<nowtime<<endl;
+		//cout<<"nowtime："<<nowtime<<endl;
 		x.bw = H.U_Randint(100,1000);
 		x.ts = H.U_Randint(20,50);
 		x.td = (int)H.E_Rand(0.01)%100;
