@@ -171,9 +171,9 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
 			// and after insert operation, if theTack->node == loc , then change theTack->node to this new node.
 			result = new CTNode();
 			result->t = t;
-			result->rs = result->pre->rs;
 			result->pre = pre;
 			result->next = loc;
+			result->rs = result->pre->rs;
 			pre->next = result;
 			loc->pre = result;
 			if (theTack->node == loc) {
