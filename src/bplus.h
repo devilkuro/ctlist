@@ -38,7 +38,7 @@ public:
 	Bplus();
 	Result* Search(int x);
 	void Split(BNode *tmp);
-	void Insert(Request a);
+	bool Insert(Request a);
 	void DSplit(BNode *tmp);
 	bool Delete(int x);
 	int Count();

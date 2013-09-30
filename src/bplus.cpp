@@ -117,7 +117,7 @@ void Bplus::Split(BNode *tmp) {
 	}
 }
 
-void Bplus::Insert(Request a) {
+bool Bplus::Insert(Request a) {
 	struct Result *r;
 	struct BNode *p, *q, *t, *l, *tmp;
 	int nowtd, i, j;
@@ -131,7 +131,7 @@ void Bplus::Insert(Request a) {
 	if (r->tag == 3) {
 		if (i != 0) {
 			if (p->record[i-1] + a.bw > MAX)
-				return;
+				return false;
 			else if (true) {
 				if (nowtd > (p->key[i] - a.ts))
 					nowtd -= (p->key[i] - a.ts);
@@ -143,7 +143,7 @@ void Bplus::Insert(Request a) {
 			while (q->next != p)
 				q = q->next;
 			if (q->record[q->keynum - 1] + a.bw > MAX)
-				return;
+				return false;
 			else {
 				if (nowtd > (p->key[i] - a.ts))
 					nowtd -= (p->key[i] - a.ts);
@@ -163,7 +163,7 @@ void Bplus::Insert(Request a) {
 				i++;
 			}
 			if ( nowtd && p->record[i] + a.bw > MAX)
-				return;
+				return false;
 			if (nowtd && i == p->keynum - 1) {
 				if (p->next) {
 					q = p->next;
@@ -375,6 +375,7 @@ void Bplus::Insert(Request a) {
 			i = 0;
 		}
 	}
+	return true;
 }
 
 void Bplus::DSplit(BNode *tmp) {
