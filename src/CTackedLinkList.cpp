@@ -9,23 +9,10 @@
 #include "bplus.h"
 #include "ctlink.h"
 
-Bplus B;
-int nowtime;
 #define CT_TEST_TIME 4305
-DWORD WINAPI Fun2(LPVOID p)
-{
-	while(1)
-	{
-		if(B.root)
-		{
-			B.FDisplay(nowtime);
-			B.Delete(nowtime);
-			B.FDisplay(nowtime);
-		}
-		Sleep(100);//ms
-	}
-	return 0;
-}
+#define CT_DEBUG_C
+//#define CT_DEBUG_B
+
 int main() {
 	// TODO :1st. test the ctlink first.
 
@@ -34,6 +21,8 @@ int main() {
 	int t1;
 	int sum = 0;
 	CTLink C;
+	Bplus B;
+	int nowtime;
 	clock_t ps, start;
 
 //	HANDLE hThread2 = CreateThread(NULL, 0, Fun2, &B, 0, NULL);
@@ -52,28 +41,36 @@ int main() {
 		x.ts = H.U_Randint(20,50);
 		x.td = (int)H.E_Rand(0.01)%100;
 		nowtime = start - ps;
+		cout<< sum << endl;
 //		cout<<"now time:"<<nowtime<<endl;
 //		cout<<"R("<<x.bw<<","<<x.ts<<","<<x.td<<"):"<<t1<<endl;
 //		if(nowtime == CT_TEST_TIME){
 //			nowtime = CT_TEST_TIME;
 //		}
-//		C.SetTime(nowtime);
-//		bool flagC = C.Insert(x);
+#ifdef CT_DEBUG_C
+		C.SetTime(nowtime);
+		bool flagC = C.Insert(x);
+#endif
+#ifdef CT_DEBUG_B
 		x.ts = nowtime + x.ts;
 		bool flagB = B.Insert(x);
-		cout<< sum << endl;
-//		if(flagC!=flagB ){
-//			C.Output();
-//			B.Output();
-//			cout<<"ERROR!!"<<endl;
-//		}
 		if (sum % 100 == 0) {
 			if (B.root) {
-				B.FDisplay(nowtime);
+//				B.FDisplay(nowtime);
 				B.Delete(nowtime);
-				B.FDisplay(nowtime);
+//				B.FDisplay(nowtime);
 			}
 		}
+#endif
+#ifdef CT_DEBUG_C
+#ifdef CT_DEBUG_B
+		if(flagC!=flagB ){
+			C.Output();
+			B.Output();
+			cout<<"ERROR!!"<<endl;
+		}
+#endif
+#endif
 	}
 	return 0;
 }

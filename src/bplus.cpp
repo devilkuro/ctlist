@@ -661,3 +661,16 @@ int Bplus::End() {
 
 	return 0;
 }
+
+bool Bplus::Output() {
+	struct BNode *p;
+	cout<<"BPLUS:DISPLAY."<<endl;
+	p = first;
+		while (p) {
+			for (int i = 0; i < p->keynum; i++){
+				cout<< "rs: " << p->key[i] << ", " << p->record[i] << endl;
+			}
+			p = p->next;
+		}
+	return true;
+}

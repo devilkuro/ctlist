@@ -45,6 +45,7 @@ public:
 	void Display();
 	void FDisplay(int t2);
 	int End();
+	bool Output(); // display the resource link list.
 public:
 	struct BNode *root;
 	struct BNode *first;
