@@ -11,6 +11,7 @@
 
 Bplus B;
 int nowtime;
+#define CT_TEST_TIME 1974
 //DWORD WINAPI Fun2(LPVOID p)
 //{
 //	while(1)
@@ -46,17 +47,17 @@ int main() {
 		sum++;
 
 		t1 = H.P_Rand(100);
-		cout<<t1<<endl;
 		start = start+t1;//ms
 
-		nowtime = start - ps;
-		if(nowtime == 4305){
-			nowtime = 4305;
-		}
-		cout<<"now time:"<<nowtime<<endl;
 		x.bw = H.U_Randint(100,1000);
 		x.ts = H.U_Randint(20,50);
 		x.td = (int)H.E_Rand(0.01)%100;
+		nowtime = start - ps;
+		cout<<"now time:"<<nowtime<<endl;
+		cout<<"R("<<x.bw<<","<<x.ts<<","<<x.td<<"):"<<t1<<endl;
+		if(nowtime == CT_TEST_TIME){
+			nowtime = CT_TEST_TIME;
+		}
 		C.SetTime(nowtime);
 		/*bool flag = */C.Insert(x);
 		x.ts = nowtime + x.ts;

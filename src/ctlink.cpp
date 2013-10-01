@@ -155,13 +155,17 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
 
 	CTNode* result = NULL;
 	CTNode* pre = loc->pre;
+	unsigned int tackLoc = getTackLoc(t);
+	CTTack* theTack = &tack[tackLoc];
 	// situation 0: in this insert operation, if the node at time t has already exist, just return it.
 	// else, insert new one, and return the new node.
 	if (pre->t == t) {
+		// add a judgment to avoid to treat normal node as temporary node.
+		if(theTack->num == 0){
+			theTack->num = 1;
+		}
 		result = pre;
 	} else {
-		unsigned int tackLoc = getTackLoc(t);
-		CTTack* theTack = &tack[tackLoc];
 		if (theTack->num == 0) {
 			// situation 1: this tack has just one temporary node. then replace this temporary node with target node.
 			result = pre;
