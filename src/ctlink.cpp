@@ -69,9 +69,10 @@ CTLink::~CTLink() {
 bool CTLink::SetTime(unsigned int t) {
 	// maintain the current time and memory.
 	iCurrentTime = t;
-	iCurrentTack = getTackLoc(iCurrentTime);
+	unsigned int aliveTackLoc = t / CT_TACK_INTERVAL;
 	// the tack is 1 smaller than iCurrentTack is to store the start resource, so if a node is 2 or more smaller than iCurrentTack, it needs to be cleared.
-	for (; iStartTack < iCurrentTack - 1; iStartTack++) {
+	// Update at 1310012316: change the algorithm to fix the bug.
+	for (; iStartTack < aliveTackLoc - 1; iStartTack++) {
 		clearTack(iStartTack);
 	}
 	// only return true.
