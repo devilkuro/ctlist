@@ -169,6 +169,11 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
 		if (theTack->num == 0) {
 			// situation 1: this tack has just one temporary node. then replace this temporary node with target node.
 			result = pre;
+#ifdef CT_DEBUG
+			if(t==2112){
+				t=2112;
+			}
+#endif
 			result->t = t;
 			theTack->num++;
 		} else {
@@ -245,9 +250,10 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
 bool CTLink::clearTack(unsigned int n) {
 	// this function will clear this tack, and link this tack to last usable tack. n stands for the tack number.
 	// 1. clear all tack; 2. link this tack to the last tack.
-	unsigned int loc = n % CT_TACK_ARRAY_SIZE;
-	unsigned int pre = (n - 1) % CT_TACK_ARRAY_SIZE;
-	unsigned int next = (n + 1) % CT_TACK_ARRAY_SIZE;
+	// Update at 1310012228: change n to n+CT_TACK_ARRAY_SIZE to avoid to mod a negative number.
+	unsigned int loc = (n+CT_TACK_ARRAY_SIZE) % CT_TACK_ARRAY_SIZE;
+	unsigned int pre = (n+CT_TACK_ARRAY_SIZE - 1) % CT_TACK_ARRAY_SIZE;
+	unsigned int next = (n+CT_TACK_ARRAY_SIZE + 1) % CT_TACK_ARRAY_SIZE;
 	// clear this tack.
 	// 1st. delete the node.
 	unsigned int et = tack[next].node->t;
@@ -282,7 +288,7 @@ bool CTLink::clearTack(unsigned int n) {
 	tack[pre].node->next = tack[loc].node;
 	// return true. there is no other result in normal.
 #ifdef CT_DEBUG
-	if(tack[pre].node->t == tack[next].node->t){
+	if(tack[pre].node->t == tack[next].node->t||tack[loc].node->t ==2112){
 		cout<< iCurrentTime << endl;
 	}
 #endif
