@@ -9,6 +9,22 @@
 #include "bplus.h"
 #include "ctlink.h"
 
+Bplus B;
+int nowtime;
+//DWORD WINAPI Fun2(LPVOID p)
+//{
+//	while(1)
+//	{
+//		if(B.root)
+//		{
+//			B.FDisplay(nowtime);
+//			B.Delete(nowtime);
+//			B.FDisplay(nowtime);
+//		}
+//		Sleep(1000);//ms
+//	}
+//	return 0;
+//}
 int main() {
 	// TODO :1st. test the ctlink first.
 
@@ -16,16 +32,12 @@ int main() {
 	Helper H;
 	int t1;
 	int sum = 0;
-	Bplus B;
 	CTLink C;
 	int nowtime;
 	clock_t ps, start;
-	//srand((unsigned)time(NULL));
 
-	//HANDLE hThread1 = CreateThread(NULL, 0, Fun1, &A, 0, NULL);
-	//CloseHandle(hThread1);
-	//HANDLE hThread3 = CreateThread(NULL, 0, Fun3, &A, 0, NULL);
-	//CloseHandle(hThread3);
+//	HANDLE hThread2 = CreateThread(NULL, 0, Fun2, &B, 0, NULL);
+//	CloseHandle(hThread2);
 
 	ps = 0;
 	start = 0;//ms
@@ -38,19 +50,19 @@ int main() {
 		start = start+t1;//ms
 
 		nowtime = start - ps;
-		//cout<<"nowtime:"<<nowtime<<endl;
+		if(nowtime == 4305){
+			nowtime = 4305;
+		}
+		cout<<"now time:"<<nowtime<<endl;
 		x.bw = H.U_Randint(100,1000);
 		x.ts = H.U_Randint(20,50);
 		x.td = (int)H.E_Rand(0.01)%100;
 		C.SetTime(nowtime);
-		if(nowtime == 4198){
-			nowtime = 4198;
-		}
-		bool flag = C.Insert(x);
+		/*bool flag = */C.Insert(x);
 		x.ts = nowtime + x.ts;
-		if(flag!= B.Insert(x)){
-			cout<<"ERROR!!"<<endl;
-		}
+//		if(flag!= B.Insert(x)){
+//			cout<<"ERROR!!"<<endl;
+//		}
 
 	}
 	return 0;

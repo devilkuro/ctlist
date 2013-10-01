@@ -247,7 +247,8 @@ bool CTLink::clearTack(unsigned int n) {
 	// clear this tack.
 	// 1st. delete the node.
 	unsigned int et = tack[next].node->t;
-	for (CTNode* temp = tack[loc].node; temp->t < et;) {
+	// change the judgment statement from t < et to t != et.
+	for (CTNode* temp = tack[loc].node; temp->t != et;) {
 		temp = temp->next;
 		delete (temp->pre);
 	}
@@ -276,6 +277,11 @@ bool CTLink::clearTack(unsigned int n) {
 	// 3rd. link previous tack to this one.
 	tack[pre].node->next = tack[loc].node;
 	// return true. there is no other result in normal.
+#ifdef CT_DEBUG
+	if(tack[pre].node->t == tack[next].node->t){
+		cout<< iCurrentTime << endl;
+	}
+#endif
 	return true;
 }
 
