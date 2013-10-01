@@ -11,21 +11,21 @@
 
 Bplus B;
 int nowtime;
-#define CT_TEST_TIME 1974
-//DWORD WINAPI Fun2(LPVOID p)
-//{
-//	while(1)
-//	{
-//		if(B.root)
-//		{
-//			B.FDisplay(nowtime);
-//			B.Delete(nowtime);
-//			B.FDisplay(nowtime);
-//		}
-//		Sleep(1000);//ms
-//	}
-//	return 0;
-//}
+#define CT_TEST_TIME 4305
+DWORD WINAPI Fun2(LPVOID p)
+{
+	while(1)
+	{
+		if(B.root)
+		{
+			B.FDisplay(nowtime);
+			B.Delete(nowtime);
+			B.FDisplay(nowtime);
+		}
+		Sleep(1000);//ms
+	}
+	return 0;
+}
 int main() {
 	// TODO :1st. test the ctlink first.
 
@@ -37,8 +37,8 @@ int main() {
 	int nowtime;
 	clock_t ps, start;
 
-//	HANDLE hThread2 = CreateThread(NULL, 0, Fun2, &B, 0, NULL);
-//	CloseHandle(hThread2);
+	HANDLE hThread2 = CreateThread(NULL, 0, Fun2, &B, 0, NULL);
+	CloseHandle(hThread2);
 
 	ps = 0;
 	start = 0;//ms
@@ -59,11 +59,11 @@ int main() {
 			nowtime = CT_TEST_TIME;
 		}
 		C.SetTime(nowtime);
-		/*bool flag = */C.Insert(x);
+		bool flag = C.Insert(x);
 		x.ts = nowtime + x.ts;
-//		if(flag!= B.Insert(x)){
-//			cout<<"ERROR!!"<<endl;
-//		}
+		if(flag!= B.Insert(x)){
+			cout<<"ERROR!!"<<endl;
+		}
 
 	}
 	return 0;

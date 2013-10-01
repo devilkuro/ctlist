@@ -12,7 +12,7 @@
 #include "stdafx.h"
 //#define DEBUG false
 //#define GN_DEBUG
-#define CT_DEBUG
+//#define CT_DEBUG
 
 #define MAX 1000
 #define MAX_REQUEST_NUM 2000000

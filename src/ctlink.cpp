@@ -136,8 +136,9 @@ CTNode* CTLink::accept(Request r) {
 	// since the judge process will use the data before et and the judge process just use the node before node temp
 	// so the end point is the first node not before et. need ) then )+] = );
 	// pseudo-code: judge: if temp->pre->rs + r.bw > iMaxResource RETURN NULL;
-	// TODO add one situation: the r.td is very small, the et is close to st, and the node next to the st is later than et.
-	while (temp->t < et) {
+	// Update at 1310012249: node->rs decides the resource after node->t
+	// so if the rs of which node from the last one before st to last one before et is more than r.bw, request r can be accepted.
+	while (temp->pre->t < et) {
 		if (temp->pre->rs + r.bw > iMaxResource) {
 			return NULL;
 		}
