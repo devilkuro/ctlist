@@ -42,6 +42,7 @@ public:
 public:
 	bool Insert(Request r); //return true if success.
 	bool SetTime(unsigned int t); //set the current time.
+	bool Output(); // display the link list.
 private:
 
 	CTTack* tack;

@@ -22,7 +22,7 @@ DWORD WINAPI Fun2(LPVOID p)
 			B.Delete(nowtime);
 			B.FDisplay(nowtime);
 		}
-		Sleep(1000);//ms
+		Sleep(100);//ms
 	}
 	return 0;
 }
@@ -34,11 +34,10 @@ int main() {
 	int t1;
 	int sum = 0;
 	CTLink C;
-	int nowtime;
 	clock_t ps, start;
 
-	HANDLE hThread2 = CreateThread(NULL, 0, Fun2, &B, 0, NULL);
-	CloseHandle(hThread2);
+//	HANDLE hThread2 = CreateThread(NULL, 0, Fun2, &B, 0, NULL);
+//	CloseHandle(hThread2);
 
 	ps = 0;
 	start = 0;//ms
@@ -53,18 +52,28 @@ int main() {
 		x.ts = H.U_Randint(20,50);
 		x.td = (int)H.E_Rand(0.01)%100;
 		nowtime = start - ps;
-		cout<<"now time:"<<nowtime<<endl;
-		cout<<"R("<<x.bw<<","<<x.ts<<","<<x.td<<"):"<<t1<<endl;
-		if(nowtime == CT_TEST_TIME){
-			nowtime = CT_TEST_TIME;
-		}
-		C.SetTime(nowtime);
-		bool flag = C.Insert(x);
+//		cout<<"now time:"<<nowtime<<endl;
+//		cout<<"R("<<x.bw<<","<<x.ts<<","<<x.td<<"):"<<t1<<endl;
+//		if(nowtime == CT_TEST_TIME){
+//			nowtime = CT_TEST_TIME;
+//		}
+//		C.SetTime(nowtime);
+//		bool flagC = C.Insert(x);
 		x.ts = nowtime + x.ts;
-		if(flag!= B.Insert(x)){
-			cout<<"ERROR!!"<<endl;
+		bool flagB = B.Insert(x);
+		cout<< sum << endl;
+//		if(flagC!=flagB ){
+//			C.Output();
+//			B.Output();
+//			cout<<"ERROR!!"<<endl;
+//		}
+		if (sum % 100 == 0) {
+			if (B.root) {
+				B.FDisplay(nowtime);
+				B.Delete(nowtime);
+				B.FDisplay(nowtime);
+			}
 		}
-
 	}
 	return 0;
 }

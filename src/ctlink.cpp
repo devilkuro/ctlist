@@ -91,18 +91,17 @@ bool CTLink::Insert(Request r) {
 		unsigned int et = st + r.td;
 		// select the start point.
 		CTNode* temp = insertNode(st, loc);
-		// change the resource before the node before et.
-		// Since the node before et should be modify after node et has been insert.(to keep the rs is unmodified.)
-		while (temp->next->t < et) {
-			temp->rs = temp->rs + r.bw;
+		CTNode* start = temp;
+		// find the next node to the et node.
+		while (temp->t <= et) {
 			temp = temp->next;
 		}
-		// if there is no node at et, insert one.
-		if (temp->next->t > et) {
-			insertNode(et, temp->next);
-		}
+		// insert et node.
+		insertNode(et, temp);
 		// after insertion of the node et, the node before et can be modified.
-		temp->rs = temp->rs + r.bw;
+		for(temp = start; temp->t<et;temp=temp->next){
+			temp->rs = temp->rs + r.bw;
+		}
 	}
 	return true;
 }
@@ -307,3 +306,10 @@ unsigned int CTLink::getIndexLoc(unsigned int t) {
 	return (t % CT_TACK_INTERVAL) / CT_INDEX_INTERVAL;
 }
 
+bool CTLink::Output() {
+	cout<<"CTLINK:DISPLAY."<<endl;
+	for(CTNode* temp = tack[(getTackLoc(iCurrentTime)+CT_TACK_ARRAY_SIZE-1)%CT_TACK_ARRAY_SIZE].node; temp != NULL; temp = temp->next){
+		cout<< "rs: " << temp->t << ", " << temp->rs << endl;
+	}
+	return true;
+}
