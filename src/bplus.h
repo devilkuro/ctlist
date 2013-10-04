@@ -10,8 +10,6 @@
 
 
 #include "common.h"
-#include <map>
-
 
 const int m = 3;
 const int s1 = 2; //第一个分裂结点的关键字个数要多
@@ -33,16 +31,10 @@ struct Result
 	int i;
 	int tag;
 };
-struct MemMark
-{
-	unsigned int cPos;
-	unsigned int dPos;
-};
-typedef map<void *,MemMark> MemMarkMap;
+
 class Bplus
 {
 public:
-	MemMarkMap mmm;
 	Bplus();
 	Result* Search(int x);
 	void Split(BNode *tmp);
@@ -53,9 +45,7 @@ public:
 	void Display();
 	void FDisplay(int t2);
 	int End();
-	void Output(); // display the resource link list.
-	void Traverse(BNode* tmp);  // traverse the whole Bplus list.
-	void DeleteBNode(BNode* tmp); // delete the BNode.
+	bool Output(); // display the resource link list.
 public:
 	struct BNode *root;
 	struct BNode *first;

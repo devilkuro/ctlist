@@ -13,10 +13,6 @@ Result* Bplus::Search(int x) {
 
 	r = new Result;
 
-	MemMark m1={1,0};
-	if(!(mmm.insert(pair<void *, MemMark>(r,m1))).second){
-		mmm[r].cPos = 1;
-	}
 	r->ptr = NULL;
 	r->i = 0;
 	if (root == NULL) {
@@ -56,10 +52,6 @@ void Bplus::Split(BNode *tmp) {
 		if (tmp == root) //根节点分裂，新建根节点
 				{
 			t = new BNode;
-			MemMark m2={2,0};
-			if(!(mmm.insert(pair<void *, MemMark>(t,m2))).second){
-				mmm[t].cPos = 2;
-			}
 			t->keynum = s2;
 			for (i = 0; i < s2; i++) {
 				t->key[i] = tmp->key[s1 + i];
@@ -73,10 +65,6 @@ void Bplus::Split(BNode *tmp) {
 			tmp->next = t;
 
 			root = new BNode;
-			MemMark m3={3,0};
-			if(!(mmm.insert(pair<void *, MemMark>(root,m3))).second){
-				mmm[root].cPos = 3;
-			}
 			root->keynum = 2;
 			root->key[0] = tmp->key[s1 - 1];
 			root->ptr[0] = tmp;
@@ -92,10 +80,6 @@ void Bplus::Split(BNode *tmp) {
 			t->seq = 1;
 		} else {
 			t = new BNode;
-			MemMark m4={4,0};
-			if(!(mmm.insert(pair<void *, MemMark>(t,m4))).second){
-				mmm[t].cPos = 4;
-			}
 			t->keynum = s2;
 			for (i = 0; i < s2; i++) {
 				t->key[i] = tmp->key[s1 + i];
@@ -146,13 +130,8 @@ bool Bplus::Insert(Request a) {
 	int flag = 0;//If flag == 1, request a is ending up before node r->ptr. If else, request a will continue in node r->ptr.
 	if (r->tag == 3) {
 		if (i != 0) {
-			if (p->record[i-1] + a.bw > MAX){
-				if(r){
-					mmm[r].dPos = 1;
-					delete r;
-				}
+			if (p->record[i-1] + a.bw > MAX)
 				return false;
-			}
 			else if (true) {
 				if (nowtd > (p->key[i] - a.ts))
 					nowtd -= (p->key[i] - a.ts);
@@ -163,13 +142,8 @@ bool Bplus::Insert(Request a) {
 			q = first;
 			while (q->next != p)
 				q = q->next;
-			if (q->record[q->keynum - 1] + a.bw > MAX){
-				if(r){
-					mmm[r].dPos = 2;
-					delete r;
-				}
+			if (q->record[q->keynum - 1] + a.bw > MAX)
 				return false;
-		}
 			else {
 				if (nowtd > (p->key[i] - a.ts))
 					nowtd -= (p->key[i] - a.ts);
@@ -188,13 +162,8 @@ bool Bplus::Insert(Request a) {
 					nowtd = 0;
 				i++;
 			}
-			if ( nowtd && p->record[i] + a.bw > MAX){
-				if(r){
-					mmm[r].dPos = 3;
-					delete r;
-				}
+			if ( nowtd && p->record[i] + a.bw > MAX)
 				return false;
-			}
 			if (nowtd && i == p->keynum - 1) {
 				if (p->next) {
 					q = p->next;
@@ -217,10 +186,6 @@ bool Bplus::Insert(Request a) {
 	if (r->tag == 0) //空树
 			{
 		p = new BNode;
-		MemMark m5={5,0};
-		if(!(mmm.insert(pair<void *, MemMark>(p,m5))).second){
-			mmm[p].cPos = 5;
-		}
 		p->keynum = 3;
 		p->key[0] = 0;
 		p->key[1] = a.ts;
@@ -232,10 +197,6 @@ bool Bplus::Insert(Request a) {
 		p->next = NULL;
 
 		q = new BNode;
-		MemMark m6={6,0};
-		if(!(mmm.insert(pair<void *, MemMark>(q,m6))).second){
-			mmm[q].cPos = 6;
-		}
 		q->keynum = 1;
 		q->key[0] = p->key[2];
 		q->record[0] = -1;
@@ -299,10 +260,6 @@ bool Bplus::Insert(Request a) {
 			if (tmp->keynum > m) //叶子结点需要分裂
 					{
 				t = new BNode;
-				MemMark m7={7,0};
-				if(!(mmm.insert(pair<void *, MemMark>(t,m7))).second){
-					mmm[t].cPos = 7;
-				}
 				t->keynum = s2;
 				for (j = 0; j < s2; j++) {
 					t->key[j] = tmp->key[s1 + j];
@@ -418,10 +375,6 @@ bool Bplus::Insert(Request a) {
 			i = 0;
 		}
 	}
-	if(r){
-		mmm[r].dPos = 4;
-		delete r;
-	}
 	return true;
 }
 
@@ -432,10 +385,6 @@ void Bplus::DSplit(BNode *tmp) {
 	while (tmp->keynum > m) //需要分裂
 	{
 		t = new BNode;
-		MemMark m8={8,0};
-		if(!(mmm.insert(pair<void *, MemMark>(t,m8))).second){
-			mmm[t].cPos = 8;
-		}
 		t->keynum = tmp->keynum / 2;
 		int n = tmp->keynum - t->keynum;
 		for (i = 0; i < t->keynum; i++) {
@@ -506,14 +455,14 @@ bool Bplus::Delete(int x) //每隔x时间段，删除叶子结点（自底向上逐层删除）
 
 				t = p;
 				p = q;
-				DeleteBNode(t); //释放内部空结点
+				delete t; //释放内部空结点
 			}
 		}
 
 		a = tmp->record[tmp->keynum - 1];
 		t = tmp;
 		tmp = tmp->next;
-		DeleteBNode(t); //释放叶子空结点
+		delete t; //释放叶子空结点
 	}
 	first = tmp;
 
@@ -548,7 +497,7 @@ bool Bplus::Delete(int x) //每隔x时间段，删除叶子结点（自底向上逐层删除）
 
 					t = q;
 					q = l;
-					DeleteBNode(t);
+					delete t;
 				}
 
 				q = p->next;
@@ -571,7 +520,7 @@ bool Bplus::Delete(int x) //每隔x时间段，删除叶子结点（自底向上逐层删除）
 				tmp = q;
 				t = p;
 				p = q->parent;
-				DeleteBNode(t);
+				delete t;
 			} else {
 				i = 0;
 				while (p->ptr[i] == 0)
@@ -713,71 +662,15 @@ int Bplus::End() {
 	return 0;
 }
 
-void Bplus::Output() {
+bool Bplus::Output() {
 	struct BNode *p;
-	cout << "BPLUS:DISPLAY." << endl;
+	cout<<"BPLUS:DISPLAY."<<endl;
 	p = first;
-	while (p) {
-		for (int i = 0; i < p->keynum; i++) {
-			cout << "rs: " << p->key[i] << ", " << p->record[i] << endl;
+		while (p) {
+			for (int i = 0; i < p->keynum; i++){
+				cout<< "rs: " << p->key[i] << ", " << p->record[i] << endl;
+			}
+			p = p->next;
 		}
-		p = p->next;
-	}
-	cout<< "list the leak memory." << endl;
-	int a[8]={0};
-	int b[6]={0};
-	int a0[8]={0};
-	map<BNode*,MemMark> mTemp;
-	for(MemMarkMap::iterator it = mmm.begin(); it!=mmm.end();++it){
-		a[it->second.cPos-1]++;
-		b[it->second.dPos]++;
-		if(it->second.dPos == 0){
-			mTemp.insert(pair<BNode*, MemMark>((BNode*)it->first,it->second));
-			a0[it->second.cPos-1]++;
-			cout<< it->second.cPos <<endl;
-		}
-	}
-	BNode *array[mTemp.size()];
-	unsigned int i = 0;
-	for(map<BNode*,MemMark>::iterator it = mTemp.begin(); it!=mTemp.end();it++){
-		array[i] = it->first;
-		i++;
-	}
-	cout<<"cPos:"<<endl;
-	for(int i = 0;i<8;i++){
-		cout<< "\t"<< a[i];
-	}
-	cout<<endl;
-	for(int i = 0;i<8;i++){
-		cout<< "\t"<< a0[i] ;
-	}
-	cout<<endl<<"dPos:"<<endl;
-	for(int i = 0;i<6;i++){
-		cout<< "\t"<< b[i] ;
-	}
-	cout<<endl;
-}
-
-void Bplus::Traverse(BNode* tmp) {
-	if(!tmp){
-		return;
-	}
-	for(int i = 0;i<tmp->keynum;i++){
-		cout << tmp->key[i] << ":" << tmp->record[i] << "->";
-		cout << endl;
-		Traverse(tmp->ptr[i]);
-	}
-}
-
-void Bplus::DeleteBNode(BNode* tmp) {
-	if(tmp){
-		mmm[tmp].dPos = 5;
-	if (tmp->key)
-		delete tmp->key;
-	if (tmp->record)
-		delete tmp->record;
-	if (tmp->ptr)
-		delete tmp->ptr;
-	delete tmp;
-	}
+	return true;
 }
