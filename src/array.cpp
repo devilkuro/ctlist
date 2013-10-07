@@ -17,7 +17,7 @@ void Array::Insert(Request r)
 	int i, end;
 
 	end = t + r.ts + r.td;
-	//进行接纳控制
+	//杩涜鎺ョ撼鎺у埗
 	i = t + r.ts ;
 	if(r.td > N)
 		return;
