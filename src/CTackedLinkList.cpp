@@ -10,8 +10,8 @@
 #include "ctlink.h"
 
 #define CT_TEST_TIME 4305
-#define CT_DEBUG_C
-//#define CT_DEBUG_B
+//#define CT_DEBUG_C
+#define CT_DEBUG_B
 
 int main() {
 	// TODO :1st. test the ctlink first.
@@ -54,12 +54,27 @@ int main() {
 #ifdef CT_DEBUG_B
 		x.ts = nowtime + x.ts;
 		bool flagB = B.Insert(x);
-		if (sum % 100 == 0) {
+		if (sum % 10 == 0) {
 			if (B.root) {
-//				B.FDisplay(nowtime);
+//				cout<<"before:"<<endl;
+//				cout<<"output:"<<endl;
+//				B.Output();
+//				cout<<"traverse:"<<endl;
+//				B.Traverse(B.root);
 				B.Delete(nowtime);
-//				B.FDisplay(nowtime);
+//				cout<<"after:"<<endl;
+//				cout<<"output:"<<endl;
+//				B.Output();
+//				cout<<"traverse:"<<endl;
+//				B.Traverse(B.root);
 			}
+			Sleep(1);
+		}
+		int interval = 5000;
+		if (sum % interval == interval-1){
+			B.Delete(nowtime+300);
+			B.Output();
+			cin >> sum;
 		}
 #endif
 #ifdef CT_DEBUG_C
