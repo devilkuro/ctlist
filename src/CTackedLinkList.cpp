@@ -27,7 +27,8 @@ int main() {
 
 //	HANDLE hThread2 = CreateThread(NULL, 0, Fun2, &B, 0, NULL);
 //	CloseHandle(hThread2);
-
+	unsigned int startTime = clock();
+	unsigned int staInterval = 1000000;
 	ps = 0;
 	start = 0;//ms
 	while(1)
@@ -41,7 +42,9 @@ int main() {
 		x.ts = H.U_Randint(20,50);
 		x.td = (int)H.E_Rand(0.01)%100;
 		nowtime = start - ps;
-		cout<< sum << endl;
+		if(sum%staInterval == 0){
+			cout<< sum/staInterval <<":"<< clock()-startTime<<endl;
+		}
 //		cout<<"now time:"<<nowtime<<endl;
 //		cout<<"R("<<x.bw<<","<<x.ts<<","<<x.td<<"):"<<t1<<endl;
 //		if(nowtime == CT_TEST_TIME){
