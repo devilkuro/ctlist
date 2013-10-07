@@ -6,16 +6,16 @@ Bplus::Bplus() {
 	first = NULL;
 }
 
-SmartPtr<Result> Bplus::Search(int x) {
-	SmartPtr<BNode> p, q;
-	SmartPtr<Result> r;
+Result* Bplus::Search(int x) {
+	struct BNode *p, *q;
+	struct Result *r;
 	int i;
 
-	r = SmartPtr<Result>(new Result);
+	r = new Result;
 
 	r->ptr = NULL;
 	r->i = 0;
-	if (!root) {
+	if (root == NULL) {
 		cout << "空树!" << endl;
 		r->tag = 0;
 	} else if (x > root->key[root->keynum - 1]) //查找的关键字比原树中的所有关键字都大
@@ -43,15 +43,15 @@ SmartPtr<Result> Bplus::Search(int x) {
 	return r;
 }
 
-void Bplus::Split(SmartPtr<BNode> tmp) {
-	SmartPtr<BNode> t, l;
+void Bplus::Split(BNode *tmp) {
+	struct BNode *t, *l;
 	int i;
 
 	while (tmp->keynum > m) //需要分裂
 	{
 		if (tmp == root) //根节点分裂，新建根节点
 				{
-			t = SmartPtr<BNode>(new BNode);
+			t = new BNode;
 			t->keynum = s2;
 			for (i = 0; i < s2; i++) {
 				t->key[i] = tmp->key[s1 + i];
@@ -64,7 +64,7 @@ void Bplus::Split(SmartPtr<BNode> tmp) {
 			t->next = tmp->next;
 			tmp->next = t;
 
-			root = SmartPtr<BNode>(new BNode);
+			root = new BNode;
 			root->keynum = 2;
 			root->key[0] = tmp->key[s1 - 1];
 			root->ptr[0] = tmp;
@@ -79,7 +79,7 @@ void Bplus::Split(SmartPtr<BNode> tmp) {
 			tmp->seq = 0;
 			t->seq = 1;
 		} else {
-			t = SmartPtr<BNode>(new BNode);
+			t = new BNode;
 			t->keynum = s2;
 			for (i = 0; i < s2; i++) {
 				t->key[i] = tmp->key[s1 + i];
@@ -118,8 +118,8 @@ void Bplus::Split(SmartPtr<BNode> tmp) {
 }
 
 bool Bplus::Insert(Request a) {
-	SmartPtr<Result> r;
-	SmartPtr<BNode> p, q, t, l, tmp;
+	struct Result *r;
+	struct BNode *p, *q, *t, *l, *tmp;
 	int nowtd, i, j;
 
 	r = Search(a.ts);
@@ -185,7 +185,7 @@ bool Bplus::Insert(Request a) {
 	//插入请求
 	if (r->tag == 0) //空树
 			{
-		p = SmartPtr<BNode>(new BNode);
+		p = new BNode;
 		p->keynum = 3;
 		p->key[0] = 0;
 		p->key[1] = a.ts;
@@ -196,7 +196,7 @@ bool Bplus::Insert(Request a) {
 		p->ptr[0] = p->ptr[1] = p->ptr[2] = NULL;
 		p->next = NULL;
 
-		q = SmartPtr<BNode>(new BNode);
+		q = new BNode;
 		q->keynum = 1;
 		q->key[0] = p->key[2];
 		q->record[0] = -1;
@@ -259,7 +259,7 @@ bool Bplus::Insert(Request a) {
 			tmp = p;
 			if (tmp->keynum > m) //叶子结点需要分裂
 					{
-				t = SmartPtr<BNode>(new BNode);
+				t = new BNode;
 				t->keynum = s2;
 				for (j = 0; j < s2; j++) {
 					t->key[j] = tmp->key[s1 + j];
@@ -378,13 +378,13 @@ bool Bplus::Insert(Request a) {
 	return true;
 }
 
-void Bplus::DSplit(SmartPtr<BNode> tmp) {
-	SmartPtr<BNode> t, l;
+void Bplus::DSplit(BNode *tmp) {
+	struct BNode *t, *l;
 	int i, j;
 
 	while (tmp->keynum > m) //需要分裂
 	{
-		t = SmartPtr<BNode>(new BNode);
+		t = new BNode;
 		t->keynum = tmp->keynum / 2;
 		int n = tmp->keynum - t->keynum;
 		for (i = 0; i < t->keynum; i++) {
@@ -405,7 +405,7 @@ void Bplus::DSplit(SmartPtr<BNode> tmp) {
 		t->parent = l;
 
 		i = 0;
-		while (!l->ptr[i])
+		while (l->ptr[i] == NULL)
 			i++;
 		for (j = 0; j < l->keynum; j++) {
 			l->key[j] = l->key[i + j];
@@ -432,7 +432,7 @@ void Bplus::DSplit(SmartPtr<BNode> tmp) {
 
 bool Bplus::Delete(int x) //每隔x时间段，删除叶子结点（自底向上逐层删除）
 		{
-	SmartPtr<BNode> tmp,  p, q, t, l;
+	struct BNode *tmp, *p, *q, *t, *l;
 	int i, j, a;
 
 	tmp = first;
@@ -455,12 +455,14 @@ bool Bplus::Delete(int x) //每隔x时间段，删除叶子结点（自底向上逐层删除）
 
 				t = p;
 				p = q;
+				delete t; //释放内部空结点
 			}
 		}
 
 		a = tmp->record[tmp->keynum - 1];
 		t = tmp;
 		tmp = tmp->next;
+		delete t; //释放叶子空结点
 	}
 	first = tmp;
 
@@ -495,6 +497,7 @@ bool Bplus::Delete(int x) //每隔x时间段，删除叶子结点（自底向上逐层删除）
 
 					t = q;
 					q = l;
+					delete t;
 				}
 
 				q = p->next;
@@ -517,9 +520,10 @@ bool Bplus::Delete(int x) //每隔x时间段，删除叶子结点（自底向上逐层删除）
 				tmp = q;
 				t = p;
 				p = q->parent;
+				delete t;
 			} else {
 				i = 0;
-				while (!p->ptr[i])
+				while (p->ptr[i] == 0)
 					i++;
 				for (j = 0; j < p->keynum; j++) {
 					p->key[j] = p->key[i + j];
@@ -549,7 +553,7 @@ bool Bplus::Delete(int x) //每隔x时间段，删除叶子结点（自底向上逐层删除）
 			if (tmp->seq != 0) //结点内的关键字需要移动
 					{
 				i = 0;
-				while (!p->ptr[i])
+				while (p->ptr[i] == NULL)
 					i++;
 				for (j = 0; j < p->keynum; j++) {
 					p->key[j] = p->key[i + j];
@@ -573,7 +577,7 @@ bool Bplus::Delete(int x) //每隔x时间段，删除叶子结点（自底向上逐层删除）
 
 void Bplus::Display() //自顶向下逐层输出
 {
-	SmartPtr<BNode> p, q;
+	BNode *p, *q;
 	int i;
 
 	p = root;
@@ -602,7 +606,7 @@ void Bplus::Display() //自顶向下逐层输出
 
 void Bplus::FDisplay(int t2) //自顶向下逐层输出
 		{
-	SmartPtr<BNode> p, q;
+	struct BNode *p, *q;
 	int i;
 
 	ofstream file("display.txt", ios::app);
@@ -635,7 +639,7 @@ void Bplus::FDisplay(int t2) //自顶向下逐层输出
 
 int Bplus::Count() {
 	int c = 0;
-	SmartPtr<BNode> p, q;
+	BNode *p, *q;
 
 	p = root;
 	while (p) {
@@ -659,7 +663,7 @@ int Bplus::End() {
 }
 
 bool Bplus::Output() {
-	SmartPtr<BNode> p;
+	struct BNode *p;
 	cout<<"BPLUS:DISPLAY."<<endl;
 	p = first;
 		while (p) {
