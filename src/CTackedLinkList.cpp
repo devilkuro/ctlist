@@ -10,8 +10,8 @@
 #include "ctlink.h"
 
 #define CT_TEST_TIME 4305
-#define CT_DEBUG_C
-//#define CT_DEBUG_B
+//#define CT_DEBUG_C
+#define CT_DEBUG_B
 
 int main() {
 	// TODO :1st. test the ctlink first.
@@ -56,10 +56,15 @@ int main() {
 		bool flagB = B.Insert(x);
 		if (sum % 100 == 0) {
 			if (B.root) {
-//				B.FDisplay(nowtime);
 				B.Delete(nowtime);
-//				B.FDisplay(nowtime);
 			}
+		}
+		int interval = 1000000;
+		if (sum % interval == interval-1) {
+			if (B.root) {
+				B.Delete(nowtime+300);
+			}
+			cin>>interval;
 		}
 #endif
 #ifdef CT_DEBUG_C

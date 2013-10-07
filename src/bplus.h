@@ -10,36 +10,42 @@
 
 
 #include "common.h"
+#include "SmartPtr.h"
 
 const int m = 3;
 const int s1 = 2; //第一个分裂结点的关键字个数要多
 const int s2 = 2;
-struct BNode
+class BNode
 {
+public:
 	int keynum;
 	int key[m+1];
 	int record[m+1];
-	struct BNode *ptr[m+1];
-	struct BNode *parent;
+	SmartPtr<BNode> ptr[m+1];
+	SmartPtr<BNode> parent;
 	int seq;
-	struct BNode *next;
+	SmartPtr<BNode> next;
 };
 
-struct Result
+class Result
 {
-	BNode *ptr;
+public:
+	SmartPtr<BNode> ptr;
 	int i;
 	int tag;
+	~Result(){
+		cout<<"delete Result."<<endl;
+	}
 };
 
 class Bplus
 {
 public:
 	Bplus();
-	Result* Search(int x);
-	void Split(BNode *tmp);
+	SmartPtr<Result> Search(int x);
+	void Split(SmartPtr<BNode> tmp);
 	bool Insert(Request a);
-	void DSplit(BNode *tmp);
+	void DSplit(SmartPtr<BNode> tmp);
 	bool Delete(int x);
 	int Count();
 	void Display();
@@ -47,8 +53,8 @@ public:
 	int End();
 	bool Output(); // display the resource link list.
 public:
-	struct BNode *root;
-	struct BNode *first;
+	SmartPtr<BNode> root;
+	SmartPtr<BNode> first;
 	static int sumB;
 };
 
