@@ -10,8 +10,8 @@
 #include "ctlink.h"
 
 #define CT_TEST_TIME 4305
-#define CT_DEBUG_C
-//#define CT_DEBUG_B
+//#define CT_DEBUG_C
+#define CT_DEBUG_B
 
 int main() {
 	// TODO :1st. test the ctlink first.

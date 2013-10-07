@@ -12,7 +12,7 @@
 #include "common.h"
 
 const int m = 3;
-const int s1 = 2; //µÚÒ»¸ö·ÖÁÑ½áµãµÄ¹Ø¼ü×Ö¸öÊıÒª¶à
+const int s1 = 2; //ç¬¬ä¸€ä¸ªåˆ†è£‚ç»“ç‚¹çš„å…³é”®å­—ä¸ªæ•°è¦å¤š
 const int s2 = 2;
 struct BNode
 {
@@ -36,7 +36,7 @@ class Bplus
 {
 public:
 	Bplus();
-	Result* Search(int x);
+	Result Search(int x);
 	void Split(BNode *tmp);
 	bool Insert(Request a);
 	void DSplit(BNode *tmp);
@@ -50,6 +50,10 @@ public:
 	struct BNode *root;
 	struct BNode *first;
 	static int sumB;
+private:
+	void deleteBNode(BNode* b);
+	void deleteResult(Result* r);
 };
 
 #endif /* _BPLUS_H_ */
+H_ */

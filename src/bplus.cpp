@@ -6,19 +6,20 @@ Bplus::Bplus() {
 	first = NULL;
 }
 
-Result* Bplus::Search(int x) {
+Result Bplus::Search(int x) {
 	struct BNode *p, *q;
 	struct Result *r;
 	int i;
+	struct Result rr;
 
 	r = new Result;
 
 	r->ptr = NULL;
 	r->i = 0;
 	if (root == NULL) {
-		cout << "¿ÕÊ÷!" << endl;
+		cout << "ç©ºæ ‘!" << endl;
 		r->tag = 0;
-	} else if (x > root->key[root->keynum - 1]) //²éÕÒµÄ¹Ø¼ü×Ö±ÈÔ­Ê÷ÖĞµÄËùÓĞ¹Ø¼ü×Ö¶¼´ó
+	} else if (x > root->key[root->keynum - 1]) //æŸ¥æ‰¾çš„å…³é”®å­—æ¯”åŸæ ‘ä¸­çš„æ‰€æœ‰å…³é”®å­—éƒ½å¤§
 			{
 		r->tag = 1;
 	} else {
@@ -33,23 +34,24 @@ Result* Bplus::Search(int x) {
 		}
 		r->ptr = q;
 		r->i = i;
-		if (q->key[i] == x) //²éÕÒµÄ¹Ø¼ü×ÖÒÑ´æÔÚ
+		if (q->key[i] == x) //æŸ¥æ‰¾çš„å…³é”®å­—å·²å­˜åœ¨
 			r->tag = 2;
 		else
-			//²éÕÒµÄ¹Ø¼ü×Ö²»´æÔÚ£¬µ«²»´óÓÚÔ­Ê÷ÖĞ×î´óµÄ¹Ø¼ü×Ö
+			//æŸ¥æ‰¾çš„å…³é”®å­—ä¸å­˜åœ¨ï¼Œä½†ä¸å¤§äºåŸæ ‘ä¸­æœ€å¤§çš„å…³é”®å­—
 			r->tag = 3;
 	}
-
-	return r;
+	rr = *r;
+	deleteResult(r);
+	return rr;
 }
 
 void Bplus::Split(BNode *tmp) {
 	struct BNode *t, *l;
 	int i;
 
-	while (tmp->keynum > m) //ĞèÒª·ÖÁÑ
+	while (tmp->keynum > m) //éœ€è¦åˆ†è£‚
 	{
-		if (tmp == root) //¸ù½Úµã·ÖÁÑ£¬ĞÂ½¨¸ù½Úµã
+		if (tmp == root) //æ ¹èŠ‚ç‚¹åˆ†è£‚ï¼Œæ–°å»ºæ ¹èŠ‚ç‚¹
 				{
 			t = new BNode;
 			t->keynum = s2;
@@ -118,19 +120,19 @@ void Bplus::Split(BNode *tmp) {
 }
 
 bool Bplus::Insert(Request a) {
-	struct Result *r;
+	struct Result r;
 	struct BNode *p, *q, *t, *l, *tmp;
 	int nowtd, i, j;
 
 	r = Search(a.ts);
-	//½ÓÄÉ¿ØÖÆ
+	//æ¥çº³æ§åˆ¶
 	nowtd = a.td;
-	p = r->ptr;
-	i = r->i;
-	int flag = 0;//If flag == 1, request a is ending up before node r->ptr. If else, request a will continue in node r->ptr.
-	if (r->tag == 3) {
+	p = r.ptr;
+	i = r.i;
+	int flag = 0; //If flag == 1, request a is ending up before node r.ptr. If else, request a will continue in node r.ptr.
+	if (r.tag == 3) {
 		if (i != 0) {
-			if (p->record[i-1] + a.bw > MAX)
+			if (p->record[i - 1] + a.bw > MAX)
 				return false;
 			else if (true) {
 				if (nowtd > (p->key[i] - a.ts))
@@ -152,17 +154,16 @@ bool Bplus::Insert(Request a) {
 			}
 		}
 	}
-	if ((r->tag == 3 && flag == 0) || r->tag == 2) {
+	if ((r.tag == 3 && flag == 0) || r.tag == 2) {
 		while (nowtd) {
-			while (nowtd && i < p->keynum - 1 && p->record[i] + a.bw <= MAX)
-			{
+			while (nowtd && i < p->keynum - 1 && p->record[i] + a.bw <= MAX) {
 				if (nowtd > p->key[i + 1] - p->key[i])
 					nowtd -= p->key[i + 1] - p->key[i];
 				else
 					nowtd = 0;
 				i++;
 			}
-			if ( nowtd && p->record[i] + a.bw > MAX)
+			if (nowtd && p->record[i] + a.bw > MAX)
 				return false;
 			if (nowtd && i == p->keynum - 1) {
 				if (p->next) {
@@ -182,8 +183,8 @@ bool Bplus::Insert(Request a) {
 	}
 
 	sumB++;
-	//²åÈëÇëÇó
-	if (r->tag == 0) //¿ÕÊ÷
+	//æ’å…¥è¯·æ±‚
+	if (r.tag == 0) //ç©ºæ ‘
 			{
 		p = new BNode;
 		p->keynum = 3;
@@ -211,22 +212,22 @@ bool Bplus::Insert(Request a) {
 		root = q;
 		first = p;
 	} else {
-		//##########################¶ÔÆğÊ¼Î»ÖÃµÄ´¦Àí###############################
+		//##########################å¯¹èµ·å§‹ä½ç½®çš„å¤„ç†###############################
 
-		if (r->tag == 2) //´Ë¹Ø¼ü×ÖÒÑ´æÔÚ
+		if (r.tag == 2) //æ­¤å…³é”®å­—å·²å­˜åœ¨
 				{
 			nowtd = a.td;
-			p = r->ptr; //µ±Ç°²éÕÒµ½µÄ½áµã
-			i = r->i; //¼ÇÂ¼ÆğÊ¼Î»ÖÃ
-		} else //´Ë¹Ø¼ü×Ö²»´æÔÚ£¬ÓÚ²éÑ¯·µ»ØµÄÒ¶×Ó½áµãÖĞ²åÈë
+			p = r.ptr; //å½“å‰æŸ¥æ‰¾åˆ°çš„ç»“ç‚¹
+			i = r.i; //è®°å½•èµ·å§‹ä½ç½®
+		} else //æ­¤å…³é”®å­—ä¸å­˜åœ¨ï¼ŒäºæŸ¥è¯¢è¿”å›çš„å¶å­ç»“ç‚¹ä¸­æ’å…¥
 		{
 			nowtd = a.td;
-			p = r->ptr;
-			i = r->i;
-			if (r->tag == 1) //µ±Ç°µÄ²éÕÒÖµ±ÈÔ­Ê÷ÖĞµÄËùÓĞÖµ¶¼Òª´ó
+			p = r.ptr;
+			i = r.i;
+			if (r.tag == 1) //å½“å‰çš„æŸ¥æ‰¾å€¼æ¯”åŸæ ‘ä¸­çš„æ‰€æœ‰å€¼éƒ½è¦å¤§
 					{
 				tmp = root;
-				while (tmp->ptr[0]) //tmpÎªÄÚ²¿½áµã
+				while (tmp->ptr[0]) //tmpä¸ºå†…éƒ¨ç»“ç‚¹
 				{
 					tmp->key[tmp->keynum - 1] = a.ts;
 					tmp = tmp->ptr[tmp->keynum - 1];
@@ -257,7 +258,7 @@ bool Bplus::Insert(Request a) {
 			}
 
 			tmp = p;
-			if (tmp->keynum > m) //Ò¶×Ó½áµãĞèÒª·ÖÁÑ
+			if (tmp->keynum > m) //å¶å­ç»“ç‚¹éœ€è¦åˆ†è£‚
 					{
 				t = new BNode;
 				t->keynum = s2;
@@ -296,16 +297,16 @@ bool Bplus::Insert(Request a) {
 			}
 
 			if (tmp->keynum > m)
-				Split(tmp); //ÄÚ²¿½áµãĞèÒª¼ÌĞø·ÖÁÑ
+				Split(tmp); //å†…éƒ¨ç»“ç‚¹éœ€è¦ç»§ç»­åˆ†è£‚
 		}
-//#########################¶ÔÖÕÖ¹Î»ÖÃµÄ´¦Àí##############################
+//#########################å¯¹ç»ˆæ­¢ä½ç½®çš„å¤„ç†##############################
 		q = NULL;
 		while (nowtd) {
 			if (q) {
 				if (nowtd >= p->key[i] - q->key[q->keynum - 1]) {
 					q->record[q->keynum - 1] += a.bw;
 					nowtd -= (p->key[i] - q->key[q->keynum - 1]);
-				} else //´ËÇëÇóÒÑ¿É²åÈëÍê³É£¬ÏÂÒ»¸ö½áµãµÄµÚÒ»¸ö
+				} else //æ­¤è¯·æ±‚å·²å¯æ’å…¥å®Œæˆï¼Œä¸‹ä¸€ä¸ªç»“ç‚¹çš„ç¬¬ä¸€ä¸ª
 				{
 					nowtd = 0;
 					for (j = p->keynum - 1; j >= 0; j--) {
@@ -330,14 +331,14 @@ bool Bplus::Insert(Request a) {
 				nowtd -= (p->key[i + 1] - p->key[i]);
 				i++;
 			}
-			if (nowtd == 0) //ÖÕÖ¹Î»ÖÃµÄ¹Ø¼ü×ÖÇ¡ºÃ´æÔÚ
+			if (nowtd == 0) //ç»ˆæ­¢ä½ç½®çš„å…³é”®å­—æ°å¥½å­˜åœ¨
 				break;
-			else if (i == p->keynum - 1) //ÒÑÔ¤Áôµ½µ±Ç°½áµãµÄ×îºóÒ»¸ö¹Ø¼ü×Ö
+			else if (i == p->keynum - 1) //å·²é¢„ç•™åˆ°å½“å‰ç»“ç‚¹çš„æœ€åä¸€ä¸ªå…³é”®å­—
 					{
 				if (p->next) {
 					q = p;
 					p = p->next;
-				} else //µ±Ç°½áµãÎª×îºóÒ»¸ö½áµã£¬´ËÇëÇóÒÑ¿É²åÈëÍê³É
+				} else //å½“å‰ç»“ç‚¹ä¸ºæœ€åä¸€ä¸ªç»“ç‚¹ï¼Œæ­¤è¯·æ±‚å·²å¯æ’å…¥å®Œæˆ
 				{
 					nowtd = 0;
 					p->key[p->keynum] = a.ts + a.td;
@@ -355,7 +356,7 @@ bool Bplus::Insert(Request a) {
 					if (p->keynum > m)
 						Split(p);
 				}
-			} else //´ËÇëÇóÒÑ¿É²åÈëÍê³É£¬µ±Ç°½áµã²åÈë
+			} else //æ­¤è¯·æ±‚å·²å¯æ’å…¥å®Œæˆï¼Œå½“å‰ç»“ç‚¹æ’å…¥
 			{
 				nowtd = 0;
 				for (j = p->keynum - 1; j >= i + 1; j--) {
@@ -382,7 +383,7 @@ void Bplus::DSplit(BNode *tmp) {
 	struct BNode *t, *l;
 	int i, j;
 
-	while (tmp->keynum > m) //ĞèÒª·ÖÁÑ
+	while (tmp->keynum > m) //éœ€è¦åˆ†è£‚
 	{
 		t = new BNode;
 		t->keynum = tmp->keynum / 2;
@@ -430,8 +431,8 @@ void Bplus::DSplit(BNode *tmp) {
 	}
 }
 
-bool Bplus::Delete(int x) //Ã¿¸ôxÊ±¼ä¶Î£¬É¾³ıÒ¶×Ó½áµã£¨×Ôµ×ÏòÉÏÖğ²ãÉ¾³ı£©
-		{
+bool Bplus::Delete(int x) {
+	//æ¯éš”xæ—¶é—´æ®µï¼Œåˆ é™¤å¶å­ç»“ç‚¹ï¼ˆè‡ªåº•å‘ä¸Šé€å±‚åˆ é™¤ï¼‰
 	struct BNode *tmp, *p, *q, *t, *l;
 	int i, j, a;
 
@@ -443,7 +444,7 @@ bool Bplus::Delete(int x) //Ã¿¸ôxÊ±¼ä¶Î£¬É¾³ıÒ¶×Ó½áµã£¨×Ôµ×ÏòÉÏÖğ²ãÉ¾³ı£©
 		p->keynum--;
 
 		while (p->keynum == 0) {
-			if (p == root) //Õû¿ÃÊ÷É¾Ã»ÁË,ÍË³ö
+			if (p == root) //æ•´æ£µæ ‘åˆ æ²¡äº†,é€€å‡º
 					{
 				root = NULL;
 				first = NULL;
@@ -451,22 +452,26 @@ bool Bplus::Delete(int x) //Ã¿¸ôxÊ±¼ä¶Î£¬É¾³ıÒ¶×Ó½áµã£¨×Ôµ×ÏòÉÏÖğ²ãÉ¾³ı£©
 			} else {
 				q = p->parent;
 				q->ptr[p->seq] = NULL;
+//				// Fanjing:1310072143: resort the children list.
+//				for(int i=p->seq;i+1<q->keynum;i++){
+//					q->ptr[i] = q->ptr[i+1];
+//				}
 				q->keynum--;
 
 				t = p;
 				p = q;
-				delete t; //ÊÍ·ÅÄÚ²¿¿Õ½áµã
+				deleteBNode(t); //é‡Šæ”¾å†…éƒ¨ç©ºç»“ç‚¹
 			}
 		}
 
 		a = tmp->record[tmp->keynum - 1];
 		t = tmp;
 		tmp = tmp->next;
-		delete t; //ÊÍ·ÅÒ¶×Ó¿Õ½áµã
+		deleteBNode(t); //é‡Šæ”¾å¶å­ç©ºç»“ç‚¹
 	}
 	first = tmp;
 
-	//½«µ±Ç°É¾³ıµÄ½ØÖ¹Ê±¼ä²åÈëfirst½ÚµãÖĞ
+	//å°†å½“å‰åˆ é™¤çš„æˆªæ­¢æ—¶é—´æ’å…¥firstèŠ‚ç‚¹ä¸­
 	if (x < first->key[0]) {
 		for (i = first->keynum - 1; i >= 0; i--) {
 			first->key[i + 1] = first->key[i];
@@ -483,8 +488,8 @@ bool Bplus::Delete(int x) //Ã¿¸ôxÊ±¼ä¶Î£¬É¾³ıÒ¶×Ó½áµã£¨×Ôµ×ÏòÉÏÖğ²ãÉ¾³ı£©
 
 	p = first->parent;
 	while (p) {
-		if (p->keynum < s2 && p->next && p->parent) //ĞèÒªºÏ²¢,ÇÒ´æÔÚºó¼Ì½áµã¿ÉÓÃÓÚºÏ²¢
-				{
+		if (p->keynum < s2 && p->next && p->parent) {
+			//éœ€è¦åˆå¹¶,ä¸”å­˜åœ¨åç»§ç»“ç‚¹å¯ç”¨äºåˆå¹¶
 			if (p->keynum + p->next->keynum <= m) {
 				q = p->parent;
 				q->ptr[p->seq] = NULL;
@@ -497,7 +502,7 @@ bool Bplus::Delete(int x) //Ã¿¸ôxÊ±¼ä¶Î£¬É¾³ıÒ¶×Ó½áµã£¨×Ôµ×ÏòÉÏÖğ²ãÉ¾³ı£©
 
 					t = q;
 					q = l;
-					delete t;
+					deleteBNode(t);
 				}
 
 				q = p->next;
@@ -520,7 +525,7 @@ bool Bplus::Delete(int x) //Ã¿¸ôxÊ±¼ä¶Î£¬É¾³ıÒ¶×Ó½áµã£¨×Ôµ×ÏòÉÏÖğ²ãÉ¾³ı£©
 				tmp = q;
 				t = p;
 				p = q->parent;
-				delete t;
+				deleteBNode(t);
 			} else {
 				i = 0;
 				while (p->ptr[i] == 0)
@@ -548,9 +553,8 @@ bool Bplus::Delete(int x) //Ã¿¸ôxÊ±¼ä¶Î£¬É¾³ıÒ¶×Ó½áµã£¨×Ôµ×ÏòÉÏÖğ²ãÉ¾³ı£©
 				}
 
 			}
-		} else //²»ºÏ²¢
-		{
-			if (tmp->seq != 0) //½áµãÄÚµÄ¹Ø¼ü×ÖĞèÒªÒÆ¶¯
+		} else { //ä¸åˆå¹¶
+			if (tmp->seq != 0) //ç»“ç‚¹å†…çš„å…³é”®å­—éœ€è¦ç§»åŠ¨
 					{
 				i = 0;
 				while (p->ptr[i] == NULL)
@@ -575,14 +579,14 @@ bool Bplus::Delete(int x) //Ã¿¸ôxÊ±¼ä¶Î£¬É¾³ıÒ¶×Ó½áµã£¨×Ôµ×ÏòÉÏÖğ²ãÉ¾³ı£©
 	return true;
 }
 
-void Bplus::Display() //×Ô¶¥ÏòÏÂÖğ²ãÊä³ö
+void Bplus::Display() //è‡ªé¡¶å‘ä¸‹é€å±‚è¾“å‡º
 {
 	BNode *p, *q;
 	int i;
 
 	p = root;
 	while (p) {
-		q = p; //q¼ÇÂ¼¸Ã²ãµÄµÚÒ»¸ö½áµã
+		q = p; //qè®°å½•è¯¥å±‚çš„ç¬¬ä¸€ä¸ªç»“ç‚¹
 		while (p) {
 			for (i = 0; i < p->keynum; i++)
 				cout << p->key[i] << ' ';
@@ -591,7 +595,7 @@ void Bplus::Display() //×Ô¶¥ÏòÏÂÖğ²ãÊä³ö
 		}
 
 		cout << endl;
-		p = q->ptr[0]; //ÍùÏÂÒ»²ã
+		p = q->ptr[0]; //å¾€ä¸‹ä¸€å±‚
 	}
 
 	p = first;
@@ -604,16 +608,16 @@ void Bplus::Display() //×Ô¶¥ÏòÏÂÖğ²ãÊä³ö
 	cout << endl;
 }
 
-void Bplus::FDisplay(int t2) //×Ô¶¥ÏòÏÂÖğ²ãÊä³ö
+void Bplus::FDisplay(int t2) //è‡ªé¡¶å‘ä¸‹é€å±‚è¾“å‡º
 		{
 	struct BNode *p, *q;
 	int i;
 
 	ofstream file("display.txt", ios::app);
-	file << "É¾³ıÊ±¼ä:" << t2 << endl;
+	file << "åˆ é™¤æ—¶é—´:" << t2 << endl;
 	p = root;
 	while (p) {
-		q = p; //q¼ÇÂ¼¸Ã²ãµÄµÚÒ»¸ö½áµã
+		q = p; //qè®°å½•è¯¥å±‚çš„ç¬¬ä¸€ä¸ªç»“ç‚¹
 		while (p) {
 			for (i = 0; i < p->keynum; i++)
 				file << p->key[i] << ' ';
@@ -622,7 +626,7 @@ void Bplus::FDisplay(int t2) //×Ô¶¥ÏòÏÂÖğ²ãÊä³ö
 		}
 
 		file << endl;
-		p = q->ptr[0]; //ÍùÏÂÒ»²ã
+		p = q->ptr[0]; //å¾€ä¸‹ä¸€å±‚
 	}
 
 	p = first;
@@ -643,12 +647,12 @@ int Bplus::Count() {
 
 	p = root;
 	while (p) {
-		q = p; //q¼ÇÂ¼¸Ã²ãµÄµÚÒ»¸ö½áµã
+		q = p; //qè®°å½•è¯¥å±‚çš„ç¬¬ä¸€ä¸ªç»“ç‚¹
 		while (p) {
 			c++;
 			p = p->next;
 		}
-		p = q->ptr[0]; //ÍùÏÂÒ»²ã
+		p = q->ptr[0]; //å¾€ä¸‹ä¸€å±‚
 	}
 
 	return c;
@@ -664,13 +668,34 @@ int Bplus::End() {
 
 bool Bplus::Output() {
 	struct BNode *p;
-	cout<<"BPLUS:DISPLAY."<<endl;
+	cout << "BPLUS:DISPLAY." << endl;
 	p = first;
-		while (p) {
-			for (int i = 0; i < p->keynum; i++){
-				cout<< "rs: " << p->key[i] << ", " << p->record[i] << endl;
-			}
-			p = p->next;
+	while (p) {
+		for (int i = 0; i < p->keynum; i++) {
+			cout << "rs: " << p->key[i] << ", " << p->record[i] << endl;
 		}
+		p = p->next;
+	}
 	return true;
+}
+
+void Bplus::deleteBNode(BNode* b) {
+	if (b->key) {
+		delete b->key;
+	}
+	if (b->record) {
+		delete b->record;
+	}
+	if (b->ptr) {
+		delete b->ptr;
+	}
+	if (b) {
+		delete b;
+	}
+}
+
+void Bplus::deleteResult(Result* r) {
+	if (r) {
+		delete r;
+	}
 }
