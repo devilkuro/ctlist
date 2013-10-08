@@ -12,7 +12,7 @@
 #include "common.h"
 
 const int m = 3;
-const int s1 = 2; //第一个分裂结点的关键字个数要多
+const int s1 = 2; // the num of the key in the first split node shold somehow bigger than other. i don't know the exact meaning of this comment, please refer to the chinese edition.
 const int s2 = 2;
 struct BNode
 {
