@@ -8,11 +8,13 @@
 #include "helper.h"
 #include "bplus.h"
 #include "ctlink.h"
+#include "CArrayList.h"
 
 #define CT_TEST_TIME 4305
-#define CT_DEBUG_C
+//#define CT_DEBUG_C
 #define CT_DEBUG_B
-#define CT_DEBUG_B_C
+//#define CT_DEBUG_A
+//#define CT_DEBUG_B_C
 
 int main() {
 	// TODO :1st. test the ctlink first.
@@ -25,6 +27,7 @@ int main() {
 	int sum = 0;
 	CTLink C;
 	Bplus B;
+	CArrayList A = CArrayList(256);
 	int nowtime;
 	clock_t ps, start;
 	unsigned int startTime = clock();
@@ -34,21 +37,20 @@ int main() {
 	cout << "start to generate the data." << endl;
 	for(unsigned int i = 0;i<MAX_REQUEST_NUM;i++){
 		tlist[i] = H.P_Rand(100);
-		xlist[i].bw = H.U_Randint(10,390);
-		xlist[i].ts = H.U_Randint(200,1500);
-		xlist[i].td = ((int)H.E_Rand(0.01)%100)*20+H.U_Randint(0,20);
+		xlist[i].bw = H.U_Randint(100,1000);
+		xlist[i].ts = H.U_Randint(20,50);
+		xlist[i].td = (unsigned int)H.E_Rand(0.01)%100;
 	}
 	tempTime = clock();
 	cout << "generation finished." <<endl;
 	cout << "generation takes " <<(tempTime-startTime)/1000.0<<" s, "<< MAX_REQUEST_NUM <<" requests have been generated."<< endl;
 
 	tempTime = clock();
-//	HANDLE hThread2 = CreateThread(NULL, 0, Fun2, &B, 0, NULL);
-//	CloseHandle(hThread2);
+
 	unsigned int staInterval = 1000000;
+	unsigned int acceptNum = 0;
 	ps = 0;
 	start = 0;//ms
-	unsigned int acceptNum = 0;
 	for(unsigned int i = 0;i<MAX_REQUEST_NUM;i++)
 	{
 		sum++;
@@ -57,6 +59,9 @@ int main() {
 		x.bw = xlist[i].bw;
 		x.td = xlist[i].td;
 		x.ts = xlist[i].ts;
+		if(x.td<0){
+			cout<<"Warning!"<< endl;
+		}
 		nowtime = start - ps;
 //		cout<<"now time:"<<nowtime<<endl;
 //		cout<<"R("<<x.bw<<","<<x.ts<<","<<x.td<<"):"<<t1<<endl;
@@ -69,6 +74,21 @@ int main() {
 #ifndef CT_DEBUG_B_C
 		if(flagC){
 			acceptNum++;
+		}
+#endif
+#endif
+#ifdef CT_DEBUG_A
+		A.setTime(nowtime);
+		bool flagA = A.Insert(x);
+#ifndef CT_DEBUG_C
+		if(flagA){
+			acceptNum++;
+		}
+#endif
+#ifdef CT_DEBUG_C
+		if(flagA!=flagC){
+			C.Output();
+			cout<< "Error!!"<< endl;
 		}
 #endif
 #endif

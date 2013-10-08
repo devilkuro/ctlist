@@ -10,6 +10,9 @@
 
 #include "common.h"
 
+#define CT_TACK_NUM  16
+#define CT_INDEX_NUM 4
+#define CT_MAX_RESERVE_TIME 256 //16*4*4=256
 struct CTNode{
 	unsigned int rs; // rs stands for the remainder resource.
 	unsigned int t; // t stands for the time of this node.
@@ -32,10 +35,7 @@ public:
 	~CTLink();
 public:
 	// add public member variable here
-	unsigned int CT_TACK_NUM;
-	unsigned int CT_INDEX_NUM;
 	unsigned int CT_INDEX_THRESHOLD;
-	unsigned int CT_MAX_RESERVE_TIME;
 	unsigned int CT_TACK_ARRAY_SIZE;
 	unsigned int CT_TACK_INTERVAL; //decide the interval between two tacks.
 	unsigned int CT_INDEX_INTERVAL; //decide the interval between two indexes.

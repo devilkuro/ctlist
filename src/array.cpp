@@ -12,7 +12,7 @@ Array::Array(int n)
 		p[i] = 0;
 }
 
-void Array::Insert(Request r)
+bool Array::Insert(Request r)
 {
 	int i, end;
 
@@ -20,14 +20,14 @@ void Array::Insert(Request r)
 	//进行接纳控制
 	i = t + r.ts ;
 	if(r.td > N)
-		return;
+		return false;
 	while(i < end && i < N && p[i] + r.bw <= MAX)
 	{
 		i++;
 	}
 	if(p[i] + r.bw > MAX)
 	{
-		return;
+		return false;
 	}
 	else if(i >= N)
 	{
@@ -37,7 +37,7 @@ void Array::Insert(Request r)
 		}
 		if(p[i-N] + r.bw > MAX)
 		{
-			return;
+			return false;
 		}
 	}
 
@@ -56,6 +56,7 @@ void Array::Insert(Request r)
 			i++;
 		}
 	}
+	return true;
 }
 
 void Array::Clear()

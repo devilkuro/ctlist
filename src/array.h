@@ -15,7 +15,7 @@ class Array
 {
 public:
 	Array(int n);
-	void Insert(Request r);
+	bool Insert(Request r);
 	void Clear();
 	void Display();
 	static int sumA;
