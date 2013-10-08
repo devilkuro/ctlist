@@ -19,7 +19,7 @@ Result Bplus::Search(int x) {
 	if (root == NULL) {
 		cout << "空树!" << endl;
 		r->tag = 0;
-	} else if (x > root->key[root->keynum - 1]) //查找的关键字比原树中的所有关键字都大
+	} else if (x > root->key[root->keynum - 1]) // the target key is bigger than every node in this tree.
 			{
 		r->tag = 1;
 	} else {
@@ -34,10 +34,10 @@ Result Bplus::Search(int x) {
 		}
 		r->ptr = q;
 		r->i = i;
-		if (q->key[i] == x) //查找的关键字已存在
+		if (q->key[i] == x) //the target key is already exist.
 			r->tag = 2;
 		else
-			//查找的关键字不存在，但不大于原树中最大的关键字
+			// the target key is not exist, and is also not bigger than the biggest node in this tree.
 			r->tag = 3;
 	}
 	rr = *r;
@@ -49,9 +49,9 @@ void Bplus::Split(BNode *tmp) {
 	struct BNode *t, *l;
 	int i;
 
-	while (tmp->keynum > m) //需要分裂
+	while (tmp->keynum > m) // needs to be split
 	{
-		if (tmp == root) //根节点分裂，新建根节点
+		if (tmp == root) // split the root node
 				{
 			t = new BNode;
 			t->keynum = s2;
@@ -125,7 +125,7 @@ bool Bplus::Insert(Request a) {
 	int nowtd, i, j;
 
 	r = Search(a.ts);
-	//接纳控制
+	//accept control
 	nowtd = a.td;
 	p = r.ptr;
 	i = r.i;
@@ -183,8 +183,8 @@ bool Bplus::Insert(Request a) {
 	}
 
 	sumB++;
-	//插入请求
-	if (r.tag == 0) //空树
+	//insert node
+	if (r.tag == 0) // empty tree
 			{
 		p = new BNode;
 		p->keynum = 3;
@@ -212,22 +212,22 @@ bool Bplus::Insert(Request a) {
 		root = q;
 		first = p;
 	} else {
-		//##########################对起始位置的处理###############################
+		//-----------------------insert the start point---------------------------
 
-		if (r.tag == 2) //此关键字已存在
+		if (r.tag == 2) // the insert point is already exist
 				{
 			nowtd = a.td;
-			p = r.ptr; //当前查找到的结点
-			i = r.i; //记录起始位置
-		} else //此关键字不存在，于查询返回的叶子结点中插入
+			p = r.ptr; //the result node return from the search function
+			i = r.i; // start postion
+		} else //this key is not exist , insert this key into the returned node.
 		{
 			nowtd = a.td;
 			p = r.ptr;
 			i = r.i;
-			if (r.tag == 1) //当前的查找值比原树中的所有值都要大
+			if (r.tag == 1) //the search key is bigger than every exist key in this tree
 					{
 				tmp = root;
-				while (tmp->ptr[0]) //tmp为内部结点
+				while (tmp->ptr[0]) //tmp is an inner node
 				{
 					tmp->key[tmp->keynum - 1] = a.ts;
 					tmp = tmp->ptr[tmp->keynum - 1];
@@ -258,7 +258,7 @@ bool Bplus::Insert(Request a) {
 			}
 
 			tmp = p;
-			if (tmp->keynum > m) //叶子结点需要分裂
+			if (tmp->keynum > m) //leaf node needs to be split
 					{
 				t = new BNode;
 				t->keynum = s2;
@@ -297,16 +297,16 @@ bool Bplus::Insert(Request a) {
 			}
 
 			if (tmp->keynum > m)
-				Split(tmp); //内部结点需要继续分裂
+				Split(tmp); //the inner node needs to be split
 		}
-//#########################对终止位置的处理##############################
+//-------------------------------insert the end point ------------------------
 		q = NULL;
 		while (nowtd) {
 			if (q) {
 				if (nowtd >= p->key[i] - q->key[q->keynum - 1]) {
 					q->record[q->keynum - 1] += a.bw;
 					nowtd -= (p->key[i] - q->key[q->keynum - 1]);
-				} else //此请求已可插入完成，下一个结点的第一个
+				} else // i don't know the exact meaning of this comment, please refer to the chinese edition.
 				{
 					nowtd = 0;
 					for (j = p->keynum - 1; j >= 0; j--) {
@@ -331,14 +331,14 @@ bool Bplus::Insert(Request a) {
 				nowtd -= (p->key[i + 1] - p->key[i]);
 				i++;
 			}
-			if (nowtd == 0) //终止位置的关键字恰好存在
+			if (nowtd == 0) // the end point is already exist
 				break;
-			else if (i == p->keynum - 1) //已预留到当前结点的最后一个关键字
+			else if (i == p->keynum - 1) //i don't know the exact meaning of this comment, please refer to the chinese edition.
 					{
 				if (p->next) {
 					q = p;
 					p = p->next;
-				} else //当前结点为最后一个结点，此请求已可插入完成
+				} else //i don't know the exact meaning of this comment, please refer to the chinese edition.
 				{
 					nowtd = 0;
 					p->key[p->keynum] = a.ts + a.td;
@@ -356,7 +356,7 @@ bool Bplus::Insert(Request a) {
 					if (p->keynum > m)
 						Split(p);
 				}
-			} else //此请求已可插入完成，当前结点插入
+			} else //i don't know the exact meaning of this comment, please refer to the chinese edition.
 			{
 				nowtd = 0;
 				for (j = p->keynum - 1; j >= i + 1; j--) {
@@ -383,7 +383,7 @@ void Bplus::DSplit(BNode *tmp) {
 	struct BNode *t, *l;
 	int i, j;
 
-	while (tmp->keynum > m) //需要分裂
+	while (tmp->keynum > m) // needs to be split
 	{
 		t = new BNode;
 		t->keynum = tmp->keynum / 2;
@@ -432,7 +432,7 @@ void Bplus::DSplit(BNode *tmp) {
 }
 
 bool Bplus::Delete(int x) {
-	//每隔x时间段，删除叶子结点（自底向上逐层删除）
+	//delete the nodes before time x.
 	struct BNode *tmp, *p, *q, *t, *l;
 	int i, j, a;
 
@@ -444,7 +444,7 @@ bool Bplus::Delete(int x) {
 		p->keynum--;
 
 		while (p->keynum == 0) {
-			if (p == root) //整棵树删没了,退出
+			if (p == root) // the whole tree is deleted
 					{
 				root = NULL;
 				first = NULL;
@@ -460,18 +460,18 @@ bool Bplus::Delete(int x) {
 
 				t = p;
 				p = q;
-				deleteBNode(t); //释放内部空结点
+				deleteBNode(t); //delete inner node
 			}
 		}
 
 		a = tmp->record[tmp->keynum - 1];
 		t = tmp;
 		tmp = tmp->next;
-		deleteBNode(t); //释放叶子空结点
+		deleteBNode(t); //delete the empty leaf node
 	}
 	first = tmp;
 
-	//将当前删除的截止时间插入first节点中
+	//insert the new start time in to the first node.
 	if (x < first->key[0]) {
 		for (i = first->keynum - 1; i >= 0; i--) {
 			first->key[i + 1] = first->key[i];
@@ -489,7 +489,7 @@ bool Bplus::Delete(int x) {
 	p = first->parent;
 	while (p) {
 		if (p->keynum < s2 && p->next && p->parent) {
-			//需要合并,且存在后继结点可用于合并
+			//needs to be merged, and the next can be used to do this 
 			if (p->keynum + p->next->keynum <= m) {
 				q = p->parent;
 				q->ptr[p->seq] = NULL;
@@ -553,8 +553,8 @@ bool Bplus::Delete(int x) {
 				}
 
 			}
-		} else { //不合并
-			if (tmp->seq != 0) //结点内的关键字需要移动
+		} else { // do not merge
+			if (tmp->seq != 0) // move the key in this node
 					{
 				i = 0;
 				while (p->ptr[i] == NULL)
@@ -579,14 +579,14 @@ bool Bplus::Delete(int x) {
 	return true;
 }
 
-void Bplus::Display() //自顶向下逐层输出
+void Bplus::Display() //display all nodes from upper layer to lower layer
 {
 	BNode *p, *q;
 	int i;
 
 	p = root;
 	while (p) {
-		q = p; //q记录该层的第一个结点
+		q = p; //q record the first node in this layer
 		while (p) {
 			for (i = 0; i < p->keynum; i++)
 				cout << p->key[i] << ' ';
@@ -595,7 +595,7 @@ void Bplus::Display() //自顶向下逐层输出
 		}
 
 		cout << endl;
-		p = q->ptr[0]; //往下一层
+		p = q->ptr[0]; // down to next layer
 	}
 
 	p = first;
@@ -608,7 +608,7 @@ void Bplus::Display() //自顶向下逐层输出
 	cout << endl;
 }
 
-void Bplus::FDisplay(int t2) //自顶向下逐层输出
+void Bplus::FDisplay(int t2) //display all nodes from upper layer to lower layer and record result into display.txt file
 		{
 	struct BNode *p, *q;
 	int i;
@@ -617,7 +617,7 @@ void Bplus::FDisplay(int t2) //自顶向下逐层输出
 	file << "删除时间:" << t2 << endl;
 	p = root;
 	while (p) {
-		q = p; //q记录该层的第一个结点
+		q = p; //q record the first node in this layer
 		while (p) {
 			for (i = 0; i < p->keynum; i++)
 				file << p->key[i] << ' ';
@@ -626,7 +626,7 @@ void Bplus::FDisplay(int t2) //自顶向下逐层输出
 		}
 
 		file << endl;
-		p = q->ptr[0]; //往下一层
+		p = q->ptr[0]; // down to next layer
 	}
 
 	p = first;
@@ -647,12 +647,12 @@ int Bplus::Count() {
 
 	p = root;
 	while (p) {
-		q = p; //q记录该层的第一个结点
+		q = p; //q record the first node in this layer
 		while (p) {
 			c++;
 			p = p->next;
 		}
-		p = q->ptr[0]; //往下一层
+		p = q->ptr[0]; // down to next layer
 	}
 
 	return c;
