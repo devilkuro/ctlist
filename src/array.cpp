@@ -1,10 +1,10 @@
 #include "array.h"
 
 int Array::sumA = 0;
-int Array::t = 0;
+unsigned int Array::t = 0;
 Array::Array(int n)
 {
-	int i;
+	unsigned int i;
 
 	p = new int[n];
 	N = n;
@@ -14,7 +14,7 @@ Array::Array(int n)
 
 bool Array::Insert(Request r)
 {
-	int i, end;
+	unsigned int i, end;
 
 	end = t + r.ts + r.td;
 	//进行接纳控制
@@ -67,7 +67,7 @@ void Array::Clear()
 
 void Array::Display()
 {
-	int i;
+	unsigned int i;
 
 	for(i = t; i < N; i++)
 		cout<<p[i]<<' ';

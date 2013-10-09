@@ -49,7 +49,7 @@ double Generator::getNext(Request* rq) {
 	Helper hp;
 	rq->bw = hp.U_Randint(100, 1000);
 	rq->ts = hp.U_Randint(20, 50);
-	rq->td = (int) hp.E_Rand(0.01) % 100;
+	rq->td = (unsigned int) hp.E_Rand(0.01) % 100;
 	return hp.P_Rand(100);
 }
 

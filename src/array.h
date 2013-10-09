@@ -19,10 +19,10 @@ public:
 	void Clear();
 	void Display();
 	static int sumA;
-	static int t;
+	static unsigned int t;
 private:
 	int* p;
-	int N;
+	unsigned int N;
 };
 
 

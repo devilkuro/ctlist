@@ -10,9 +10,9 @@
 
 struct Request
 {
-	int bw;
-	int ts;
-	int td;
+	unsigned int bw;
+	unsigned int ts;
+	unsigned int td;
 };
 
 #endif /* _UTILS_H_ */
