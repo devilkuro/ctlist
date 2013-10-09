@@ -8,7 +8,7 @@
 #include "ctlink.h"
 
 CTLink::CTLink() {
-	CT_INDEX_THRESHOLD = CT_INDEX_NUM - 1;
+	CT_INDEX_THRESHOLD = CT_INDEX_NUM+1;
 	CT_TACK_ARRAY_SIZE = CT_TACK_NUM + 3; // one to keep all alive node in range; one to record start node; one to record end node.
 	CT_TACK_INTERVAL = (CT_MAX_RESERVE_TIME + CT_TACK_NUM - 1) / CT_TACK_NUM; // to make sure that CT_TACK_INTERVAL * CT_TACK_NUM >= CT_MAX_RESERVE_TIME.
 	CT_INDEX_INTERVAL = (CT_TACK_INTERVAL + CT_INDEX_NUM - 1) / CT_INDEX_NUM;

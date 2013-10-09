@@ -10,9 +10,9 @@
 
 #include "common.h"
 
-#define CT_TACK_NUM  16
-#define CT_INDEX_NUM 4
-#define CT_MAX_RESERVE_TIME 256 //16*4*4=256
+#define CT_TACK_NUM  512
+#define CT_INDEX_NUM 8
+#define CT_MAX_RESERVE_TIME 4096 //16*4*4=256
 struct CTNode{
 	unsigned int rs; // rs stands for the remainder resource.
 	unsigned int t; // t stands for the time of this node.
