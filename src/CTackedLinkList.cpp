@@ -69,7 +69,6 @@ int main() {
 //			nowtime = CT_TEST_TIME;
 //		}
 #ifdef CT_DEBUG_C
-		cout<< "CT_DEBUG_C::"<< endl;
 		C.SetTime(nowtime);
 		bool flagC = C.Insert(x);
 #ifndef CT_DEBUG_B_C
@@ -79,7 +78,6 @@ int main() {
 #endif
 #endif
 #ifdef CT_DEBUG_A
-		cout<< "CT_DEBUG_A::"<< endl;
 		A.setTime(nowtime);
 		bool flagA = A.Insert(x);
 #ifndef CT_DEBUG_C
@@ -95,7 +93,6 @@ int main() {
 #endif
 #endif
 #ifdef CT_DEBUG_B
-		cout<< "CT_DEBUG_B::"<< endl;
 		x.ts = nowtime + x.ts;
 		bool flagB = B.Insert(x);
 		if (sum % 100 == 0) {
@@ -121,6 +118,15 @@ int main() {
 
 #ifndef CT_DEBUG_B_C
 		if(sum%staInterval == 0){
+#ifdef CT_DEBUG_A
+		cout<< "CT_DEBUG_A::"<< endl;
+#endif
+#ifdef CT_DEBUG_B
+		cout<< "CT_DEBUG_B::"<< endl;
+#endif
+#ifdef CT_DEBUG_C
+		cout<< "CT_DEBUG_C::"<< endl;
+#endif
 			cout<< sum/staInterval <<":"<< clock()-tempTime<<"\taccept rate: "<<(acceptNum*1.0)/sum <<endl;
 			tempTime = clock();
 		}
