@@ -51,6 +51,15 @@ int main() {
 	unsigned int acceptNum = 0;
 	ps = 0;
 	start = 0;//ms
+#ifdef CT_DEBUG_A
+	cout<< "CT_DEBUG_A::"<< endl;
+#endif
+#ifdef CT_DEBUG_B
+	cout<< "CT_DEBUG_B::"<< endl;
+#endif
+#ifdef CT_DEBUG_C
+	cout<< "CT_DEBUG_C::"<< endl;
+#endif
 	for(unsigned int i = 0;i<MAX_REQUEST_NUM;i++)
 	{
 		sum++;
@@ -118,15 +127,6 @@ int main() {
 
 #ifndef CT_DEBUG_B_C
 		if(sum%staInterval == 0){
-#ifdef CT_DEBUG_A
-		cout<< "CT_DEBUG_A::"<< endl;
-#endif
-#ifdef CT_DEBUG_B
-		cout<< "CT_DEBUG_B::"<< endl;
-#endif
-#ifdef CT_DEBUG_C
-		cout<< "CT_DEBUG_C::"<< endl;
-#endif
 			cout<< sum/staInterval <<":"<< clock()-tempTime<<"\taccept rate: "<<(acceptNum*1.0)/sum <<endl;
 			tempTime = clock();
 		}
