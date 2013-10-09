@@ -1,4 +1,4 @@
-/*
+ï»¿/*
  * helper.h
  *
  *  Edited on: 2013-9-15
@@ -8,14 +8,14 @@
 
 #ifndef _HELPER_H_
 #define _HELPER_H_
-//Éú³ÉÇëÇóµÄ¸¨Öúº¯Êı
+// the Helper class
 
 class Helper
 {
 public:
-	int U_Randint(int a, int b);//¾ùÔÈ·Ö²¼£¬¾ùÖµÎª(a+b)/2
-    double P_Rand(double Lamda);//²´ËÉ·Ö²¼£¬LamdaÎª²´ËÉ·Ö²¼µÄ¾ùÖµ
-    double E_Rand(double Lamda);//Ö¸Êı·Ö²¼£¬¾ùÖµÎª1 / Lamda
+	int U_Randint(int a, int b);//uniform distribution, the average number is (a+b)/2.
+    double P_Rand(double Lamda);//poisson distribution, the average number is Lamda.
+    double E_Rand(double Lamda);//exponential distribution, the average number is 1/Lamda.
 };
 
 
