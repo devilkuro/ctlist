@@ -11,9 +11,9 @@
 #include "CArrayList.h"
 
 #define CT_TEST_TIME 4305
-//#define CT_DEBUG_C
+#define CT_DEBUG_C
 //#define CT_DEBUG_B
-#define CT_DEBUG_A
+//#define CT_DEBUG_A
 //#define CT_DEBUG_B_C
 
 int main() {
@@ -37,7 +37,7 @@ int main() {
 	cout << "start to generate the data." << endl;
 	for(unsigned int i = 0;i<MAX_REQUEST_NUM;i++){
 		tlist[i] = H.P_Rand(100)/10;
-		xlist[i].bw = H.U_Randint(20,100);
+		xlist[i].bw = H.U_Randint(20,50);
 		xlist[i].ts = H.U_Randint(20,1000);
 		xlist[i].td = (unsigned int)H.E_Rand(0.001)%3000;
 	}
