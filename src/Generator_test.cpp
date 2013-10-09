@@ -6,7 +6,8 @@
  */
 
 #include "Generator.h"
-
+#define GN_DEBUG
+#define DEBUG false
 #ifdef GN_DEBUG
 int main() {
 #ifdef DEBUG
