@@ -6,8 +6,8 @@
  */
 
 #include "Generator.h"
-//#define GN_DEBUG
-//#define DEBUG false
+#define GN_DEBUG
+#define DEBUG false
 #ifdef GN_DEBUG
 int main() {
 #ifdef DEBUG
@@ -32,7 +32,7 @@ int main() {
 	length = file.tellg();
 	file.seekg(0, file.beg);
 
-	size = (sizeof(double) + sizeof(Request) + sizeof(char));
+	size = sizeof(double) + sizeof(Request);
 	buff = new char[length];
 	file.read(buff, length);
 
@@ -41,7 +41,6 @@ int main() {
 	for (unsigned int i = 0; i < length / size; i++) {
 		interval = (double*) (buff + i * size);
 		rq = (Request*) (buff + i * size + sizeof(double));
-		z = (char*) (buff + i * size + sizeof(double) + sizeof(Request));
 		if (i % 100000 == 0 && DEBUG) {
 			cout << "read:: Request(" << rq->bw << " , " << rq->ts << " , "
 			<< rq->td << " ):" << *interval << "+" << *z + 0 << endl;

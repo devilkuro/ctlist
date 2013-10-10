@@ -23,7 +23,7 @@ bool Generator::output(const char* fileName, unsigned int t) {
 	ofstream file(fileName, ios_base::binary);
 	if (file == NULL)
 		return false;
-	unsigned int size = (sizeof(double) + sizeof(Request) + sizeof(char));
+	unsigned int size = sizeof(double) + sizeof(Request);
 	buff = new char[size * t];
 	for (unsigned i = 0; i < t; i++) {
 		interval = this->getNext(&rq);
@@ -35,7 +35,6 @@ bool Generator::output(const char* fileName, unsigned int t) {
 #endif
 		memcpy(buff + i * size, &interval, sizeof(double));
 		memcpy(buff + i * size + sizeof(double), &rq, sizeof(Request));
-		buff[i * size + sizeof(double) + sizeof(Request)] = 0;
 	}
 	file.write(buff, size * t);
 #ifdef DEBUG
