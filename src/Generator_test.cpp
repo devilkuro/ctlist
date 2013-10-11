@@ -6,11 +6,12 @@
  */
 
 #include "Generator.h"
-#define GN_DEBUG
-#define DEBUG false
+//#define GN_DEBUG
+//#define GN_OUT_DEBUG false
+
 #ifdef GN_DEBUG
 int main() {
-#ifdef DEBUG
+#ifdef GN_OUT_DEBUG
 	unsigned int size; //size of each block.
 	char* buff;
 	unsigned long length;//total size
@@ -24,7 +25,7 @@ int main() {
 	Generator* gn = new Generator();
 	string fileName("output.dat");
 	gn->output(fileName.c_str(), MAX_REQUEST_NUM);
-#ifdef DEBUG
+#ifdef GN_OUT_DEBUG
 	t_write = clock() - t_start;
 
 	ifstream file("output.dat");
@@ -41,7 +42,7 @@ int main() {
 	for (unsigned int i = 0; i < length / size; i++) {
 		interval = (double*) (buff + i * size);
 		rq = (Request*) (buff + i * size + sizeof(double));
-		if (i % 100000 == 0 && DEBUG) {
+		if (i % 100000 == 0 && GN_OUT_DEBUG) {
 			cout << "read:: Request(" << rq->bw << " , " << rq->ts << " , "
 			<< rq->td << " ):" << *interval << "+" << *z + 0 << endl;
 		}

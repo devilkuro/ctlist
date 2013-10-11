@@ -9,13 +9,98 @@
 #include "bplus.h"
 #include "ctlink.h"
 #include "CArrayList.h"
+#include "Generator.h"
 
 #define CT_TEST_TIME 4305
+//#define CT_DEBUG
 #define CT_DEBUG_C
 //#define CT_DEBUG_B
 //#define CT_DEBUG_A
 //#define CT_DEBUG_B_C
+//#define GN_DEBUG
+//#define GN_OUT_DEBUG false
+#define TEST_DEBUG
+#ifdef TEST_DEBUG
+int main(){
+	Helper H;
+	unsigned int max = 1000000;
+	unsigned int num = 0;
+	unsigned int sum = 0;
+	unsigned int p = 0;
+	unsigned int a[101] = {0};
+	for(unsigned int i = 0; i < max ; i++){
+		p =  H.E_Rand(0.01);
+		if(p<1010){
+		a[p/10]++;
+		}else{
+			a[100]++;
+		}
+		sum += (unsigned int )p;
+		if(p >= 1010){
+			cout << num++ <<"\tP:"<< p << "\tavg:" << (double)sum/(i+1)<< endl;
+		}
+	}
+	for(unsigned int i = 0;i<101;i++){
+		if(i%10 == 0){
+			cout<< endl;
+		}
+		cout<< a[i] << "\t";
+	}
+}
+#endif
+#ifdef GN_DEBUG
+int main() {
+#ifdef GN_OUT_DEBUG
+	unsigned int size; //size of each block.
+	char* buff;
+	unsigned long length;//total size
+	Request* rq;
+	double* interval;
+	char* z;
+	clock_t t_start, t_write, t_read, t_total;
 
+	t_start = clock();
+#endif
+	Generator* gn = new Generator();
+	string fileName("output.dat");
+	gn->output(fileName.c_str(), MAX_REQUEST_NUM);
+#ifdef GN_OUT_DEBUG
+	t_write = clock() - t_start;
+
+	ifstream file("output.dat");
+	file.seekg(0, file.end);
+	length = file.tellg();
+	file.seekg(0, file.beg);
+
+	size = sizeof(double) + sizeof(Request);
+	buff = new char[length];
+	file.read(buff, length);
+
+	t_read = clock() - t_start - t_write;
+
+	for (unsigned int i = 0; i < length / size; i++) {
+		interval = (double*) (buff + i * size);
+		rq = (Request*) (buff + i * size + sizeof(double));
+		if (i % 100000 == 0 && GN_OUT_DEBUG) {
+			cout << "read:: Request(" << rq->bw << " , " << rq->ts << " , "
+			<< rq->td << " ):" << *interval << "+" << *z + 0 << endl;
+		}
+	}
+	file.close();
+
+	delete(buff);
+	t_total = clock() - t_start;
+	cout << "function started at " << t_start << endl;
+	cout << "generate and write finished in " << t_write
+	<< " ms and read finished in " << t_read << " ms." << endl;
+	cout << "function finished in " << t_total << " ms." << endl;
+#endif
+
+	delete(gn);
+	return 0;
+}
+#endif
+#ifdef CT_DEBUG
 int main() {
 	// TODO :1st. test the ctlink first.
 
@@ -134,3 +219,4 @@ int main() {
 	}
 	return 0;
 }
+#endif

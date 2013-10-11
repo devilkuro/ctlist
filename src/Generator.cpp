@@ -8,7 +8,14 @@
 #include "Generator.h"
 
 Generator::Generator() {
-	// there is nothing to do here at now.
+	// initialize all members here.
+	bw_down = 100;
+	bw_up = 1000;
+	ts_down = 20;
+	ts_up = 50;
+	td_ave = 100;
+	td_limit = 100;
+	interval = 100;
 }
 
 Generator::~Generator() {
@@ -44,11 +51,11 @@ bool Generator::output(const char* fileName, unsigned int t) {
 	return true;
 }
 
-double Generator::getNext(Request* rq) {
+unsigned int Generator::getNext(Request* rq) {
 	Helper hp;
-	rq->bw = hp.U_Randint(100, 1000);
-	rq->ts = hp.U_Randint(20, 50);
-	rq->td = (unsigned int) hp.E_Rand(0.01) % 100;
-	return hp.P_Rand(100);
+	rq->bw = hp.U_Randint(bw_down, bw_up);
+	rq->ts = hp.U_Randint(ts_down, ts_up);
+	rq->td = (unsigned int) hp.E_Rand(1.0/td_ave) % td_limit;
+	return (unsigned int )hp.P_Rand(interval);
 }
 
