@@ -6,46 +6,12 @@
  */
 
 #include "ctlink.h"
-
-CTLink::CTLink() {
-	CT_INDEX_THRESHOLD = CT_INDEX_NUM+1;
-	CT_TACK_ARRAY_SIZE = CT_TACK_NUM + 3; // one to keep all alive node in range; one to record start node; one to record end node.
-	CT_TACK_INTERVAL = (CT_MAX_RESERVE_TIME + CT_TACK_NUM - 1) / CT_TACK_NUM; // to make sure that CT_TACK_INTERVAL * CT_TACK_NUM >= CT_MAX_RESERVE_TIME.
-	CT_INDEX_INTERVAL = (CT_TACK_INTERVAL + CT_INDEX_NUM - 1) / CT_INDEX_NUM;
-	iStartTack = 0;
-	iCurrentTack = 0;
-	iCurrentTime = 0;
-	iMaxResource = MAX;
-	tack = new CTTack[CT_TACK_ARRAY_SIZE];
-	// 1st. initialize all tacks and their nodes.
-	for (unsigned int i = 0; i < CT_TACK_ARRAY_SIZE; i++) {
-		//initial each tack.
-		tack[i].num = 0;
-		tack[i].indexed = false; //new tack has no index
-		tack[i].iIndexMask = 0;
-		tack[i].index = NULL;
-		tack[i].node = new CTNode();
-		tack[i].node->t = (((i + CT_TACK_ARRAY_SIZE
-				- (iStartTack % CT_TACK_ARRAY_SIZE)) % CT_TACK_ARRAY_SIZE)
-				+ iStartTack) * CT_TACK_INTERVAL;
-		tack[i].node->rs = 0;
-	}
-	// 2nd. then link these nodes.
-	for (unsigned int i =0; i<CT_TACK_ARRAY_SIZE;i++){
-		if (iStartTack % CT_TACK_ARRAY_SIZE == i) { //the first tack dose not have the pre tack.
-			tack[i].node->pre = NULL;
-			tack[i].node->next = tack[(i + 1) % CT_TACK_ARRAY_SIZE].node;
-			if (iStartTack == 0) {
-				tack[i].num = 1; // if the current tack is the 0 tack, make the start node at time 0 to a normal node. To fix the NULL point bug.
-			}
-		} else if (iStartTack % CT_TACK_ARRAY_SIZE - 1 == i) { //the last tack dose not have the next tack.
-			tack[i].node->pre = tack[(i - 1) % CT_TACK_ARRAY_SIZE].node;
-			tack[i].node->next = NULL;
-		} else { //the middle tacks have both pre tack and next tack.
-			tack[i].node->pre = tack[(i - 1) % CT_TACK_ARRAY_SIZE].node;
-			tack[i].node->next = tack[(i + 1) % CT_TACK_ARRAY_SIZE].node;
-		}
-	}
+CTLink::CTLink(){
+	initCTLink(256,16,4096);
+}
+CTLink::CTLink(unsigned int tnum,unsigned int inum,unsigned int max) {
+	// tnum means the CT_TACK_NUM; inum means the CT_INDEX_NUM; max means the CT_MAX_RESERVE_TIME.
+	initCTLink(tnum,inum,max);
 }
 
 CTLink::~CTLink() {
@@ -315,4 +281,49 @@ bool CTLink::Output() {
 		cout<< "rs: " << temp->t << ", " << temp->rs << endl;
 	}
 	return true;
+}
+
+void CTLink::initCTLink(unsigned int tnum, unsigned int inum,
+		unsigned int max) {
+	CT_TACK_NUM = tnum;
+	CT_INDEX_NUM = inum;
+	CT_MAX_RESERVE_TIME = max; //16*4*4=256
+	CT_INDEX_THRESHOLD = CT_INDEX_NUM;
+	CT_TACK_ARRAY_SIZE = CT_TACK_NUM + 3; // one to keep all alive node in range; one to record start node; one to record end node.
+	CT_TACK_INTERVAL = (CT_MAX_RESERVE_TIME + CT_TACK_NUM - 1) / CT_TACK_NUM; // to make sure that CT_TACK_INTERVAL * CT_TACK_NUM >= CT_MAX_RESERVE_TIME.
+	CT_INDEX_INTERVAL = (CT_TACK_INTERVAL + CT_INDEX_NUM - 1) / CT_INDEX_NUM;
+	iStartTack = 0;
+	iCurrentTack = 0;
+	iCurrentTime = 0;
+	iMaxResource = MAX;
+	tack = new CTTack[CT_TACK_ARRAY_SIZE];
+	// 1st. initialize all tacks and their nodes.
+	for (unsigned int i = 0; i < CT_TACK_ARRAY_SIZE; i++) {
+		//initial each tack.
+		tack[i].num = 0;
+		tack[i].indexed = false; //new tack has no index
+		tack[i].iIndexMask = 0;
+		tack[i].index = NULL;
+		tack[i].node = new CTNode();
+		tack[i].node->t = (((i + CT_TACK_ARRAY_SIZE
+				- (iStartTack % CT_TACK_ARRAY_SIZE)) % CT_TACK_ARRAY_SIZE)
+				+ iStartTack) * CT_TACK_INTERVAL;
+		tack[i].node->rs = 0;
+	}
+	// 2nd. then link these nodes.
+	for (unsigned int i = 0; i < CT_TACK_ARRAY_SIZE; i++) {
+		if (iStartTack % CT_TACK_ARRAY_SIZE == i) { //the first tack dose not have the pre tack.
+			tack[i].node->pre = NULL;
+			tack[i].node->next = tack[(i + 1) % CT_TACK_ARRAY_SIZE].node;
+			if (iStartTack == 0) {
+				tack[i].num = 1; // if the current tack is the 0 tack, make the start node at time 0 to a normal node. To fix the NULL point bug.
+			}
+		} else if (iStartTack % CT_TACK_ARRAY_SIZE - 1 == i) { //the last tack dose not have the next tack.
+			tack[i].node->pre = tack[(i - 1) % CT_TACK_ARRAY_SIZE].node;
+			tack[i].node->next = NULL;
+		} else { //the middle tacks have both pre tack and next tack.
+			tack[i].node->pre = tack[(i - 1) % CT_TACK_ARRAY_SIZE].node;
+			tack[i].node->next = tack[(i + 1) % CT_TACK_ARRAY_SIZE].node;
+		}
+	}
 }

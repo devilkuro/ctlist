@@ -13,13 +13,13 @@
 
 #define CT_TEST_TIME 4305
 //#define CT_DEBUG
-#define CT_DEBUG_C
+//#define CT_DEBUG_C
 //#define CT_DEBUG_B
 //#define CT_DEBUG_A
 //#define CT_DEBUG_B_C
-//#define GN_DEBUG
+#define GN_DEBUG
 //#define GN_OUT_DEBUG false
-#define TEST_DEBUG
+//#define TEST_DEBUG
 #ifdef TEST_DEBUG
 int main(){
 	Helper H;
@@ -64,6 +64,7 @@ int main() {
 	Generator* gn = new Generator();
 	string fileName("output.dat");
 	gn->output(fileName.c_str(), MAX_REQUEST_NUM);
+
 #ifdef GN_OUT_DEBUG
 	t_write = clock() - t_start;
 
@@ -107,7 +108,6 @@ int main() {
 	Request *xlist;
 	unsigned int *tlist;
 	Request x;
-	Helper H;
 	int t1;
 	int sum = 0;
 	CTLink C;
@@ -117,18 +117,37 @@ int main() {
 	clock_t ps, start;
 	unsigned int startTime = clock();
 	unsigned int tempTime = 0;
+
 	xlist = new Request[MAX_REQUEST_NUM];
 	tlist = new unsigned int[MAX_REQUEST_NUM];
-	cout << "start to generate the data." << endl;
-	for(unsigned int i = 0;i<MAX_REQUEST_NUM;i++){
-		tlist[i] = H.P_Rand(100)/10;
-		xlist[i].bw = H.U_Randint(5,35);
-		xlist[i].ts = H.U_Randint(20,1000);
-		xlist[i].td = (unsigned int)H.E_Rand(0.001)%3000;
+	cout << "start to read the data." << endl;
+	unsigned int size; //size of each block.
+	char* buff;
+	unsigned long length;//total size
+	Request* rq;
+	double* interval;
+	ifstream file("output.dat");
+	file.seekg(0, file.end);
+	length = file.tellg();
+	file.seekg(0, file.beg);
+	size = sizeof(double) + sizeof(Request);
+	buff = new char[length];
+	file.read(buff, length);
+	if(MAX_REQUEST_NUM!=length/size){
+		cout<<"ERROR!"<<endl;
+		return 0;
+	}
+	for (unsigned int i = 0; i < MAX_REQUEST_NUM; i++) {
+		interval = (double*) (buff + i * size);
+		rq = (Request*) (buff + i * size + sizeof(double));
+		xlist[i].bw = rq->bw;
+		xlist[i].td = rq->td;
+		xlist[i].ts = rq->ts;
+		tlist[i] = (unsigned int )*interval;
 	}
 	tempTime = clock();
-	cout << "generation finished." <<endl;
-	cout << "generation takes " <<(tempTime-startTime)/1000.0<<" s, "<< MAX_REQUEST_NUM <<" requests have been generated."<< endl;
+	cout << "reading finished." <<endl;
+	cout << "reading takes " <<(tempTime-startTime)/1000.0<<" s, "<< MAX_REQUEST_NUM <<" requests have been read."<< endl;
 
 	tempTime = clock();
 

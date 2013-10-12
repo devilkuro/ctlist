@@ -34,7 +34,7 @@ bool Generator::output(const char* fileName, unsigned int t) {
 	buff = new char[size * t];
 	for (unsigned i = 0; i < t; i++) {
 		interval = this->getNext(&rq);
-#ifdef DEBUG
+#ifdef GN_OUT_DEBUG
 		if (i % 100000 == 0 && DEBUG) {
 			cout << "write:: Request(" << rq.bw << " , " << rq.ts << " , "
 					<< rq.td << " ):" << interval << endl;
@@ -44,7 +44,7 @@ bool Generator::output(const char* fileName, unsigned int t) {
 		memcpy(buff + i * size + sizeof(double), &rq, sizeof(Request));
 	}
 	file.write(buff, size * t);
-#ifdef DEBUG
+#ifdef GN_OUT_DEBUG
 	cout << "total write: " << size * t << endl;
 #endif
 	file.close();

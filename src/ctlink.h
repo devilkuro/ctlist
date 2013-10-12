@@ -10,9 +10,6 @@
 
 #include "common.h"
 
-#define CT_TACK_NUM  256
-#define CT_INDEX_NUM 16
-#define CT_MAX_RESERVE_TIME 4096 //16*4*4=256
 struct CTNode{
 	unsigned int rs; // rs stands for the remainder resource.
 	unsigned int t; // t stands for the time of this node.
@@ -32,25 +29,30 @@ struct CTTack{
 class CTLink{
 public:
 	CTLink();
+	CTLink(unsigned int tnum,unsigned int inum,unsigned int max);
 	~CTLink();
 public:
 	// add public member variable here
-	unsigned int CT_INDEX_THRESHOLD;
-	unsigned int CT_TACK_ARRAY_SIZE;
-	unsigned int CT_TACK_INTERVAL; //decide the interval between two tacks.
-	unsigned int CT_INDEX_INTERVAL; //decide the interval between two indexes.
 public:
 	bool Insert(Request r); //return true if success.
 	bool SetTime(unsigned int t); //set the current time.
 	bool Output(); // display the link list.
 private:
 
+	unsigned int CT_TACK_NUM;
+	unsigned int CT_INDEX_NUM;
+	unsigned int CT_MAX_RESERVE_TIME;
+	unsigned int CT_INDEX_THRESHOLD;
+	unsigned int CT_TACK_ARRAY_SIZE;
+	unsigned int CT_TACK_INTERVAL; //decide the interval between two tacks.
+	unsigned int CT_INDEX_INTERVAL; //decide the interval between two indexes.
 	CTTack* tack;
 	unsigned int iStartTack; // to mark the start tack.
 	unsigned int iCurrentTack; //pCurrentTack stands for the tack num that include current time. current ->[tack).
 	unsigned int iCurrentTime; //stands for current time.
 	unsigned int iMaxResource; //stands for the max available resource.
 private:
+	void initCTLink(unsigned int tnum,unsigned int inum,unsigned int max);
 	CTNode* insertNode(unsigned int t, CTNode* loc); //insert target node into the link list, node loc stands for the first node after target node.
 	CTNode* accept(Request r); //to judge whether the request r can be accecpted or not
 	bool clearTack(unsigned int n); // to clear tack n.

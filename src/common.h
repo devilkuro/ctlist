@@ -15,7 +15,7 @@
 //#define CT_DEBUG
 
 #define MAX 1000
-#define MAX_REQUEST_NUM 4000000
+#define MAX_REQUEST_NUM 40000000
 
 
 #endif /* _COMMON_H_ */
