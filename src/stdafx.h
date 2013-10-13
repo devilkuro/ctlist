@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <iostream>
+#include <sstream>
 using namespace std;
 
 #endif

@@ -20,6 +20,12 @@
 #define GN_DEBUG
 //#define GN_OUT_DEBUG false
 //#define TEST_DEBUG
+template <class T> string m_toStr(T tmp)
+{
+    stringstream ss;
+    ss << tmp;
+    return ss.str();
+}
 #ifdef TEST_DEBUG
 int main(){
 	Helper H;

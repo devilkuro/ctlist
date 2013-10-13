@@ -59,3 +59,14 @@ unsigned int Generator::getNext(Request* rq) {
 	return (unsigned int )hp.P_Rand(interval);
 }
 
+void Generator::setGenerator(unsigned int bw_down, unsigned int bw_up,
+		unsigned int ts_down, unsigned int ts_up, unsigned int td_ave,
+		unsigned int td_limit, unsigned int interval) {
+	this->bw_down = bw_down;
+	this->bw_up = bw_up;
+	this->ts_down = ts_down;
+	this->ts_up = ts_up;
+	this->td_ave = td_ave;
+	this->td_limit = td_limit;
+	this->interval = interval;
+}
