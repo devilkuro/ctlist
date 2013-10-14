@@ -26,6 +26,22 @@ template <class T> string m_toStr(T tmp)
     ss << tmp;
     return ss.str();
 }
+void setGN(Generator * gn, unsigned int interval, unsigned int ts_down, unsigned int ts_up,
+		unsigned int td_avg, unsigned int td_limit) {
+	unsigned int bw_down = 1;
+	unsigned int bw_up = (2*MAX*interval)/td_avg;
+	if(bw_up<1){
+		bw_up = 1;
+	}
+	gn->setGenerator(bw_down,bw_up,ts_down,ts_up,td_avg,td_limit,interval);
+}
+string getFN(unsigned int interval, unsigned int ts_down, unsigned int ts_up,
+		unsigned int td_avg, unsigned int td_limit) {
+	return "output_i" + m_toStr(interval) + "_ts" + m_toStr(ts_down) + "_"
+			+ m_toStr(ts_up) + "_td" + m_toStr(td_avg) + "_" + m_toStr(td_limit)
+			+ ".dat";
+}
+
 #ifdef TEST_DEBUG
 int main(){
 	Helper H;
@@ -69,8 +85,26 @@ int main() {
 #endif
 	Generator* gn = new Generator();
 	string fileName("output.dat");
-	gn->output(fileName.c_str(), MAX_REQUEST_NUM);
-
+//	gn->output(fileName.c_str(), MAX_REQUEST_NUM);
+	unsigned int interval = 1;
+	unsigned int ts_down = 1;
+	unsigned int ts_up = 0;
+	unsigned int td_avg = 0;
+	unsigned int td_limit = 0;
+	for(unsigned int i = 0;i<3;i++,interval*=10){
+		ts_down = 1;
+		for(unsigned int j = 0;j<3;j++,ts_down*=10){
+			for(unsigned int k = 0;k<5;k++){
+				ts_up = 3*ts_down;
+				td_avg = 2*ts_down*(k+1);
+				td_limit = 5*td_avg;
+				setGN(gn, interval, ts_down, ts_up, td_avg, td_limit);
+				fileName = getFN(interval, ts_down, ts_up, td_avg, td_limit);
+				cout<< "fileName:" << fileName << endl;
+				gn->output(fileName.c_str(),MAX_REQUEST_NUM/4);
+			}
+		}
+	}
 #ifdef GN_OUT_DEBUG
 	t_write = clock() - t_start;
 
@@ -109,7 +143,6 @@ int main() {
 #endif
 #ifdef CT_DEBUG
 int main() {
-	// TODO :1st. test the ctlink first.
 
 	Request *xlist;
 	unsigned int *tlist;

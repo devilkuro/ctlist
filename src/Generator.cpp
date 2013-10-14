@@ -47,6 +47,7 @@ bool Generator::output(const char* fileName, unsigned int t) {
 #ifdef GN_OUT_DEBUG
 	cout << "total write: " << size * t << endl;
 #endif
+	delete (buff);
 	file.close();
 	return true;
 }

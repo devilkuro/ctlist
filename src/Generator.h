@@ -19,7 +19,6 @@ public:
 	Generator();
 	virtual ~Generator();
 public:
-	//TODO Add member variable here. 2013-10-11
 	unsigned int bw_down;
 	unsigned int bw_up;
 	unsigned int ts_down;
