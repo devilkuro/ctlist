@@ -43,23 +43,20 @@ string getFN(unsigned int interval, unsigned int ts_down, unsigned int ts_up,
 }
 #ifdef CT_TEST
 int main(){
-	unsigned int num = 1000000;
+	unsigned int num = 2000000;
 	Request* rq = new Request[num];
 	unsigned int* interval = new unsigned int[num];
 	Generator* gn = new Generator();
-	setGN(gn,10,5,100,300,900);
+	setGN(gn,10,50,9000,300,1000);
 	for(unsigned int i = 0;i<num;i++){
 		interval[i] = gn->getNext(&rq[i]);
 	}
-	for(unsigned int i = 5;i<20;i++){
-		CTLink* c = new CTLink(i*10,5,1000);
+	for(unsigned int i = 1;i<200;i++){
+		CTLink* c = new CTLink(i*5,2000/i,10000);
 		unsigned int t = 0;
 		clock_t t0 = clock();
 		for(unsigned int j = 0;j<num;j++){
 			t = t+interval[j];
-			if(t == 116479){
-				t = 116479;
-			}
 			c->SetTime(t);
 			c->Insert(rq[j]);
 		}
