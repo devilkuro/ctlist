@@ -11,15 +11,15 @@
 #include "CArrayList.h"
 #include "Generator.h"
 
-#define CT_TEST_TIME 4305
 //#define CT_DEBUG
 //#define CT_DEBUG_C
 //#define CT_DEBUG_B
 //#define CT_DEBUG_A
 //#define CT_DEBUG_B_C
-#define GN_DEBUG
+//#define GN_DEBUG
 //#define GN_OUT_DEBUG false
 //#define TEST_DEBUG
+#define CT_TEST
 template <class T> string m_toStr(T tmp)
 {
     stringstream ss;
@@ -41,7 +41,32 @@ string getFN(unsigned int interval, unsigned int ts_down, unsigned int ts_up,
 			+ m_toStr(ts_up) + "_td" + m_toStr(td_avg) + "_" + m_toStr(td_limit)
 			+ ".dat";
 }
-
+#ifdef CT_TEST
+int main(){
+	unsigned int num = 1000000;
+	Request* rq = new Request[num];
+	unsigned int* interval = new unsigned int[num];
+	Generator* gn = new Generator();
+	setGN(gn,10,5,100,300,900);
+	for(unsigned int i = 0;i<num;i++){
+		interval[i] = gn->getNext(&rq[i]);
+	}
+	for(unsigned int i = 5;i<20;i++){
+		CTLink* c = new CTLink(i*10,5,1000);
+		unsigned int t = 0;
+		clock_t t0 = clock();
+		for(unsigned int j = 0;j<num;j++){
+			t = t+interval[j];
+			if(t == 116479){
+				t = 116479;
+			}
+			c->SetTime(t);
+			c->Insert(rq[j]);
+		}
+		cout<< "when i = " << i << " , the cost is " << clock()-t0 << "ms" << endl;
+	}
+}
+#endif
 #ifdef TEST_DEBUG
 int main(){
 	Helper H;
