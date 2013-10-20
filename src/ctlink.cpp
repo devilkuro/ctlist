@@ -107,8 +107,12 @@ CTNode* CTLink::accept(Request r) {
 	// pseudo-code: judge: if temp->pre->rs + r.bw > iMaxResource RETURN NULL;
 	// Update at 1310012249: node->rs decides the resource after node->t
 	// so if the rs of which node from the last one before st to last one before et is more than r.bw, request r can be accepted.
-	while (temp->pre->t < et) {
-		if (temp->pre->rs + r.bw > iMaxResource) {
+	// update at 1310201505: change the algorithmic logic to fix a bug that temp can be pointed to NULL.
+	if (temp->pre->rs + r.bw > iMaxResource) {
+		return NULL;
+	}
+	while (temp->t < et) {
+		if (temp->rs + r.bw > iMaxResource) {
 			return NULL;
 		}
 		temp = temp->next;
