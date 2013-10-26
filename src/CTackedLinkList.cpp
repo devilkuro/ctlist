@@ -31,7 +31,7 @@ int main(){
 		rq[i].bw = 1;
 	}
 	ofstream file1("result1.txt");
-	file1 << "tnum\t5\t10\t15\t20" <<endl;
+	file1 << "tnum/interval\t5\t10\t15\t20" <<endl;
 	file1.close();
 	for(unsigned int i = 2;i<=500;i+=2){
 		ofstream file("result1.txt",ios::app);
@@ -54,7 +54,7 @@ int main(){
 	}
 
 	ofstream file2("result2.txt");
-	file2 << "tnum\t4\t8\t16\t32" <<endl;
+	file2 << "td/tnum\t8\t16\t32\t64" <<endl;
 	file2.close();
 	// experiment 2
 	for(unsigned int i = 2;i<=200;i+=2){
