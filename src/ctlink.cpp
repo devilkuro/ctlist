@@ -15,8 +15,15 @@ CTLink::CTLink(unsigned int tnum,unsigned int inum,unsigned int max) {
 }
 
 CTLink::~CTLink() {
+	// get the first alive tack, the one before iCurrentTime
+	unsigned int aliveTackLoc = iCurrentTime / CT_TACK_INTERVAL;
+	if(aliveTackLoc<1){
+		iCurrentTack = 0;
+	}else{
+		iCurrentTack = (aliveTackLoc+CT_TACK_ARRAY_SIZE - 1) % CT_TACK_ARRAY_SIZE;
+	}
 	CTNode* ptrNode = tack[iCurrentTack].node->next;
-	while (!ptrNode) {
+	while (ptrNode) {
 		delete (ptrNode->pre);
 		ptrNode = ptrNode->next;
 	} //delete the link list
@@ -26,7 +33,7 @@ CTLink::~CTLink() {
 			delete (tack[i].index);
 		}
 	} //delete all indexes
-	delete (tack); //delete the tacks
+	delete[] (tack); //delete the tacks
 }
 
 bool CTLink::SetTime(unsigned int t) {
