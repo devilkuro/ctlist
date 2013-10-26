@@ -30,14 +30,14 @@ int main(){
 		rq[i].td = 4;
 		rq[i].bw = 1;
 	}
-	ofstream file0("result1.txt");
-	file0.close();
-	ofstream file("result1.txt",ios::app);
-	file << "tnum\t5\t10\t15\t20" <<endl;
+	ofstream file1("result1.txt");
+	file1 << "tnum\t5\t10\t15\t20" <<endl;
+	file1.close();
 	for(unsigned int i = 2;i<=500;i+=2){
+		ofstream file("result1.txt",ios::app);
 		file << i ;
 		cout << i << endl;
-		for(unsigned int j = 5;j<=20;j+=5){
+		for(unsigned int j = 1;j<=20;j+=5){
 			CTLink* ct = new CTLink(i,2000,2000);
 			unsigned int t = 0;
 			clock_t start = clock();
@@ -47,10 +47,42 @@ int main(){
 				ct->SetTime(t);
 			}
 			file << "\t" << clock() - start;
+			delete ct;
 		}
 		file << endl;
+		file.close();
 	}
-	file.close();
+
+	ofstream file2("result2.txt");
+	file2 << "tnum\t4\t8\t16\t32" <<endl;
+	file2.close();
+	// experiment 2
+	for(unsigned int i = 2;i<=200;i+=2){
+		for(unsigned int j = 0;j<REQUEST_NUM;j++){
+			rq[i].ts = H.U_Randint(1,2000-i);
+			rq[i].td = i;
+			rq[i].bw = 1;
+		}
+		ofstream file("result2.txt",ios::app);
+		file << i ;
+		cout << i << endl;
+		for(unsigned int j = 8;j<=64;j*=2){
+			CTLink* ct = new CTLink(i,2000,2000);
+			unsigned int t = 0;
+			clock_t start = clock();
+			for(unsigned int k = 0;k<REQUEST_NUM;k++){
+				ct->Insert(rq[k]);
+				t+=4;
+				ct->SetTime(t);
+			}
+			file << "\t" << clock() - start;
+			delete ct;
+		}
+		file << endl;
+		file.close();
+	}
+	// experiment 3
+	// TODO:add experiment 3~6.
 }
 
 
