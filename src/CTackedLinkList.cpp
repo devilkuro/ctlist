@@ -11,6 +11,9 @@
 #include "CArrayList.h"
 #include "Generator.h"
 
+//#define CT_TEST_1
+#define CT_TEST_2
+//#define CT_TEST_6
 #define REQUEST_NUM 10000000
 template <class T> string m_toStr(T tmp)
 {
@@ -21,7 +24,7 @@ template <class T> string m_toStr(T tmp)
 int main(){
 	Helper H;
 	Request* rq = new Request[REQUEST_NUM];
-/*
+#ifdef CT_TEST_1
 	// experiment 1
 	// 1.1st generate the request set.
 
@@ -53,12 +56,13 @@ int main(){
 		file << endl;
 		file.close();
 	}
-*/
+#endif
 
+#ifdef CT_TEST_2
+	// experiment 2
 	ofstream file2("result2.txt");
 	file2 << "td/tnum\t8\t16\t32\t64" <<endl;
 	file2.close();
-	// experiment 2
 	for(unsigned int i = 2;i<=200;i+=2){
 		srand(0);
 		for(unsigned int j = 0;j<REQUEST_NUM;j++){
@@ -75,7 +79,7 @@ int main(){
 			clock_t start = clock();
 			for(unsigned int k = 0;k<REQUEST_NUM;k++){
 				ct->Insert(rq[k]);
-				t+=1;
+				t+=4;
 				ct->SetTime(t);
 			}
 			file << "\t" << clock() - start;
@@ -84,8 +88,11 @@ int main(){
 		file << endl;
 		file.close();
 	}
+#endif
+
 	// experiment 3
 	// TODO:add experiment 3~5.
+#ifdef CT_TEST_6
 
 	// experiment 6
 	srand(0);
@@ -156,6 +163,7 @@ int main(){
 		file << endl;
 		file.close();
 	}
+#endif
 }
 
 
