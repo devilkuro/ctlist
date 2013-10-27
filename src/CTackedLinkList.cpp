@@ -62,9 +62,9 @@ int main(){
 	for(unsigned int i = 2;i<=200;i+=2){
 		srand(0);
 		for(unsigned int j = 0;j<REQUEST_NUM;j++){
-			rq[i].ts = H.U_Randint(1,2000-i);
-			rq[i].td = i;
-			rq[i].bw = 1;
+			rq[j].ts = H.U_Randint(1,2000-i);
+			rq[j].td = i;
+			rq[j].bw = 1;
 		}
 		ofstream file("result2.txt",ios::app);
 		file << i ;
