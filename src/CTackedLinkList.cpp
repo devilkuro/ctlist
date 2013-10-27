@@ -11,7 +11,7 @@
 #include "CArrayList.h"
 #include "Generator.h"
 
-#define REQUEST_NUM 1000000
+#define REQUEST_NUM 10000000
 template <class T> string m_toStr(T tmp)
 {
     stringstream ss;
@@ -21,10 +21,10 @@ template <class T> string m_toStr(T tmp)
 int main(){
 	// experiment 1
 	Helper H;
-	srand(0);
 	// 1.1st generate the request set.
 	Request* rq = new Request[REQUEST_NUM];
 
+	srand(0);
 	for(unsigned int i = 0;i<REQUEST_NUM;i++){
 		rq[i].ts = H.U_Randint(1,2000-4);
 		rq[i].td = 4;
@@ -37,7 +37,7 @@ int main(){
 		ofstream file("result1.txt",ios::app);
 		file << i ;
 		cout << i << endl;
-		for(unsigned int j = 1;j<=20;j+=5){
+		for(unsigned int j = 5;j<=20;j+=5){
 			CTLink* ct = new CTLink(i,2000,2000);
 			unsigned int t = 0;
 			clock_t start = clock();
@@ -82,7 +82,69 @@ int main(){
 		file.close();
 	}
 	// experiment 3
-	// TODO:add experiment 3~6.
+	// TODO:add experiment 3~5.
+
+	// experiment 6
+	srand(0);
+	unsigned int *interval = new unsigned int[REQUEST_NUM];
+	for (unsigned int i = 0; i < REQUEST_NUM; i++) {
+		rq[i].td = H.U_Randint(60,3600);
+		rq[i].ts = H.U_Randint(1, 86400 - rq[i].td);
+		rq[i].bw = H.U_Randint(6,16);
+		interval[i] = H.U_Randint(10,30);
+	}
+	ofstream file6("result6.txt");
+	file6 << "tnum/cost\tCTLink\tArrayList\tBplus\tX" << endl;
+	file6.close();
+	for (unsigned int i = 4; i <= 2048; i*=2) {
+		ofstream file("result6.txt", ios::app);
+		file << i;
+		cout << i << endl;
+		//CTLink
+		{
+			CTLink* ct = new CTLink(i, 86400, 86400);
+			unsigned int t = 0;
+			clock_t start = clock();
+			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+				ct->Insert(rq[k]);
+				t += interval[k];
+				ct->SetTime(t);
+			}
+			file << "\t" << clock() - start;
+			delete ct;
+		}
+		//CArrayList
+		{
+			CArrayList* ca = new CArrayList(86400);
+			unsigned int t = 0;
+			clock_t start = clock();
+			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+				ca->Insert(rq[k]);
+				t += interval[k];
+				ca->setTime(t);
+			}
+			file << "\t" << clock() - start;
+			delete ca;
+		}
+		//Bplus
+		{
+			Bplus* bp = new Bplus();
+			unsigned int t = 0;
+			clock_t start = clock();
+			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+				rq[k].ts += t;
+				bp->Insert(rq[k]);
+				t += interval[k];
+				if((k+1)%1000==0){
+					bp->Delete(t);
+				}
+			}
+			file << "\t" << clock() - start;
+			delete bp;
+		}
+		file << endl;
+		file.close();
+	}
 }
 
 
