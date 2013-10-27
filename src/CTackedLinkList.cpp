@@ -75,7 +75,7 @@ int main(){
 			clock_t start = clock();
 			for(unsigned int k = 0;k<REQUEST_NUM;k++){
 				ct->Insert(rq[k]);
-				t+=4;
+				t+=1;
 				ct->SetTime(t);
 			}
 			file << "\t" << clock() - start;
@@ -87,7 +87,7 @@ int main(){
 	// experiment 3
 	// TODO:add experiment 3~5.
 
-/*	// experiment 6
+	// experiment 6
 	srand(0);
 	unsigned int *interval = new unsigned int[REQUEST_NUM];
 	for (unsigned int i = 0; i < REQUEST_NUM; i++) {
@@ -116,38 +116,46 @@ int main(){
 			file << "\t" << clock() - start;
 			delete ct;
 		}
-		//CArrayList
-		{
-			CArrayList* ca = new CArrayList(86400);
-			unsigned int t = 0;
-			clock_t start = clock();
-			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
-				ca->Insert(rq[k]);
-				t += interval[k];
-				ca->setTime(t);
-			}
-			file << "\t" << clock() - start;
-			delete ca;
-		}
-		//Bplus
-		{
-			Bplus* bp = new Bplus();
-			unsigned int t = 0;
-			clock_t start = clock();
-			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
-				rq[k].ts += t;
-				bp->Insert(rq[k]);
-				t += interval[k];
-				if((k+1)%1000==0){
-					bp->Delete(t);
-				}
-			}
-			file << "\t" << clock() - start;
-			delete bp;
-		}
 		file << endl;
 		file.close();
-	}*/
+	}
+	//CArrayList
+	{
+		ofstream file("result6.txt", ios::app);
+		cout << "CArrayList:" << endl;
+		CArrayList* ca = new CArrayList(86400);
+		unsigned int t = 0;
+		clock_t start = clock();
+		for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+			ca->Insert(rq[k]);
+			t += interval[k];
+			ca->setTime(t);
+		}
+		file << "\t" << clock() - start;
+		delete ca;
+		file << endl;
+		file.close();
+	}
+	//Bplus
+	{
+		ofstream file("result6.txt", ios::app);
+		cout << "Bplus:" << endl;
+		Bplus* bp = new Bplus();
+		unsigned int t = 0;
+		clock_t start = clock();
+		for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+			rq[k].ts += t;
+			bp->Insert(rq[k]);
+			t += interval[k];
+			if((k+1)%1000==0){
+				bp->Delete(t);
+			}
+		}
+		file << "\t" << clock() - start;
+		delete bp;
+		file << endl;
+		file.close();
+	}
 }
 
 
