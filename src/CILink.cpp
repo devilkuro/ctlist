@@ -61,4 +61,5 @@ bool CILink::clearIndex(unsigned int n) {
 
 unsigned int CILink::getIndexLoc(unsigned int t) {
 	// TODO fix this function
+	return 0;
 }

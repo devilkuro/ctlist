@@ -21,11 +21,12 @@ public:
 private:
 	bool accept(Request r);
 	unsigned int getIndex(unsigned int t);
+public:
+	unsigned int max_resource;
 private:
 	unsigned int time;
 	unsigned int *resource;
 	unsigned int array_size;
-	unsigned int max_resource;
 };
 
 #endif /* _CARRAYLIST_H_ */

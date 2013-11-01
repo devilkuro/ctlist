@@ -14,6 +14,7 @@
 //#define CT_TEST_1
 //#define CT_TEST_2
 //#define CT_TEST_3
+#define CT_TEST_5
 //#define CT_TEST_6
 //#define CT_TEST_0
 #define REQUEST_NUM 10000000
@@ -23,18 +24,29 @@ template<class T> string m_toStr(T tmp) {
 	return ss.str();
 }
 
-DWORD WINAPI Fun2(LPVOID p)
-{
-	ofstream file("result6.log");
-	file<<"time\t"<<"n"<<endl;
-	file.close();
-	for(unsigned int i = 0;i<10;i++)
-	{
-		ofstream file("result6.log",ios::app);
-		file<<i<<"\t"<<p<<endl;
+struct ControlStack {
+	// synchronizer between main thread and record thread.
+	unsigned int n; // the num of requests processed
+	unsigned int t; // the seconds passed
+	string logName; // the name of the log file
+	bool stopFlag;
+};
+
+DWORD WINAPI RecordFor6(LPVOID tmp) {
+	ControlStack* p = (ControlStack*) tmp;
+	unsigned int pre_num=0;
+	while (1) {
+		if (p->stopFlag) {
+			break;
+		}
+		ofstream file(p->logName.c_str(), ios::app);
+		p->t++;
+		file << p->t << "\t" << p->n << "\t" << p->n - pre_num << endl;
+		pre_num = p->n;
 		file.close();
-		Sleep(1000);//以毫秒为单位
+		Sleep(100); //ms
 	}
+	return 0;
 }
 
 int main() {
@@ -61,7 +73,7 @@ int main() {
 				ct->Insert(rq[k]);
 				t += 4;
 				ct->SetTime(t);
-				if((k+1)%10000 == 0){
+				if((k+1)%10000 == 0) {
 					cout<< k << endl;
 				}
 			}
@@ -149,7 +161,82 @@ int main() {
 
 	// experiment 5
 #ifdef CT_TEST_5
+	{
+		// initialize the log file.
+		ofstream file5("result5.log");
+		file5 << "";
+		file5.close();
+		for (unsigned int i = 0; i < REQUEST_NUM; i++) {
+			rq[i].td = H.U_Randint(60, 3600);
+			rq[i].ts = H.U_Randint(1, 86400 - rq[i].td);
+			rq[i].bw = 1;
+		}
+		{
+			//CTLink
+			ofstream file("result5.log", ios::app);
+			file << "CTLink" << endl;
+			file << "TIME\t" << "NUM\t" << "DIFF" << endl;
+			file.close();
 
+			ControlStack n;
+			n.logName = "result5.log";
+			n.t = 0;
+			n.n = 0;
+			n.stopFlag = false;
+			CTLink* ct = new CTLink(4000, 86400, 86400);
+			ct->iMaxResource = UINT_MAX;
+			HANDLE hThread2 = CreateThread(NULL, 0, RecordFor6, &n, 0,
+			NULL);
+			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+				ct->Insert(rq[k]);
+				ct->SetTime(n.t/10);
+				n.n++;
+				if (n.t < 200){
+					if (k == REQUEST_NUM - 1) {
+						k = 0;
+					}
+				} else {
+					n.stopFlag = true;
+					break;
+				}
+			}
+			CloseHandle(hThread2);
+			delete ct;
+		}
+		Sleep(200);
+		{
+			//CArrayList
+			ofstream file("result5.log", ios::app);
+			file << "CArrayList" << endl;
+			file << "TIME\t" << "NUM\t" << "DIFF" << endl;
+			file.close();
+
+			ControlStack n;
+			n.logName = "result5.log";
+			n.t = 0;
+			n.n = 0;
+			n.stopFlag = false;
+			CArrayList* ca = new CArrayList(86400);
+			ca->max_resource = UINT_MAX;
+			HANDLE hThread2 = CreateThread(NULL, 0, RecordFor6, &n, 0,
+			NULL);
+			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+				ca->Insert(rq[k]);
+				ca->setTime(n.t/10);
+				n.n++;
+				if (n.t < 200){
+					if (k == REQUEST_NUM - 1) {
+						k = 0;
+					}
+				} else {
+					n.stopFlag = true;
+					break;
+				}
+			}
+			CloseHandle(hThread2);
+			delete ca;
+		}
+	}
 #endif
 
 	// experiment 6
@@ -184,6 +271,9 @@ int main() {
 					}
 					file << "\t" << clock() - start;
 					delete ct;
+				}
+				{
+					// TODO add CILink if necessary
 				}
 				file << endl;
 				file.close();
