@@ -38,10 +38,13 @@ CTLink::~CTLink() {
 
 bool CTLink::SetTime(unsigned int t) {
 	// maintain the current time and memory.
+	if(t==iCurrentTime){
+		return false;
+	}
 	iCurrentTime = t;
 	unsigned int aliveTackLoc = t / CT_TACK_INTERVAL;
 	if(aliveTackLoc<1){
-		return true;
+		return false;
 	}
 	// the tack is 1 smaller than iCurrentTack is to store the start resource, so if a node is 2 or more smaller than iCurrentTack, it needs to be cleared.
 	// Update at 1310012316: change the algorithm to fix the bug.
@@ -323,13 +326,17 @@ void CTLink::initCTLink(unsigned int tnum, unsigned int inum,
 	}
 	// 2nd. then link these nodes.
 	for (unsigned int i = 0; i < CT_TACK_ARRAY_SIZE; i++) {
-		if (iStartTack % CT_TACK_ARRAY_SIZE == i) { //the first tack dose not have the pre tack.
+		if ((iStartTack + CT_TACK_ARRAY_SIZE) % CT_TACK_ARRAY_SIZE == i) {
+			//the first tack dose not have the pre tack.
 			tack[i].node->pre = NULL;
 			tack[i].node->next = tack[(i + 1) % CT_TACK_ARRAY_SIZE].node;
 			if (iStartTack == 0) {
 				tack[i].num = 1; // if the current tack is the 0 tack, make the start node at time 0 to a normal node. To fix the NULL point bug.
 			}
-		} else if (iStartTack % CT_TACK_ARRAY_SIZE - 1 == i) { //the last tack dose not have the next tack.
+		} else if ((iStartTack + CT_TACK_ARRAY_SIZE - 1) % CT_TACK_ARRAY_SIZE
+				== i) {
+			//the last tack dose not have the next tack.
+			//update at 1311011842: to fix error in ~CTLINK()
 			tack[i].node->pre = tack[(i - 1) % CT_TACK_ARRAY_SIZE].node;
 			tack[i].node->next = NULL;
 		} else { //the middle tacks have both pre tack and next tack.
