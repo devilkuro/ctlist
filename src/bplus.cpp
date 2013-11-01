@@ -2,6 +2,7 @@
 
 int Bplus::sumB = 0;
 Bplus::Bplus() {
+	RMAX = MAX;
 	root = NULL;
 	first = NULL;
 }
@@ -132,7 +133,7 @@ bool Bplus::Insert(Request a) {
 	int flag = 0; //If flag == 1, request a is ending up before node r.ptr. If else, request a will continue in node r.ptr.
 	if (r.tag == 3) {
 		if (i != 0) {
-			if (p->record[i - 1] + a.bw > MAX)
+			if (p->record[i - 1] + a.bw > RMAX)
 				return false;
 			else if (true) {
 				if (nowtd > (p->key[i] - a.ts))
@@ -144,7 +145,7 @@ bool Bplus::Insert(Request a) {
 			q = first;
 			while (q->next != p)
 				q = q->next;
-			if (q->record[q->keynum - 1] + a.bw > MAX)
+			if (q->record[q->keynum - 1] + a.bw > RMAX)
 				return false;
 			else {
 				if (nowtd > (p->key[i] - a.ts))
@@ -156,19 +157,19 @@ bool Bplus::Insert(Request a) {
 	}
 	if ((r.tag == 3 && flag == 0) || r.tag == 2) {
 		while (nowtd) {
-			while (nowtd && i < p->keynum - 1 && p->record[i] + a.bw <= MAX) {
+			while (nowtd && i < p->keynum - 1 && p->record[i] + a.bw <= RMAX) {
 				if (nowtd > p->key[i + 1] - p->key[i])
 					nowtd -= p->key[i + 1] - p->key[i];
 				else
 					nowtd = 0;
 				i++;
 			}
-			if (nowtd && p->record[i] + a.bw > MAX)
+			if (nowtd && p->record[i] + a.bw > RMAX)
 				return false;
 			if (nowtd && i == p->keynum - 1) {
 				if (p->next) {
 					q = p->next;
-					if (p->record[p->keynum - 1] + a.bw <= MAX) {
+					if (p->record[p->keynum - 1] + a.bw <= RMAX) {
 						if (nowtd > q->key[0] - p->key[p->keynum - 1]) {
 							nowtd -= q->key[0] - p->key[p->keynum - 1];
 							p = q;
@@ -435,6 +436,7 @@ bool Bplus::Delete(int x) {
 	//delete the nodes before time x.
 	struct BNode *tmp, *p, *q, *t, *l;
 	int i, j, a;
+	a=0;
 
 	tmp = first;
 

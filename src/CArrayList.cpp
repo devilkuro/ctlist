@@ -28,7 +28,7 @@ unsigned int CArrayList::getIndex(unsigned int t) {
 }
 
 CArrayList::~CArrayList() {
-	delete resource;
+	delete[] resource;
 }
 
 bool CArrayList::Insert(Request r) {

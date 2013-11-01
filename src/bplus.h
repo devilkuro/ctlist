@@ -35,6 +35,7 @@ struct Result
 class Bplus
 {
 public:
+
 	Bplus();
 	Result Search(int x);
 	void Split(BNode *tmp);
@@ -47,6 +48,7 @@ public:
 	int End();
 	bool Output(); // display the resource link list.
 public:
+	unsigned int RMAX;
 	struct BNode *root;
 	struct BNode *first;
 	static int sumB;

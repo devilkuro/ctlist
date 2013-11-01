@@ -203,6 +203,7 @@ int main() {
 			CloseHandle(hThread2);
 			delete ct;
 		}
+		// sleep 200ms to wait the RecordThread to stop
 		Sleep(200);
 		{
 			//CArrayList
@@ -235,6 +236,45 @@ int main() {
 			}
 			CloseHandle(hThread2);
 			delete ca;
+		}
+		// sleep 200ms to wait the RecordThread to stop
+		Sleep(200);
+		{
+			//CArrayList
+			ofstream file("result5.log", ios::app);
+			file << "Bplus" << endl;
+			file << "TIME\t" << "NUM\t" << "DIFF" << endl;
+			file.close();
+
+			ControlStack n;
+			n.logName = "result5.log";
+			n.t = 0;
+			n.n = 0;
+			n.stopFlag = false;
+			Bplus* bp = new Bplus();
+			Request tmpR;
+
+			bp->RMAX = UINT_MAX;
+			HANDLE hThread2 = CreateThread(NULL, 0, RecordFor6, &n, 0,
+			NULL);
+			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+				tmpR.bw = rq[k].bw;
+				tmpR.td = rq[k].td;
+				tmpR.ts = rq[k].ts+n.t/10;
+				bp->Insert(tmpR);
+				bp->Delete(n.t/10);
+				n.n++;
+				if (n.t < 200){
+					if (k == REQUEST_NUM - 1) {
+						k = 0;
+					}
+				} else {
+					n.stopFlag = true;
+					break;
+				}
+			}
+			CloseHandle(hThread2);
+			delete bp;
 		}
 	}
 #endif
