@@ -13,8 +13,8 @@
 
 //#define CT_TEST_1
 //#define CT_TEST_2
-//#define CT_TEST_3
-#define CT_TEST_5
+#define CT_TEST_3
+//#define CT_TEST_5
 //#define CT_TEST_6
 //#define CT_TEST_0
 #define REQUEST_NUM 10000000
@@ -154,10 +154,41 @@ int main() {
 #endif
 
 	// experiment 3
-	// TODO:add experiment 3~5.
 #ifdef CT_TEST_3
-
+	{
+		// 1.initialize the log file
+		ofstream file3("result3.log");
+		file3 << "";
+		file3.close();
+		srand(0);
+		for(unsigned int interval = 16;interval<=128;interval+=16){
+			for (unsigned int duration = 4; duration <= 64; duration += 4) {
+				// 2.1st generate the request set.
+				for (unsigned int i = 0; i < REQUEST_NUM; i++) {
+					rq[i].ts = H.U_Randint(1, 65536 - duration);
+					rq[i].td = duration;
+					rq[i].bw = 1;
+				}
+				// 2.2nd calculate the result and record into the log file.
+				CTLink* ct = new CTLink(65536/interval, 65536, 65536);
+				unsigned int t = 0;
+				ofstream file("result3.log", ios::app);
+				clock_t start = clock();
+				for (int j = 0; j < 10; ++j) {
+					for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+						ct->Insert(rq[k]);
+						t += 4;
+						ct->SetTime(t);
+					}
+				}
+				file << "T: "<<interval<<"; t: 4; d: "<< duration<<"; -> coat: " << clock() - start<<endl;
+				file.close();
+				delete ct;
+			}
+		}
+	}
 #endif
+	// TODO:add experiment 4~5.
 
 	// experiment 5
 #ifdef CT_TEST_5
@@ -183,7 +214,7 @@ int main() {
 			n.t = 0;
 			n.n = 0;
 			n.stopFlag = false;
-			CTLink* ct = new CTLink(4000, 86400, 86400);
+			CTLink* ct = new CTLink(16000, 86400, 86400);
 			ct->iMaxResource = UINT_MAX;
 			HANDLE hThread2 = CreateThread(NULL, 0, RecordFor6, &n, 0,
 			NULL);
@@ -240,7 +271,7 @@ int main() {
 		// sleep 200ms to wait the RecordThread to stop
 		Sleep(200);
 		{
-			//CArrayList
+			//Bplus
 			ofstream file("result5.log", ios::app);
 			file << "Bplus" << endl;
 			file << "TIME\t" << "NUM\t" << "DIFF" << endl;
