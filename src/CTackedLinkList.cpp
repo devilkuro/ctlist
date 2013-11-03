@@ -161,16 +161,17 @@ int main() {
 		file3 << "";
 		file3.close();
 		srand(0);
+		unsigned int max_reserve_time = 1048576;
 		for(unsigned int interval = 16;interval<=128;interval+=16){
 			for (unsigned int duration = 4; duration <= 64; duration += 4) {
 				// 2.1st generate the request set.
 				for (unsigned int i = 0; i < REQUEST_NUM; i++) {
-					rq[i].ts = H.U_Randint(1, 65536 - duration);
+					rq[i].ts = H.U_Randint(1, max_reserve_time - duration);
 					rq[i].td = duration;
 					rq[i].bw = 1;
 				}
 				// 2.2nd calculate the result and record into the log file.
-				CTLink* ct = new CTLink(65536/interval, 65536, 65536);
+				CTLink* ct = new CTLink(max_reserve_time/interval, max_reserve_time, max_reserve_time);
 				unsigned int t = 0;
 				ofstream file("result3.log", ios::app);
 				clock_t start = clock();
