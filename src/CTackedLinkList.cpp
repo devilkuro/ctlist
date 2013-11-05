@@ -12,9 +12,9 @@
 #include "Generator.h"
 
 //#define CT_TEST_1
-//#define CT_TEST_2
+#define CT_TEST_2
 //#define CT_TEST_3
-#define CT_TEST_5
+//#define CT_TEST_5
 //#define CT_TEST_6
 //#define CT_TEST_0
 #define REQUEST_NUM 10000000
@@ -123,25 +123,28 @@ int main() {
 
 	{
 		ofstream file2("result2.log");
-		file2 << "td/tnum\t8\t16\t32\t64" << endl;
+		file2 << "TD/ITV\t4\t8\t16\t32" << endl;
 		file2.close();
-		for (unsigned int i = 2; i <= 200; i += 2) {
-			srand(0);
-			for (unsigned int j = 0; j < REQUEST_NUM; j++) {
-				rq[j].ts = H.U_Randint(1, 2000 - i);
-				rq[j].td = i;
-				rq[j].bw = 1;
-			}
+		unsigned int max_reserve_time = 131072;
+		srand(0);
+		for (unsigned int j = 0; j < REQUEST_NUM; j++) {
+			rq[j].ts = H.U_Randint(1, max_reserve_time - 4);
+			rq[j].td = 128;
+			rq[j].bw = 1;
+		}
+		// i stands for T in cost formula
+		for (unsigned int i = 4; i <= 1024; i += 4) {
 			ofstream file("result2.log", ios::app);
 			file << i;
 			cout << i << endl;
-			for (unsigned int j = 8; j <= 64; j *= 2) {
-				CTLink* ct = new CTLink(j, 2000, 2000);
+			// j stands for t in cost formula
+			for (unsigned int j = 4; j <= 32; j *= 2) {
+				CTLink* ct = new CTLink(max_reserve_time/i, max_reserve_time, max_reserve_time);
 				unsigned int t = 0;
 				clock_t start = clock();
 				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
 					ct->Insert(rq[k]);
-					t += 4;
+					t += j;
 					ct->SetTime(t);
 				}
 				file << "\t" << clock() - start;
