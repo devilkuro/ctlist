@@ -14,7 +14,7 @@
 //#define GN_DEBUG
 //#define CT_DEBUG
 
-#define MAX 1000
+#define MAX 20000000
 #define MAX_REQUEST_NUM 20000000
 
 

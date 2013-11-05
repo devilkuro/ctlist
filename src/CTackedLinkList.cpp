@@ -11,11 +11,11 @@
 #include "CArrayList.h"
 #include "Generator.h"
 
-//#define CT_TEST_1
+#define CT_TEST_1
 #define CT_TEST_2
-//#define CT_TEST_3
-//#define CT_TEST_5
-//#define CT_TEST_6
+#define CT_TEST_3
+#define CT_TEST_5
+#define CT_TEST_6
 //#define CT_TEST_0
 #define REQUEST_NUM 10000000
 template<class T> string m_toStr(T tmp) {
@@ -85,24 +85,38 @@ int main() {
 
 	// experiment 1
 #ifdef CT_TEST_1
+
 	{
-		// 1.1st generate the request set.
+		ofstream file2("result1.log");
+		file2 << "TD/ITV\t4\t8\t16\t32" << endl;
+		file2.close();
+		unsigned int max_reserve_time = 131072;
 		srand(0);
-		for (unsigned int i = 0; i < REQUEST_NUM; i++) {
-			rq[i].ts = H.U_Randint(1, 2000 - 4);
-			rq[i].td = 4;
-			rq[i].bw = 1;
+		for (unsigned int j = 0; j < REQUEST_NUM; j++) {
+			rq[j].ts = H.U_Randint(1, max_reserve_time - 4);
+			rq[j].td = 1;
+			rq[j].bw = 1;
 		}
-		ofstream file1("result1.log");
-		file1 << "tnum/interval\t5\t10\t15\t20" << endl;
-		file1.close();
-		for (unsigned int i = 2; i <= 500; i += 2) {
+		// i stands for T in cost formula
+		for (unsigned int i = 4; i <= 1024; i += 4) {
 			ofstream file("result1.log", ios::app);
 			file << i;
 			cout << i << endl;
-			for (unsigned int j = 5; j <= 20; j += 5) {
-				CTLink* ct = new CTLink(i, 2000, 2000);
+			// j stands for t in cost formula
+			for (unsigned int j = 4; j <= 32; j *= 2) {
+				CTLink* ct = new CTLink(max_reserve_time/i, max_reserve_time, max_reserve_time);
 				unsigned int t = 0;
+				// 1st. first round to fill the CTLink
+				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+					ct->Insert(rq[k]);
+					t += j;
+					ct->SetTime(t);
+					// the CTLink is full.
+					if(t>max_reserve_time){
+						break;
+					}
+				}
+				// 2nd. second round to test the performance
 				clock_t start = clock();
 				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
 					ct->Insert(rq[k]);
@@ -122,29 +136,39 @@ int main() {
 #ifdef CT_TEST_2
 
 	{
-		ofstream file2("result2.log");
-		file2 << "TD/ITV\t4\t8\t16\t32" << endl;
-		file2.close();
+		ofstream file1("result2.log");
+		file1 << "TD/T\t16\t32\t64\t128" << endl;
+		file1.close();
 		unsigned int max_reserve_time = 131072;
-		srand(0);
-		for (unsigned int j = 0; j < REQUEST_NUM; j++) {
-			rq[j].ts = H.U_Randint(1, max_reserve_time - 4);
-			rq[j].td = 128;
-			rq[j].bw = 1;
-		}
-		// i stands for T in cost formula
-		for (unsigned int i = 4; i <= 1024; i += 4) {
+		for (unsigned int i = 8; i <= 2048; i += 8) {
 			ofstream file("result2.log", ios::app);
 			file << i;
 			cout << i << endl;
-			// j stands for t in cost formula
-			for (unsigned int j = 4; j <= 32; j *= 2) {
-				CTLink* ct = new CTLink(max_reserve_time/i, max_reserve_time, max_reserve_time);
+			// generate the request set.
+			srand(0);
+			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+				rq[k].ts = H.U_Randint(1, max_reserve_time - i);
+				rq[k].td = i;
+				rq[k].bw = 1;
+			}
+			for (unsigned int j = 16; j <= 128; j *=2) {
+				CTLink* ct = new CTLink(max_reserve_time/j, max_reserve_time, max_reserve_time);
 				unsigned int t = 0;
+				// 1st. first round to fill the CTLink
+				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+					ct->Insert(rq[k]);
+					t += 4;
+					ct->SetTime(t);
+					// the CTLink is full.
+					if(t>max_reserve_time){
+						break;
+					}
+				}
+				// 2nd. second round to test the performance
 				clock_t start = clock();
 				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
 					ct->Insert(rq[k]);
-					t += j;
+					t += 4;
 					ct->SetTime(t);
 				}
 				file << "\t" << clock() - start;
@@ -154,6 +178,7 @@ int main() {
 			file.close();
 		}
 	}
+
 #endif
 
 	// experiment 3
