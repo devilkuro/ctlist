@@ -13,8 +13,8 @@
 
 //#define CT_TEST_1
 //#define CT_TEST_2
-#define CT_TEST_3
-//#define CT_TEST_5
+//#define CT_TEST_3
+#define CT_TEST_5
 //#define CT_TEST_6
 //#define CT_TEST_0
 #define REQUEST_NUM 10000000
@@ -32,7 +32,7 @@ struct ControlStack {
 	bool stopFlag;
 };
 
-DWORD WINAPI RecordFor6(LPVOID tmp) {
+DWORD WINAPI RecordFor5(LPVOID tmp) {
 	ControlStack* p = (ControlStack*) tmp;
 	unsigned int pre_num=0;
 	while (1) {
@@ -195,12 +195,13 @@ int main() {
 #ifdef CT_TEST_5
 	{
 		// initialize the log file.
+		unsigned int max_reserve_time = 864000;
 		ofstream file5("result5.log");
 		file5 << "";
 		file5.close();
 		for (unsigned int i = 0; i < REQUEST_NUM; i++) {
 			rq[i].td = H.U_Randint(60, 3600);
-			rq[i].ts = H.U_Randint(1, 86400 - rq[i].td);
+			rq[i].ts = H.U_Randint(1, max_reserve_time - rq[i].td);
 			rq[i].bw = 1;
 		}
 		{
@@ -215,9 +216,9 @@ int main() {
 			n.t = 0;
 			n.n = 0;
 			n.stopFlag = false;
-			CTLink* ct = new CTLink(16000, 86400, 86400);
+			CTLink* ct = new CTLink(160000, max_reserve_time, max_reserve_time);
 			ct->iMaxResource = UINT_MAX;
-			HANDLE hThread2 = CreateThread(NULL, 0, RecordFor6, &n, 0,
+			HANDLE hThread2 = CreateThread(NULL, 0, RecordFor5, &n, 0,
 			NULL);
 			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
 				ct->Insert(rq[k]);
@@ -249,9 +250,9 @@ int main() {
 			n.t = 0;
 			n.n = 0;
 			n.stopFlag = false;
-			CArrayList* ca = new CArrayList(86400);
+			CArrayList* ca = new CArrayList(max_reserve_time);
 			ca->max_resource = UINT_MAX;
-			HANDLE hThread2 = CreateThread(NULL, 0, RecordFor6, &n, 0,
+			HANDLE hThread2 = CreateThread(NULL, 0, RecordFor5, &n, 0,
 			NULL);
 			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
 				ca->Insert(rq[k]);
@@ -287,7 +288,7 @@ int main() {
 			Request tmpR;
 
 			bp->RMAX = UINT_MAX;
-			HANDLE hThread2 = CreateThread(NULL, 0, RecordFor6, &n, 0,
+			HANDLE hThread2 = CreateThread(NULL, 0, RecordFor5, &n, 0,
 			NULL);
 			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
 				tmpR.bw = rq[k].bw;
