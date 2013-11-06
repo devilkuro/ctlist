@@ -17,7 +17,7 @@
 #define CT_TEST_5
 #define CT_TEST_6
 //#define CT_TEST_0
-#define REQUEST_NUM 10000000
+#define REQUEST_NUM 1000000
 template<class T> string m_toStr(T tmp) {
 	stringstream ss;
 	ss << tmp;
