@@ -11,11 +11,11 @@
 #include "CArrayList.h"
 #include "Generator.h"
 
-#define CT_TEST_1
+//#define CT_TEST_1
 #define CT_TEST_2
-#define CT_TEST_3
-#define CT_TEST_5
-#define CT_TEST_6
+//#define CT_TEST_3
+//#define CT_TEST_5
+//#define CT_TEST_6
 //#define CT_TEST_0
 #define REQUEST_NUM 1000000
 template<class T> string m_toStr(T tmp) {
@@ -137,10 +137,10 @@ int main() {
 
 	{
 		ofstream file1("result2.log");
-		file1 << "TD/T\t16\t32\t64\t128" << endl;
+		file1 << "TD/T\t128\t256\t512\t1024" << endl;
 		file1.close();
 		unsigned int max_reserve_time = 131072;
-		for (unsigned int i = 8; i <= 2048; i += 8) {
+		for (unsigned int i = 256; i <= 2048; i += 8) {
 			ofstream file("result2.log", ios::app);
 			file << i;
 			cout << i << endl;
@@ -151,7 +151,7 @@ int main() {
 				rq[k].td = i;
 				rq[k].bw = 1;
 			}
-			for (unsigned int j = 16; j <= 128; j *=2) {
+			for (unsigned int j = 128; j <= 1024; j *=2) {
 				CTLink* ct = new CTLink(max_reserve_time/j, max_reserve_time, max_reserve_time);
 				unsigned int t = 0;
 				// 1st. first round to fill the CTLink
