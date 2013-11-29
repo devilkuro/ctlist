@@ -183,7 +183,8 @@ bool CTLink::clearTack(unsigned int n) {
 	// 1st. delete the node.
 	unsigned int et = tack[next].node->t;
 	// change the judgment statement from t < et to t != et.
-	for (CTNode* temp = tack[loc].node; temp->t != et;) {
+	// edited at 1311291157: do not delete the first node in the tack.
+	for (CTNode* temp = tack[loc].node->next; temp->t < et;) {
 		temp = temp->next;
 		delete (temp->pre);
 	}
@@ -197,7 +198,6 @@ bool CTLink::clearTack(unsigned int n) {
 	// so just initialize this tack and link it to the the start node of previous tack.
 	// 1st. initial this tack.
 	tack[loc].num = 0;
-	tack[loc].node = new CTNode();
 	tack[loc].node->rs = 0;
 	tack[loc].node->t = tack[pre].node->t + CT_TACK_INTERVAL;
 	// 2nd. link this tack to previous one.
