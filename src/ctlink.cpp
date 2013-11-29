@@ -28,11 +28,6 @@ CTLink::~CTLink() {
 		ptrNode = ptrNode->next;
 	} //delete the link list
 	delete (ptrNode);
-	for (unsigned int i = 0; i < CT_TACK_ARRAY_SIZE; i++) {
-		if (tack[i].indexed) {
-			delete (tack[i].index);
-		}
-	} //delete all indexes
 	delete[] (tack); //delete the tacks
 }
 
@@ -99,10 +94,7 @@ CTNode* CTLink::accept(Request r) {
 	tackLoc = getTackLoc(st);
 	if (et > iCurrentTime + CT_MAX_RESERVE_TIME) // request r is out of range.
 		return NULL;
-	if (tack[tackLoc].indexed) {
-		indexLoc = getIndexLoc(st);
-		temp = tack[tackLoc].index[indexLoc];
-	} else {
+	{
 		temp = tack[tackLoc].node;
 	} //select start point to search. st->[temp->t,NULL)
 	  // select start point to judge. the result needs sp.t->[st,next), next node is the first node after sp.
@@ -174,57 +166,6 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
 				theTack->node = result;
 			}
 			theTack->num++;
-			if (theTack->num == CT_INDEX_THRESHOLD) {
-				// situation 3: if after insert this new node, the theTack->num is equal to CT_INDEX_THERSHOLD, then an index needs to be built in this tack.
-				// step 1: initial the index array and index mask.
-				theTack->index = new CTNode*[CT_INDEX_NUM];
-				theTack->iIndexMask = UINT_MAX << CT_INDEX_NUM;
-				theTack->indexed = true;
-				// step 2: put node in certain index point.
-				CTNode* tempNode = theTack->node;
-				bool outFlag = false;
-				for (unsigned int i = 0; i < CT_INDEX_NUM; i++) {
-					// if tempNode is out of the tack, point index[i] to this node.
-					if (outFlag) {
-						theTack->index[i] = tempNode;
-						continue;
-					} else {
-						//find the start of next index.
-						while (getIndexLoc(tempNode->t) < i) {
-							tempNode = tempNode->next;
-							if (getTackLoc(tempNode->t) != tackLoc) {
-								outFlag = true;
-								break;
-							}
-						}
-						theTack->index[i] = tempNode;
-						//if tempNode is in the index[i], modify the index mask. make sure the tempNode is in the range of this tack before judgment.
-						if (!outFlag && getIndexLoc(tempNode->t) == i) {
-							theTack->iIndexMask |= 1 << i;
-						}
-					}
-				} // end of the initialization of the index.
-			} else if (theTack->indexed) {
-				// situation 4: if this tack has index, should maintain the index.
-				unsigned int indexLoc = getIndexLoc(t);
-				// if the node after result node is the index node, point the index to result node.
-				if (theTack->index[indexLoc] == loc) {
-					theTack->index[indexLoc] = result;
-					// after change the index, the index before time t needs to be maintained, and the iIndexMask needs to be modified.
-					if (theTack->iIndexMask != UINT_MAX) {
-						// 1st. modify the mask of indexLoc.
-						theTack->iIndexMask |= 1 << indexLoc;
-						// 2nd. modify the before index mask if necessary.
-						for (int i = indexLoc - 1; i >= 0; i--) {
-							if (theTack->index[i] == loc) {
-								theTack->index[i] = result;
-							} else {
-								break;
-							}
-						} // end of before index maintain loop.
-					}
-				} //end of all index maintenance.
-			}
 		} // end of insert new node.
 	} // end of insertion.
 
@@ -251,17 +192,11 @@ bool CTLink::clearTack(unsigned int n) {
 	// Important!! there is a big problem in this function. It is necessary to keep a live tack before current tack to record the start resource.
 	// THIS HAS BEEN FIXED AT 1309291826.
 	// 2nd. delete the index if necessary.
-	if (tack[loc].indexed) {
-		delete (tack[loc].index);
-	}
 	// link this tack to the last tack.
 	// since the last tack is used to store the end point, it has only one node which stands for the end time.
 	// so just initialize this tack and link it to the the start node of previous tack.
 	// 1st. initial this tack.
 	tack[loc].num = 0;
-	tack[loc].indexed = false; //new tack has no index
-	tack[loc].iIndexMask = 0;
-	tack[loc].index = NULL;
 	tack[loc].node = new CTNode();
 	tack[loc].node->rs = 0;
 	tack[loc].node->t = tack[pre].node->t + CT_TACK_INTERVAL;
@@ -284,11 +219,6 @@ unsigned int CTLink::getTackLoc(unsigned int t) {
 	return (t / CT_TACK_INTERVAL) % CT_TACK_ARRAY_SIZE;
 }
 
-unsigned int CTLink::getIndexLoc(unsigned int t) {
-	//get the index num of the time t.
-	return (t % CT_TACK_INTERVAL) / CT_INDEX_INTERVAL;
-}
-
 bool CTLink::Output() {
 	cout<<"CTLINK:DISPLAY."<<endl;
 	for(CTNode* temp = tack[(getTackLoc(iCurrentTime)+CT_TACK_ARRAY_SIZE-1)%CT_TACK_ARRAY_SIZE].node; temp != NULL; temp = temp->next){
@@ -300,12 +230,9 @@ bool CTLink::Output() {
 void CTLink::initCTLink(unsigned int tnum, unsigned int inum,
 		unsigned int max) {
 	CT_TACK_NUM = tnum;
-	CT_INDEX_NUM = inum;
 	CT_MAX_RESERVE_TIME = max; //16*4*4=256
-	CT_INDEX_THRESHOLD = CT_INDEX_NUM;
 	CT_TACK_ARRAY_SIZE = CT_TACK_NUM + 3; // one to keep all alive node in range; one to record start node; one to record end node.
 	CT_TACK_INTERVAL = (CT_MAX_RESERVE_TIME + CT_TACK_NUM - 1) / CT_TACK_NUM; // to make sure that CT_TACK_INTERVAL * CT_TACK_NUM >= CT_MAX_RESERVE_TIME.
-	CT_INDEX_INTERVAL = (CT_TACK_INTERVAL + CT_INDEX_NUM - 1) / CT_INDEX_NUM;
 	iStartTack = 0;
 	iCurrentTack = 0;
 	iCurrentTime = 0;
@@ -315,9 +242,6 @@ void CTLink::initCTLink(unsigned int tnum, unsigned int inum,
 	for (unsigned int i = 0; i < CT_TACK_ARRAY_SIZE; i++) {
 		//initial each tack.
 		tack[i].num = 0;
-		tack[i].indexed = false; //new tack has no index
-		tack[i].iIndexMask = 0;
-		tack[i].index = NULL;
 		tack[i].node = new CTNode();
 		tack[i].node->t = (((i + CT_TACK_ARRAY_SIZE
 				- (iStartTack % CT_TACK_ARRAY_SIZE)) % CT_TACK_ARRAY_SIZE)
