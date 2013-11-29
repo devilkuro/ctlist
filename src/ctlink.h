@@ -29,7 +29,7 @@ struct CTTack{
 class CTLink{
 public:
 	CTLink();
-	CTLink(unsigned int tnum,unsigned int inum,unsigned int max);
+	CTLink(unsigned int tnum,unsigned int max);
 	~CTLink();
 public:
 	// add public member variable here
@@ -51,7 +51,7 @@ private:
 	unsigned int iCurrentTack; //pCurrentTack stands for the tack num that include current time. current ->[tack).
 	unsigned int iCurrentTime; //stands for current time.
 private:
-	void initCTLink(unsigned int tnum,unsigned int inum,unsigned int max);
+	void initCTLink(unsigned int tnum, unsigned int max);
 	CTNode* insertNode(unsigned int t, CTNode* loc); //insert target node into the link list, node loc stands for the first node after target node.
 	CTNode* accept(Request r); //to judge whether the request r can be accecpted or not
 	bool clearTack(unsigned int n); // to clear tack n.

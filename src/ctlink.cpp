@@ -7,11 +7,11 @@
 
 #include "ctlink.h"
 CTLink::CTLink(){
-	initCTLink(256,16,4096);
+	initCTLink(256,4096);
 }
-CTLink::CTLink(unsigned int tnum,unsigned int inum,unsigned int max) {
+CTLink::CTLink(unsigned int tnum,unsigned int max) {
 	// tnum means the CT_TACK_NUM; inum means the CT_INDEX_NUM; max means the CT_MAX_RESERVE_TIME.
-	initCTLink(tnum,inum,max);
+	initCTLink(tnum,max);
 }
 
 CTLink::~CTLink() {
@@ -227,8 +227,7 @@ bool CTLink::Output() {
 	return true;
 }
 
-void CTLink::initCTLink(unsigned int tnum, unsigned int inum,
-		unsigned int max) {
+void CTLink::initCTLink(unsigned int tnum, unsigned int max) {
 	CT_TACK_NUM = tnum;
 	CT_MAX_RESERVE_TIME = max; //16*4*4=256
 	CT_TACK_ARRAY_SIZE = CT_TACK_NUM + 3; // one to keep all alive node in range; one to record start node; one to record end node.

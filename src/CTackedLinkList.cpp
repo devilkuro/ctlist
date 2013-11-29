@@ -11,12 +11,12 @@
 #include "CArrayList.h"
 #include "Generator.h"
 
-//#define CT_TEST_1
+#define CT_TEST_1
 #define CT_TEST_2
-//#define CT_TEST_3
-//#define CT_TEST_5
-//#define CT_TEST_6
-//#define CT_TEST_0
+#define CT_TEST_3
+#define CT_TEST_5
+#define CT_TEST_6
+#define CT_TEST_0
 #define REQUEST_NUM 1000000
 template<class T> string m_toStr(T tmp) {
 	stringstream ss;
@@ -65,8 +65,7 @@ int main() {
 		}
 		{
 			//CILink
-			CTLink* ct = new CTLink(1, 200, 86400);
-			ct->CT_INDEX_THRESHOLD = 1;
+			CTLink* ct = new CTLink(1,86400);
 			unsigned int t = 0;
 			clock_t start = clock();
 			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
@@ -104,7 +103,7 @@ int main() {
 			cout << i << endl;
 			// j stands for t in cost formula
 			for (unsigned int j = 4; j <= 32; j *= 2) {
-				CTLink* ct = new CTLink(max_reserve_time/i, max_reserve_time, max_reserve_time);
+				CTLink* ct = new CTLink(max_reserve_time/i,max_reserve_time);
 				unsigned int t = 0;
 				// 1st. first round to fill the CTLink
 				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
@@ -152,7 +151,7 @@ int main() {
 				rq[k].bw = 1;
 			}
 			for (unsigned int j = 128; j <= 1024; j *=2) {
-				CTLink* ct = new CTLink(max_reserve_time/j, max_reserve_time, max_reserve_time);
+				CTLink* ct = new CTLink(max_reserve_time/j, max_reserve_time);
 				unsigned int t = 0;
 				// 1st. first round to fill the CTLink
 				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
@@ -199,7 +198,7 @@ int main() {
 					rq[i].bw = 1;
 				}
 				// 2.2nd calculate the result and record into the log file.
-				CTLink* ct = new CTLink(max_reserve_time/interval, max_reserve_time, max_reserve_time);
+				CTLink* ct = new CTLink(max_reserve_time/interval, max_reserve_time);
 				unsigned int t = 0;
 				ofstream file("result3.log", ios::app);
 				clock_t start = clock();
@@ -244,7 +243,7 @@ int main() {
 			n.t = 0;
 			n.n = 0;
 			n.stopFlag = false;
-			CTLink* ct = new CTLink(160000, max_reserve_time, max_reserve_time);
+			CTLink* ct = new CTLink(160000,max_reserve_time);
 			ct->iMaxResource = UINT_MAX;
 			HANDLE hThread2 = CreateThread(NULL, 0, RecordFor5, &n, 0,
 			NULL);
@@ -362,7 +361,7 @@ int main() {
 				cout << i << endl;
 				{
 					//CTLink
-					CTLink* ct = new CTLink(i, 86400, 86400);
+					CTLink* ct = new CTLink(i, 86400);
 					unsigned int t = 0;
 					clock_t start = clock();
 					for (unsigned int k = 0; k < REQUEST_NUM; k++) {
