@@ -34,13 +34,23 @@ bool CILink::Output() {
 
 void CILink::initCILink(unsigned int inum, unsigned int rmax) {
 	CI_INDEX_NUM = inum;
+	CI_INDEX_ARRAY_SIZE = CI_INDEX_NUM + 2;
 	CI_MAX_RESERVE_TIME = rmax;
+	CI_INDEX_INTERVAL = (rmax + CI_INDEX_NUM - 1)/CI_INDEX_NUM;
 	iCurrentIndex = 0;
 	index = new CIndex[CI_INDEX_NUM];
 	for(unsigned int i = 0;i<CI_INDEX_NUM;i++){
 		index[i].node = NULL;
 	}
 	// TODO: ehh...fix these functions. 2013-10-31
+	// initialize the head node.
+	head = new CINode();
+	head->t = 0;
+	head->rs = 0;
+	head->pre = NULL;
+	head->next = NULL;
+	index[0] = head;
+
 
 }
 

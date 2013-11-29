@@ -34,10 +34,22 @@ public:
 	bool Output(); // display the link list.
 private:
 	// add private member variable here
+	// the number of usable index
 	unsigned int CI_INDEX_NUM;
+	// the size of index[], equals to 2 added to CI_INDEX_NUM
+	unsigned int CI_INDEX_ARRAY_SIZE;
+	// the reserve time limit
 	unsigned int CI_MAX_RESERVE_TIME;
+	// the interval between two index
+	unsigned int CI_INDEX_INTERVAL;
 	CIndex* index;
+	CINode* head;
+	// the number of the index which contain the current time
 	unsigned int iCurrentIndex;
+	// the first index
+	unsigned int iStartIndex;
+	// the current time
+	unsigned int iCurrentTime;
 
 private:
 	// add private function here
