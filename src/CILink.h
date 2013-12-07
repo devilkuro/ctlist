@@ -28,6 +28,7 @@ public:
 	virtual ~CILink();
 public:
 	// add public member variable here
+	unsigned int iMaxResource; //stands for the max available resource.
 public:
 	bool Insert(Request r); //return true if success.
 	bool SetTime(unsigned int t); //set the current time.
@@ -44,7 +45,7 @@ private:
 	unsigned int CI_INDEX_INTERVAL;
 	CIndex* index;
 	CINode* head;
-	// the number of the index which contain the current time
+	// the number of the index which contains the current time
 	unsigned int iCurrentIndex;
 	// the first index
 	unsigned int iStartIndex;
