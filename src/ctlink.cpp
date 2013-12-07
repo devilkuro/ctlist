@@ -16,13 +16,13 @@ CTLink::CTLink(unsigned int tnum,unsigned int max) {
 
 CTLink::~CTLink() {
 	// get the first alive tack, the one before iCurrentTime
-	unsigned int aliveTackLoc = iCurrentTime / CT_TACK_INTERVAL;
-	if(aliveTackLoc<1){
-		iCurrentTack = 0;
+	unsigned int iStartTackNum = iCurrentTime / CT_TACK_INTERVAL;
+	if(iStartTackNum<1){
+		iCurrentTackLoc = 0;
 	}else{
-		iCurrentTack = (aliveTackLoc+CT_TACK_ARRAY_SIZE - 1) % CT_TACK_ARRAY_SIZE;
+		iCurrentTackLoc = (iStartTackNum+CT_TACK_ARRAY_SIZE - 1) % CT_TACK_ARRAY_SIZE;
 	}
-	CTNode* ptrNode = tack[iCurrentTack].node->next;
+	CTNode* ptrNode = tack[iCurrentTackLoc].node->next;
 	while (ptrNode) {
 		delete (ptrNode->pre);
 		ptrNode = ptrNode->next;
@@ -33,17 +33,15 @@ CTLink::~CTLink() {
 
 bool CTLink::SetTime(unsigned int t) {
 	// maintain the current time and memory.
-	if(t==iCurrentTime){
+	if(t<=iCurrentTime){
 		return false;
 	}
 	iCurrentTime = t;
-	unsigned int aliveTackLoc = t / CT_TACK_INTERVAL;
-	if(aliveTackLoc<1){
-		return false;
-	}
+	unsigned int iCurrentTackNum = t / CT_TACK_INTERVAL;
+
 	// the tack is 1 smaller than iCurrentTack is to store the start resource, so if a node is 2 or more smaller than iCurrentTack, it needs to be cleared.
 	// Update at 1310012316: change the algorithm to fix the bug.
-	for (; iStartTack < aliveTackLoc - 1; iStartTack++) {
+	for (; iStartTack + 1< iCurrentTackNum; iStartTack++) {
 		clearTack(iStartTack);
 	}
 	// only return true.
@@ -86,19 +84,20 @@ CTNode* CTLink::accept(Request r) {
 	// to avoid point to NULL, the tack array size should be two more than the tack number. one to record the start resource, one to record end point.
 	// else if request r can not be accepted then return NULL.
 	unsigned int st, et; // st stands for the start time of this request, et stands for the end time.
-	CTNode* result, *temp; // result is used to store the result node. temp is used as temp node to mark the search start.
+	CTNode* result = NULL;
+	CTNode* temp = NULL; // result is used to store the result node. temp is used as temp node to mark the search start.
 	unsigned int tackLoc, indexLoc; // used to store the loc of tack and index, if there is an index.
 	st = iCurrentTime + r.ts;
 	et = st + r.td;
 
 	tackLoc = getTackLoc(st);
-	if (et > iCurrentTime + CT_MAX_RESERVE_TIME) // request r is out of range.
+	if (et > iCurrentTime + CT_MAX_RESERVE_TIME){ // request r is out of range.
 		return NULL;
-	{
-		temp = tack[tackLoc].node;
-	} //select start point to search. st->[temp->t,NULL)
-	  // select start point to judge. the result needs sp.t->[st,next), next node is the first node after sp.
-	  // since the judge process needs to use the node before start point, so start point is the first node after st.
+	}
+	temp = tack[tackLoc].node;
+	//select start point to search. st->[temp->t,NULL)
+	// select start point to judge. the result needs sp.t->[st,next), next node is the first node after sp.
+	// since the judge process needs to use the node before start point, so start point is the first node after st.
 	while (temp->t <= st) {
 		temp = temp->next;
 	}
@@ -145,11 +144,6 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
 		if (theTack->num == 0) {
 			// situation 1: this tack has just one temporary node. then replace this temporary node with target node.
 			result = pre;
-#ifdef CT_DEBUG
-			if(t==2112){
-				t=2112;
-			}
-#endif
 			result->t = t;
 			theTack->num++;
 		} else {
@@ -176,14 +170,14 @@ bool CTLink::clearTack(unsigned int n) {
 	// this function will clear this tack, and link this tack to last usable tack. n stands for the tack number.
 	// 1. clear all tack; 2. link this tack to the last tack.
 	// Update at 1310012228: change n to n+CT_TACK_ARRAY_SIZE to avoid to mod a negative number.
-	unsigned int loc = (n+CT_TACK_ARRAY_SIZE) % CT_TACK_ARRAY_SIZE;
-	unsigned int pre = (n+CT_TACK_ARRAY_SIZE - 1) % CT_TACK_ARRAY_SIZE;
-	unsigned int next = (n+CT_TACK_ARRAY_SIZE + 1) % CT_TACK_ARRAY_SIZE;
+	unsigned int loc = n % CT_TACK_ARRAY_SIZE;
+	unsigned int pre = (n + CT_TACK_ARRAY_SIZE - 1) % CT_TACK_ARRAY_SIZE;
+	unsigned int next = (n + 1) % CT_TACK_ARRAY_SIZE;
 	// clear this tack.
 	// 1st. delete the node.
 	unsigned int et = tack[next].node->t;
 	// change the judgment statement from t < et to t != et.
-	// edited at 1311291157: do not delete the first node in the tack.
+	// edited at 1311291157: do not delete the first node in the tack. this node will be used as the temporary tack node.
 	for (CTNode* temp = tack[loc].node->next; temp->t < et;) {
 		temp = temp->next;
 		delete (temp->pre);
@@ -206,11 +200,6 @@ bool CTLink::clearTack(unsigned int n) {
 	// 3rd. link previous tack to this one.
 	tack[pre].node->next = tack[loc].node;
 	// return true. there is no other result in normal.
-#ifdef CT_DEBUG
-	if(tack[pre].node->t == tack[next].node->t||tack[loc].node->t ==2112){
-		cout<< iCurrentTime << endl;
-	}
-#endif
 	return true;
 }
 
@@ -233,7 +222,7 @@ void CTLink::initCTLink(unsigned int tnum, unsigned int max) {
 	CT_TACK_ARRAY_SIZE = CT_TACK_NUM + 3; // one to keep all alive node in range; one to record start node; one to record end node.
 	CT_TACK_INTERVAL = (CT_MAX_RESERVE_TIME + CT_TACK_NUM - 1) / CT_TACK_NUM; // to make sure that CT_TACK_INTERVAL * CT_TACK_NUM >= CT_MAX_RESERVE_TIME.
 	iStartTack = 0;
-	iCurrentTack = 0;
+	iCurrentTackLoc = 0;
 	iCurrentTime = 0;
 	iMaxResource = MAX;
 	tack = new CTTack[CT_TACK_ARRAY_SIZE];

@@ -33,7 +33,6 @@ public:
 	~CTLink();
 public:
 	// add public member variable here
-//	unsigned int CT_INDEX_THRESHOLD;
 	unsigned int iMaxResource; //stands for the max available resource.
 public:
 	bool Insert(Request r); //return true if success.
@@ -41,14 +40,12 @@ public:
 	bool Output(); // display the link list.
 private:
 	unsigned int CT_TACK_NUM;
-//	unsigned int CT_INDEX_NUM;
 	unsigned int CT_MAX_RESERVE_TIME;
 	unsigned int CT_TACK_ARRAY_SIZE;
 	unsigned int CT_TACK_INTERVAL; //decide the interval between two tacks.
-//	unsigned int CT_INDEX_INTERVAL; //decide the interval between two indexes.
 	CTTack* tack;
 	unsigned int iStartTack; // to mark the start tack.
-	unsigned int iCurrentTack; //pCurrentTack stands for the tack num that include current time. current ->[tack).
+	unsigned int iCurrentTackLoc; //pCurrentTack stands for the tack num that include current time. current ->[tack).
 	unsigned int iCurrentTime; //stands for current time.
 private:
 	void initCTLink(unsigned int tnum, unsigned int max);
@@ -56,7 +53,6 @@ private:
 	CTNode* accept(Request r); //to judge whether the request r can be accecpted or not
 	bool clearTack(unsigned int n); // to clear tack n.
 	unsigned int getTackLoc(unsigned int t);
-//	unsigned int getIndexLoc(unsigned int t);
 };
 
 
