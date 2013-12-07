@@ -10,6 +10,9 @@
 CILink::CILink() {
 	initCILink(100,MAX);
 }
+CILink::CILink(unsigned int inum,unsigned int rmax) {
+	initCILink(inum,rmax);
+}
 
 CILink::~CILink() {
 	// free the link list
@@ -23,7 +26,6 @@ CILink::~CILink() {
 }
 
 bool CILink::Insert(Request r) {
-	// TODO fix this function
 	// accept judgment.
 	if(r.td == 0){
 		return true;
@@ -31,23 +33,31 @@ bool CILink::Insert(Request r) {
 
 	CINode* pre2st = NULL;
 	CINode* pre2et = NULL;
-	pre2st = accept(r);
-	if(pre2st == NULL){
+	if(!accept(r,pre2st,pre2et)){
 		return false;
 	}else{
  		unsigned int st = iCurrentTime + r.ts;
  		unsigned int et = st + r.td;
 
  		CINode* start = insertNode(st,pre2st);
- 		// TODO: fix this function.
+ 		if(pre2et->t<start->t){
+ 			insertNode(et,start);
+ 		}else{
+ 			insertNode(et,pre2et);
+ 		}
+		for (; start->t < et; start = start->next) {
+			start->rs = start->rs + r.bw;
+		}
 	}
-	return false;
+	return true;
 }
 
 bool CILink::Output() {
-	// TODO fix this function
-
-	return false;
+	cout<<"CILINK:DISPLAY."<<endl;
+	for(CINode* temp = head; temp != NULL; temp = temp->next){
+		cout<< "rs: " << temp->t << ", " << temp->rs << endl;
+	}
+	return true;
 }
 
 void CILink::initCILink(unsigned int inum, unsigned int rmax) {
@@ -67,7 +77,7 @@ void CILink::initCILink(unsigned int inum, unsigned int rmax) {
 	head->rs = 0;
 	head->pre = NULL;
 	head->next = NULL;
-	index[0] = head;
+	index[0].node = head;
 }
 
 CINode* CILink::insertNode(unsigned int t, CINode* pre) {
@@ -90,15 +100,14 @@ CINode* CILink::insertNode(unsigned int t, CINode* pre) {
 		unsigned int resultIndexLoc = getIndexLoc(t);
 		unsigned int preIndexLoc = getIndexLoc(pre->t);
 		if(preIndexLoc!=resultIndexLoc){
-			index[resultIndexLoc] = result;
+			index[resultIndexLoc].node = result;
 		}
 	}
 	return result;
 }
 
-CINode* CILink::accept(Request r) {
+bool CILink::accept(Request r, CINode* pre2st, CINode* pre2et) {
 	unsigned int st, et;
-	CINode* result;
 	CINode* temp;
 	unsigned int indexLoc;
 
@@ -106,11 +115,11 @@ CINode* CILink::accept(Request r) {
 	et = st + r.td;
 	// TODO: need to be confirmed twice. > or >=
 	if( et>iCurrentTime+CI_MAX_RESERVE_TIME){
-		return NULL;
+		return false;
 	}
 	// find the first usable index.
 	indexLoc = getIndexLoc(st);
-	while(index[indexLoc]==NULL){
+	while(index[indexLoc].node==NULL){
 		// move index location forward.
 		if(indexLoc>0){
 			indexLoc--;
@@ -119,14 +128,14 @@ CINode* CILink::accept(Request r) {
 		}
 	}
 	// find the last node which is not after the start time.
-	temp = index[indexLoc];
+	temp = index[indexLoc].node;
 	while(temp->next!=NULL){
 		if(temp->next->t>st){
 			break;
 		}
 		temp = temp->next;
 	}
-	result = temp;
+	pre2st = temp;
 	// decide to accept or not.
 	while(temp->next!=NULL){
 		// if the resource if not enough, return NULL.
@@ -136,10 +145,17 @@ CINode* CILink::accept(Request r) {
 		// if the next node is after the end time, break out.
 		if(temp->next->t>=et){
 			break;
+		}else{
+			temp = temp->next;
 		}
 	}
+	if(temp->next->t==et){
+		pre2et = temp->next;
+	}else{
+		pre2et = temp;
+	}
 
-	return result;
+	return true;
 }
 
 bool CILink::SetTime(unsigned int t) {
@@ -160,7 +176,7 @@ bool CILink::clearIndex(unsigned int n) {
 	unsigned int loc = n%CI_INDEX_ARRAY_SIZE;
 	unsigned int next = (n+1)%CI_INDEX_ARRAY_SIZE;
 	// 1st. reset the index
-	this->index[loc] = NULL;
+	this->index[loc].node = NULL;
 	// 2nd. free the nodes during index n.
 	// get the end time
 	unsigned int et = (n+1)*CI_INDEX_INTERVAL;
@@ -183,7 +199,7 @@ bool CILink::clearIndex(unsigned int n) {
 		head = lastNode;
 	}
 	// 3rd. link head to the next index
-	this->index[next] = head;
+	this->index[next].node = head;
 	// return true. there is not any other result.
 	return true;
 }

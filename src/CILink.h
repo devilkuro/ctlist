@@ -25,6 +25,7 @@ struct CIndex{
 class CILink {
 public:
 	CILink();
+	CILink(unsigned int inum, unsigned int rmax);
 	virtual ~CILink();
 public:
 	// add public member variable here
@@ -56,7 +57,7 @@ private:
 	// add private function here
 	void initCILink(unsigned int inum,unsigned int rmax);
 	CINode* insertNode(unsigned int t, CINode* loc); //insert target node into the link list, node loc stands for the first node before time t.
-	CINode* accept(Request r); //to judge whether the request r can be accecpted or not
+	bool accept(Request r, CINode* pre2st, CINode* pre2et); //to judge whether the request r can be accecpted or not
 	bool clearIndex(unsigned int n); // to clear index n.
 	unsigned int getIndexLoc(unsigned int t);
 };
