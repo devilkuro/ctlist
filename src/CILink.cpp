@@ -24,6 +24,23 @@ CILink::~CILink() {
 
 bool CILink::Insert(Request r) {
 	// TODO fix this function
+	// accept judgment.
+	if(r.td == 0){
+		return true;
+	}
+
+	CINode* pre2st = NULL;
+	CINode* pre2et = NULL;
+	pre2st = accept(r);
+	if(pre2st == NULL){
+		return false;
+	}else{
+ 		unsigned int st = iCurrentTime + r.ts;
+ 		unsigned int et = st + r.td;
+
+ 		CINode* start = insertNode(st,pre2st);
+ 		// TODO: fix this function.
+	}
 	return false;
 }
 
@@ -53,13 +70,28 @@ void CILink::initCILink(unsigned int inum, unsigned int rmax) {
 	index[0] = head;
 }
 
-CINode* CILink::insertNode(unsigned int t, CINode* loc) {
-	// TODO fix this function
+CINode* CILink::insertNode(unsigned int t, CINode* pre) {
 	CINode* result = NULL;
-	if(loc->t == t){
-		result = loc;
+	if(pre->t == t){
+		result = pre;
 	}else{
-
+		// creat a new node if there is not.
+		result = new CINode();
+		result->t = t;
+		result->rs = pre->rs;
+		// link these nodes.
+		if(pre->next!=NULL){
+			pre->next->pre = result;
+		}
+		result->next = pre->next;
+		result->pre = pre;
+		pre->next = result;
+		// update the index
+		unsigned int resultIndexLoc = getIndexLoc(t);
+		unsigned int preIndexLoc = getIndexLoc(pre->t);
+		if(preIndexLoc!=resultIndexLoc){
+			index[resultIndexLoc] = result;
+		}
 	}
 	return result;
 }
