@@ -53,8 +53,10 @@ bool CTLink::Insert(Request r) {
 	if(r.td == 0){
 		return true;
 	}
-	CTNode* loc = accept(r);
-	if (loc == NULL) {
+	CTNode* next2st = NULL;
+	CTNode* next2et = NULL;
+
+	if (!accept(r,next2st,next2et)) {
 		// if not accepted, return FALSE.
 		return false;
 	} else {
@@ -62,23 +64,20 @@ bool CTLink::Insert(Request r) {
 		unsigned int st = iCurrentTime + r.ts;
 		unsigned int et = st + r.td;
 		// select the start point.
-		CTNode* temp = insertNode(st, loc);
-		CTNode* start = temp;
+		CTNode* start = insertNode(st, next2st);
 		// find the next node to the et node.
-		while (temp->t <= et) {
-			temp = temp->next;
-		}
+		// update at 1312072208: change the accept function to get end time node faster.
 		// insert et node.
-		insertNode(et, temp);
+		insertNode(et, next2et);
 		// after insertion of the node et, the node before et can be modified.
-		for(temp = start; temp->t<et;temp=temp->next){
-			temp->rs = temp->rs + r.bw;
+		for(; start->t<et;start=start->next){
+			start->rs = start->rs + r.bw;
 		}
 	}
 	return true;
 }
 
-CTNode* CTLink::accept(Request r) {
+bool CTLink::accept(Request r, CTNode* next2st, CTNode* next2et) {
 	// update at 1309251613: this function has been changed into following function.
 	// if request r can be accepted return the start node which is the first node after the start time
 	// to avoid point to NULL, the tack array size should be two more than the tack number. one to record the start resource, one to record end point.
@@ -92,7 +91,7 @@ CTNode* CTLink::accept(Request r) {
 
 	tackLoc = getTackLoc(st);
 	if (et > iCurrentTime + CT_MAX_RESERVE_TIME){ // request r is out of range.
-		return NULL;
+		return false;
 	}
 	temp = tack[tackLoc].node;
 	//select start point to search. st->[temp->t,NULL)
@@ -101,7 +100,7 @@ CTNode* CTLink::accept(Request r) {
 	while (temp->t <= st) {
 		temp = temp->next;
 	}
-	result = temp; //use result to store this start point. if request r is accepted, this node will be used to create returned result node.
+	next2st = temp; //use result to store this start point. if request r is accepted, this node will be used to create returned result node.
 	// judge whether this request can be accepted.
 	// since the judge process will use the data before et and the judge process just use the node before node temp
 	// so the end point is the first node not before et. need ) then )+] = );
@@ -110,26 +109,31 @@ CTNode* CTLink::accept(Request r) {
 	// so if the rs of which node from the last one before st to last one before et is more than r.bw, request r can be accepted.
 	// update at 1310201505: change the algorithmic logic to fix a bug that temp can be pointed to NULL.
 	if (temp->pre->rs + r.bw > iMaxResource) {
-		return NULL;
+		return false;
 	}
 	while (temp->t < et) {
 		if (temp->rs + r.bw > iMaxResource) {
-			return NULL;
+			return false;
 		}
 		temp = temp->next;
 	}
+	// set the next2et to the node next to end time.
+	if(temp->t==et){
+		temp = temp->next;
+	}
+	next2et = temp;
 	//judge process finished and request r is accepted.
-	return result;
+	return true;
 }
 
-CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
+CTNode* CTLink::insertNode(unsigned int t, CTNode* next) {
 	// this function should have these function
 	// 1. maintain the index, redirect the pointer.
 	// 2. maintain the tack->num,iIndexMask, pointer and other.
 	// 3. if target is a new node, insert it ,and return it. else, modify this exist node, and return it.
 
 	CTNode* result = NULL;
-	CTNode* pre = loc->pre;
+	CTNode* pre = next->pre;
 	unsigned int tackLoc = getTackLoc(t);
 	CTTack* theTack = &tack[tackLoc];
 	// situation 0: in this insert operation, if the node at time t has already exist, just return it.
@@ -152,11 +156,11 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* loc) {
 			result = new CTNode();
 			result->t = t;
 			result->pre = pre;
-			result->next = loc;
+			result->next = next;
 			result->rs = result->pre->rs;
 			pre->next = result;
-			loc->pre = result;
-			if (theTack->node == loc) {
+			next->pre = result;
+			if (theTack->node == next) {
 				theTack->node = result;
 			}
 			theTack->num++;
