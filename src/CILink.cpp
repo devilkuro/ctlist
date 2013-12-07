@@ -22,7 +22,7 @@ CILink::~CILink() {
 		delete temp;
 	}
 	// free the index array
-	delete[] index;
+	delete[] (cIndex);
 }
 
 bool CILink::Insert(Request r) {
@@ -67,9 +67,11 @@ void CILink::initCILink(unsigned int inum, unsigned int rmax) {
 	CI_MAX_RESERVE_TIME = rmax;
 	CI_INDEX_INTERVAL = (rmax + CI_INDEX_NUM - 1)/CI_INDEX_NUM;
 	iCurrentIndex = 0;
-	index = new CIndex[CI_INDEX_NUM];
-	for(unsigned int i = 0;i<CI_INDEX_NUM;i++){
-		index[i].node = NULL;
+	iCurrentTime = 0;
+	iStartIndex = 0;
+	cIndex = new CIndex[CI_INDEX_ARRAY_SIZE];
+	for(unsigned int i = 0;i<CI_INDEX_ARRAY_SIZE;i++){
+		cIndex[i].node = NULL;
 	}
 	// initialize the head node.
 	head = new CINode();
@@ -77,7 +79,7 @@ void CILink::initCILink(unsigned int inum, unsigned int rmax) {
 	head->rs = 0;
 	head->pre = NULL;
 	head->next = NULL;
-	index[0].node = head;
+	cIndex[0].node = head;
 }
 
 CINode* CILink::insertNode(unsigned int t, CINode* pre) {
@@ -100,13 +102,13 @@ CINode* CILink::insertNode(unsigned int t, CINode* pre) {
 		unsigned int resultIndexLoc = getIndexLoc(t);
 		unsigned int preIndexLoc = getIndexLoc(pre->t);
 		if(preIndexLoc!=resultIndexLoc){
-			index[resultIndexLoc].node = result;
+			cIndex[resultIndexLoc].node = result;
 		}
 	}
 	return result;
 }
 
-bool CILink::accept(Request r, CINode* pre2st, CINode* pre2et) {
+bool CILink::accept(Request r, CINode*& pre2st, CINode*& pre2et) {
 	unsigned int st, et;
 	CINode* temp;
 	unsigned int indexLoc;
@@ -119,7 +121,7 @@ bool CILink::accept(Request r, CINode* pre2st, CINode* pre2et) {
 	}
 	// find the first usable index.
 	indexLoc = getIndexLoc(st);
-	while(index[indexLoc].node==NULL){
+	while(cIndex[indexLoc].node==NULL){
 		// move index location forward.
 		if(indexLoc>0){
 			indexLoc--;
@@ -128,19 +130,24 @@ bool CILink::accept(Request r, CINode* pre2st, CINode* pre2et) {
 		}
 	}
 	// find the last node which is not after the start time.
-	temp = index[indexLoc].node;
-	while(temp->next!=NULL){
-		if(temp->next->t>st){
-			break;
+	temp = cIndex[indexLoc].node;
+	if(temp->t>st){
+		pre2st = temp->pre;
+	}else{
+		while(temp->next!=NULL){
+			if(temp->next->t>st){
+				break;
+			}
+			temp = temp->next;
 		}
-		temp = temp->next;
+		pre2st = temp;
 	}
-	pre2st = temp;
 	// decide to accept or not.
+	temp = pre2st;
 	while(temp->next!=NULL){
 		// if the resource if not enough, return NULL.
 		if(temp->rs+r.bw>iMaxResource){
-			return NULL;
+			return false;
 		}
 		// if the next node is after the end time, break out.
 		if(temp->next->t>=et){
@@ -149,8 +156,13 @@ bool CILink::accept(Request r, CINode* pre2st, CINode* pre2et) {
 			temp = temp->next;
 		}
 	}
-	if(temp->next->t==et){
-		pre2et = temp->next;
+	// set the pre2et to match the requirement of insertNode function
+	if (temp->next != NULL) {
+		if (temp->next->t == et) {
+			pre2et = temp->next;
+		}else{
+			pre2et = temp;
+		}
 	}else{
 		pre2et = temp;
 	}
@@ -176,30 +188,37 @@ bool CILink::clearIndex(unsigned int n) {
 	unsigned int loc = n%CI_INDEX_ARRAY_SIZE;
 	unsigned int next = (n+1)%CI_INDEX_ARRAY_SIZE;
 	// 1st. reset the index
-	this->index[loc].node = NULL;
+	this->cIndex[loc].node = NULL;
 	// 2nd. free the nodes during index n.
 	// get the end time
 	unsigned int et = (n+1)*CI_INDEX_INTERVAL;
 	// find the last node before end time
-	CINode* lastNode = NULL;
-	for(lastNode = head;lastNode->next!=NULL;lastNode = lastNode->next){
-		// is lastNode is the last node before end time, break out.
-		if(lastNode->next->t>=et){
-			// delete the pre node link of the lastNode, since there is no pre node anymore.
-			lastNode->pre = NULL;
+	CINode* startNode = head;
+	while(startNode->next!=NULL){
+		if(startNode->next->t>=et){
+			startNode->pre=NULL;
 			break;
 		}
-		CINode* temp = lastNode;
-		delete temp;
+		startNode = startNode->next;
+		delete startNode->pre;
 	}
-	// at this step, the lastNode is the last node before end time.
-	// Then if the head node is not the last node, replace the head with lastNode and delete the original head node.
-	if(lastNode!=head){
-		delete head;
-		head = lastNode;
-	}
+//	CINode* lastNode = NULL;
+//	for(lastNode = head;lastNode->next!=NULL;lastNode = lastNode->next){
+//		// is lastNode is the last node before end time, break out.
+//		if(lastNode->next->t>=et){
+//			// delete the pre node link of the lastNode, since there is no pre node anymore.
+//			lastNode->pre = NULL;
+//			break;
+//		}
+//		CINode* temp = lastNode;
+//		delete temp;
+//	}
+	// at this step, the startNode is the last node before end time.
+	// Then if the head node is not the last node, replace the head with startNode and delete the original head node.
+	head = startNode;
+
 	// 3rd. link head to the next index
-	this->index[next].node = head;
+	this->cIndex[next].node = head;
 	// return true. there is not any other result.
 	return true;
 }

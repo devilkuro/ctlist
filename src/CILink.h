@@ -17,6 +17,7 @@ struct CINode{
 	CINode* next; //point to next node.
 };
 struct CIndex{
+	unsigned int flag;
 	CINode* node; //point to the first node after this tack.
 };
 /*
@@ -44,7 +45,7 @@ private:
 	unsigned int CI_MAX_RESERVE_TIME;
 	// the interval between two index
 	unsigned int CI_INDEX_INTERVAL;
-	CIndex* index;
+	CIndex* cIndex;
 	CINode* head;
 	// the number of the index which contains the current time
 	unsigned int iCurrentIndex;
@@ -57,7 +58,7 @@ private:
 	// add private function here
 	void initCILink(unsigned int inum,unsigned int rmax);
 	CINode* insertNode(unsigned int t, CINode* loc); //insert target node into the link list, node loc stands for the first node before time t.
-	bool accept(Request r, CINode* pre2st, CINode* pre2et); //to judge whether the request r can be accecpted or not
+	bool accept(Request r, CINode*& pre2st, CINode*& pre2et); //to judge whether the request r can be accecpted or not
 	bool clearIndex(unsigned int n); // to clear index n.
 	unsigned int getIndexLoc(unsigned int t);
 };

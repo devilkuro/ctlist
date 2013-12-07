@@ -77,7 +77,7 @@ bool CTLink::Insert(Request r) {
 	return true;
 }
 
-bool CTLink::accept(Request r, CTNode* next2st, CTNode* next2et) {
+bool CTLink::accept(Request r, CTNode *& next2st, CTNode *& next2et) {
 	// update at 1309251613: this function has been changed into following function.
 	// if request r can be accepted return the start node which is the first node after the start time
 	// to avoid point to NULL, the tack array size should be two more than the tack number. one to record the start resource, one to record end point.
@@ -87,7 +87,7 @@ bool CTLink::accept(Request r, CTNode* next2st, CTNode* next2et) {
 	unsigned int tackLoc; // used to store the loc of tack and index, if there is an index.
 	st = iCurrentTime + r.ts;
 	et = st + r.td;
-
+	
 	tackLoc = getTackLoc(st);
 	if (et > iCurrentTime + CT_MAX_RESERVE_TIME){ // request r is out of range.
 		return false;

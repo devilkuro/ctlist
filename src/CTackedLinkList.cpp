@@ -384,6 +384,7 @@ int main() {
 						ci->SetTime(t);
 					}
 					file << "\t" << clock() - start;
+
 					delete ci;
 				}
 				file << endl;
