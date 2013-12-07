@@ -8,15 +8,16 @@
 #include "helper.h"
 #include "bplus.h"
 #include "ctlink.h"
+#include "CILink.h"
 #include "CArrayList.h"
 #include "Generator.h"
 
-#define CT_TEST_1
-#define CT_TEST_2
-#define CT_TEST_3
-#define CT_TEST_5
+//#define CT_TEST_1
+//#define CT_TEST_2
+//#define CT_TEST_3
+//#define CT_TEST_5
 #define CT_TEST_6
-#define CT_TEST_0
+//#define CT_TEST_0
 #define REQUEST_NUM 1000000
 template<class T> string m_toStr(T tmp) {
 	stringstream ss;
@@ -373,7 +374,17 @@ int main() {
 					delete ct;
 				}
 				{
-					// TODO add CILink if necessary
+					// CILink
+					CILink* ci = new CILink(i, 86400);
+					unsigned int t = 0;
+					clock_t start = clock();
+					for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+						ci->Insert(rq[k]);
+						t += interval[k];
+						ci->SetTime(t);
+					}
+					file << "\t" << clock() - start;
+					delete ci;
 				}
 				file << endl;
 				file.close();

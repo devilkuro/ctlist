@@ -29,7 +29,7 @@ struct CTTack{
 class CTLink{
 public:
 	CTLink();
-	CTLink(unsigned int tnum,unsigned int max);
+	CTLink(unsigned int tnum,unsigned int rmax);
 	~CTLink();
 public:
 	// add public member variable here

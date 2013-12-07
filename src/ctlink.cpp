@@ -9,9 +9,9 @@
 CTLink::CTLink(){
 	initCTLink(256,4096);
 }
-CTLink::CTLink(unsigned int tnum,unsigned int max) {
+CTLink::CTLink(unsigned int tnum,unsigned int rmax) {
 	// tnum means the CT_TACK_NUM; inum means the CT_INDEX_NUM; max means the CT_MAX_RESERVE_TIME.
-	initCTLink(tnum,max);
+	initCTLink(tnum,rmax);
 }
 
 CTLink::~CTLink() {
@@ -83,9 +83,8 @@ bool CTLink::accept(Request r, CTNode* next2st, CTNode* next2et) {
 	// to avoid point to NULL, the tack array size should be two more than the tack number. one to record the start resource, one to record end point.
 	// else if request r can not be accepted then return NULL.
 	unsigned int st, et; // st stands for the start time of this request, et stands for the end time.
-	CTNode* result = NULL;
 	CTNode* temp = NULL; // result is used to store the result node. temp is used as temp node to mark the search start.
-	unsigned int tackLoc, indexLoc; // used to store the loc of tack and index, if there is an index.
+	unsigned int tackLoc; // used to store the loc of tack and index, if there is an index.
 	st = iCurrentTime + r.ts;
 	et = st + r.td;
 
