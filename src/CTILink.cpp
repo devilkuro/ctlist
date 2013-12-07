@@ -18,11 +18,11 @@ CTILink::~CTILink() {
 	// get the first alive tack, the one before iCurrentTime
 	unsigned int aliveTackLoc = iCurrentTime / CTI_TACK_INTERVAL;
 	if(aliveTackLoc<1){
-		iCurrentTack = 0;
+		iCurrentTackLoc = 0;
 	}else{
-		iCurrentTack = (aliveTackLoc+CTI_TACK_ARRAY_SIZE - 1) % CTI_TACK_ARRAY_SIZE;
+		iCurrentTackLoc = (aliveTackLoc+CTI_TACK_ARRAY_SIZE - 1) % CTI_TACK_ARRAY_SIZE;
 	}
-	CTINode* ptrNode = tack[iCurrentTack].node->next;
+	CTINode* ptrNode = tack[iCurrentTackLoc].node->next;
 	while (ptrNode) {
 		delete (ptrNode->pre);
 		ptrNode = ptrNode->next;
@@ -38,7 +38,7 @@ CTILink::~CTILink() {
 
 bool CTILink::SetTime(unsigned int t) {
 	// maintain the current time and memory.
-	if(t==iCurrentTime){
+	if(t<=iCurrentTime){
 		return false;
 	}
 	iCurrentTime = t;
@@ -307,7 +307,7 @@ void CTILink::initCTILink(unsigned int tnum, unsigned int inum,
 	CTI_TACK_INTERVAL = (CTI_MAX_RESERVE_TIME + CTI_TACK_NUM - 1) / CTI_TACK_NUM; // to make sure that CT_TACK_INTERVAL * CT_TACK_NUM >= CT_MAX_RESERVE_TIME.
 	CTI_INDEX_INTERVAL = (CTI_TACK_INTERVAL + CTI_INDEX_NUM - 1) / CTI_INDEX_NUM;
 	iStartTack = 0;
-	iCurrentTack = 0;
+	iCurrentTackLoc = 0;
 	iCurrentTime = 0;
 	iMaxResource = MAX;
 	tack = new CTITack[CTI_TACK_ARRAY_SIZE];

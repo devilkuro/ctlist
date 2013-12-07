@@ -48,7 +48,7 @@ private:
 	unsigned int CTI_INDEX_INTERVAL; //decide the interval between two indexes.
 	CTITack* tack;
 	unsigned int iStartTack; // to mark the start tack.
-	unsigned int iCurrentTack; //pCurrentTack stands for the tack num that include current time. current ->[tack).
+	unsigned int iCurrentTackLoc; //pCurrentTack stands for the tack num that include current time. current ->[tack).
 	unsigned int iCurrentTime; //stands for current time.
 private:
 	void initCTILink(unsigned int tnum,unsigned int inum,unsigned int max);
