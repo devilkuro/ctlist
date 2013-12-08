@@ -11,6 +11,7 @@
 #include "CILink.h"
 #include "CArrayList.h"
 #include "Generator.h"
+#include "PreciseTimer.h"
 
 //#define CT_TEST_1
 //#define CT_TEST_2
@@ -350,7 +351,7 @@ int main() {
 			rq[i].td = H.U_Randint(60, 3600);
 			rq[i].ts = H.U_Randint(1, 86400 - rq[i].td);
 			rq[i].bw = H.U_Randint(6, 16);
-			interval[i] = H.U_Randint(10, 30);
+			interval[i] = H.U_Randint(1, 3);
 		}
 		ofstream file6("result6.log");
 		file6 << "tnum/cost\tCTLink\tCIlink" << endl;
