@@ -202,17 +202,6 @@ bool CILink::clearIndex(unsigned int n) {
 		startNode = startNode->next;
 		delete startNode->pre;
 	}
-//	CINode* lastNode = NULL;
-//	for(lastNode = head;lastNode->next!=NULL;lastNode = lastNode->next){
-//		// is lastNode is the last node before end time, break out.
-//		if(lastNode->next->t>=et){
-//			// delete the pre node link of the lastNode, since there is no pre node anymore.
-//			lastNode->pre = NULL;
-//			break;
-//		}
-//		CINode* temp = lastNode;
-//		delete temp;
-//	}
 	// at this step, the startNode is the last node before end time.
 	// Then if the head node is not the last node, replace the head with startNode and delete the original head node.
 	head = startNode;

@@ -139,16 +139,16 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* next) {
 	// else, insert new one, and return the new node.
 	if (pre->t == t) {
 		// add a judgment to avoid to treat normal node as temporary node.
-		if(theTack->num == 0){
-			theTack->num = 1;
+		if(theTack->flag == false){
+			theTack->flag = true;
 		}
 		result = pre;
 	} else {
-		if (theTack->num == 0) {
+		if (theTack->flag == false) {
 			// situation 1: this tack has just one temporary node. then replace this temporary node with target node.
 			result = pre;
 			result->t = t;
-			theTack->num++;
+			theTack->flag = true;
 		} else {
 			// situation 2: this tack already has at last one normal node. so insert node before loc node.
 			// and after insert operation, if theTack->node == loc , then change theTack->node to this new node.
@@ -162,7 +162,6 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* next) {
 			if (theTack->node == next) {
 				theTack->node = result;
 			}
-			theTack->num++;
 		} // end of insert new node.
 	} // end of insertion.
 
@@ -194,7 +193,7 @@ bool CTLink::clearTack(unsigned int n) {
 	// since the last tack is used to store the end point, it has only one node which stands for the end time.
 	// so just initialize this tack and link it to the the start node of previous tack.
 	// 1st. initial this tack.
-	tack[loc].num = 0;
+	tack[loc].flag = false;
 	tack[loc].node->rs = 0;
 	tack[loc].node->t = tack[pre].node->t + CT_TACK_INTERVAL;
 	// 2nd. link this tack to previous one.
@@ -232,7 +231,7 @@ void CTLink::initCTLink(unsigned int tnum, unsigned int max) {
 	// 1st. initialize all tacks and their nodes.
 	for (unsigned int i = 0; i < CT_TACK_ARRAY_SIZE; i++) {
 		//initial each tack.
-		tack[i].num = 0;
+		tack[i].flag = false;
 		tack[i].node = new CTNode();
 		tack[i].node->t = (((i + CT_TACK_ARRAY_SIZE
 				- (iStartTack % CT_TACK_ARRAY_SIZE)) % CT_TACK_ARRAY_SIZE)
@@ -246,7 +245,7 @@ void CTLink::initCTLink(unsigned int tnum, unsigned int max) {
 			tack[i].node->pre = NULL;
 			tack[i].node->next = tack[(i + 1) % CT_TACK_ARRAY_SIZE].node;
 			if (iStartTack == 0) {
-				tack[i].num = 1; // if the current tack is the 0 tack, make the start node at time 0 to a normal node. To fix the NULL point bug.
+				tack[i].flag = true; // if the current tack is the 0 tack, make the start node at time 0 to a normal node. To fix the NULL point bug.
 			}
 		} else if ((iStartTack + CT_TACK_ARRAY_SIZE - 1) % CT_TACK_ARRAY_SIZE
 				== i) {
