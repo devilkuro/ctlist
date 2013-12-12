@@ -19,7 +19,7 @@
 //#define CT_TEST_5
 #define CT_TEST_6
 //#define CT_TEST_0
-#define REQUEST_NUM 1000000
+#define REQUEST_NUM 100000
 template<class T> string m_toStr(T tmp) {
 	stringstream ss;
 	ss << tmp;
@@ -351,8 +351,9 @@ int main() {
 			rq[i].td = H.U_Randint(60, 3600);
 			rq[i].ts = H.U_Randint(1, 86400 - rq[i].td);
 			rq[i].bw = H.U_Randint(6, 16);
-			interval[i] = H.U_Randint(1, 3);
+			interval[i] = H.U_Randint(5, 15);
 		}
+		PreciseTimer pt;
 		ofstream file6("result6.log");
 		file6 << "tnum/cost\tCTLink\tCIlink" << endl;
 		file6.close();
@@ -365,27 +366,28 @@ int main() {
 					//CTLink
 					CTLink* ct = new CTLink(i, 86400);
 					unsigned int t = 0;
-					clock_t start = clock();
+					pt.start();
 					for (unsigned int k = 0; k < REQUEST_NUM; k++) {
 						ct->Insert(rq[k]);
 						t += interval[k];
 						ct->SetTime(t);
 					}
-					file << "\t" << clock() - start;
+					pt.end();
+					file << "\t" << pt.getMilliseconds() <<"\t"<<pt.getCounts()<<"\t"<<pt.getCountsEC();
 					delete ct;
 				}
 				{
 					// CILink
 					CILink* ci = new CILink(i, 86400);
 					unsigned int t = 0;
-					clock_t start = clock();
+					pt.start();
 					for (unsigned int k = 0; k < REQUEST_NUM; k++) {
 						ci->Insert(rq[k]);
 						t += interval[k];
 						ci->SetTime(t);
 					}
-					file << "\t" << clock() - start;
-
+					pt.end();
+					file << "\t" << pt.getMilliseconds() <<"\t"<<pt.getCounts()<<"\t"<<pt.getCountsEC();
 					delete ci;
 				}
 				file << endl;
@@ -398,13 +400,14 @@ int main() {
 			cout << "CArrayList:" << endl;
 			CArrayList* ca = new CArrayList(86400);
 			unsigned int t = 0;
-			clock_t start = clock();
+			pt.start();
 			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
 				ca->Insert(rq[k]);
 				t += interval[k];
 				ca->setTime(t);
 			}
-			file << "\t" << clock() - start;
+			pt.end();
+			file << "\t" << pt.getMilliseconds() <<"\t"<<pt.getCounts()<<"\t"<<pt.getCountsEC();
 			delete ca;
 			file << endl;
 			file.close();
@@ -415,7 +418,7 @@ int main() {
 			cout << "Bplus:" << endl;
 			Bplus* bp = new Bplus();
 			unsigned int t = 0;
-			clock_t start = clock();
+			pt.start();
 			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
 				rq[k].ts += t;
 				bp->Insert(rq[k]);
@@ -424,7 +427,8 @@ int main() {
 					bp->Delete(t);
 				}
 			}
-			file << "\t" << clock() - start;
+			pt.end();
+			file << "\t" << pt.getMilliseconds() <<"\t"<<pt.getCounts()<<"\t"<<pt.getCountsEC();
 			delete bp;
 			file << endl;
 			file.close();
