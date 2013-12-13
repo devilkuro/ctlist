@@ -245,7 +245,7 @@ int main() {
 	// experiment 3
 #ifdef CT_TEST_3
 	{
-		unsigned int REQUEST_NUM=65536;
+		unsigned int REQUEST_NUM=2000;
 		Request* rq = new Request[REQUEST_NUM];
 		// 1.initialize the log file
 		ofstream file3("result3.log");

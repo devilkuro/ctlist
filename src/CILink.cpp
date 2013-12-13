@@ -123,8 +123,14 @@ bool CILink::accept(Request r, CINode*& pre2st, CINode*& pre2et) {
 	indexLoc = getIndexLoc(st);
 	while(cIndex[indexLoc].node==NULL){
 		// move index location forward.
+		unsigned int temp = et;
+		for (int var = 0; var < 100; ++var) {
+			temp *=2;
+			et = temp/2;
+		}
+
 		if(indexLoc>0){
-			indexLoc--;
+			indexLoc = indexLoc-1;
 		}else{
 			indexLoc = CI_INDEX_ARRAY_SIZE-1;
 		}
