@@ -245,33 +245,36 @@ int main() {
 	// experiment 3
 #ifdef CT_TEST_3
 	{
-		unsigned int REQUEST_NUM=20000;
+		unsigned int REQUEST_NUM=65536;
 		Request* rq = new Request[REQUEST_NUM];
 		// 1.initialize the log file
 		ofstream file3("result3.log");
-		file3 << "ID\tus\tc";
+		file3 << "ID\tus\tc"<< endl;
 		file3.close();
 		unsigned int max_reserve_time = 65536;
 		srand(0);
 		for (unsigned int i = 0; i < REQUEST_NUM; i++) {
-			rq[i].td = 4;
+			rq[i].td = 2;
 			rq[i].bw = 1;
 			rq[i].ts = H.U_Randint(1, max_reserve_time - rq[i].td);
 		}
 		ofstream file("result3.log", ios::app);
-		for (int i = 256; i <= 4096; i*=2) {
+		for (int i = 512; i <= 8192; i*=2) {
 			{
 				//CTLink
 				CTLink* ct = new CTLink(i,max_reserve_time);
 				unsigned int t = 0;
 				unsigned int k = 0;
+				unsigned int x = 20;
 				pt.start();
 				for (; k < REQUEST_NUM; k++) {
 					ct->Insert(rq[k]);
 					t += 4;
 					ct->SetTime(t);
-					if((k+1)%20 == 0) {
+					x--;
+					if(x==0) {
 						pt.end();
+						x=20;
 						file << i << "\tCT" <<"\t" << pt.getMicroseconds() <<  "\t" << pt.getCounts() << endl;
 						pt.start();
 					}
@@ -284,13 +287,16 @@ int main() {
 				CILink* ci = new CILink(i,max_reserve_time);
 				unsigned int t = 0;
 				unsigned int k = 0;
+				unsigned int x = 20;
 				pt.start();
 				for (; k < REQUEST_NUM; k++) {
 					ci->Insert(rq[k]);
 					t += 4;
 					ci->SetTime(t);
-					if((k+1)%20 == 0) {
+					x--;
+					if(x==0) {
 						pt.end();
+						x=20;
 						file << i << "\tCI" << "\t" << pt.getMicroseconds() <<  "\t" << pt.getCounts() << endl;
 						pt.start();
 					}
