@@ -13,12 +13,12 @@
 #include "Generator.h"
 #include "PreciseTimer.h"
 
-#define CT_TEST_1
-#define CT_TEST_2
+//#define CT_TEST_1
+//#define CT_TEST_2
 #define CT_TEST_3
-#define CT_TEST_4
-#define CT_TEST_5
-#define CT_TEST_6
+//#define CT_TEST_4
+//#define CT_TEST_5
+//#define CT_TEST_6
 //#define CT_TEST_0
 
 template<class T> string m_toStr(T tmp) {
@@ -113,7 +113,7 @@ int main() {
 		unsigned int REQUEST_NUM=100000;
 		Request* rq = new Request[REQUEST_NUM];
 		ofstream file2("result1.log");
-		file2 << "TD/ITV\t4t\tc\t4i\tc\t8t\tc\t8i\tc\t16t\tc\t16i\tc\t32t\tc\t32i\tc" << endl;
+		file2 << "T/t\t4t\tc\t4i\tc\t8t\tc\t8i\tc\t16t\tc\t16i\tc\t32t\tc\t32i\tc" << endl;
 		file2.close();
 		unsigned int max_reserve_time = 131072;
 		srand(0);
@@ -245,7 +245,7 @@ int main() {
 	// experiment 3
 #ifdef CT_TEST_3
 	{
-		unsigned int REQUEST_NUM=100000;
+		unsigned int REQUEST_NUM=20000;
 		Request* rq = new Request[REQUEST_NUM];
 		// 1.initialize the log file
 		ofstream file3("result3.log");
@@ -264,22 +264,13 @@ int main() {
 				//CTLink
 				CTLink* ct = new CTLink(i,max_reserve_time);
 				unsigned int t = 0;
-				// 1st. first round to fill the CTLink
-				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
-					ct->Insert(rq[k]);
-					t += 4;
-					ct->SetTime(t);
-					// the CTLink is full.
-					if(t>max_reserve_time){
-						break;
-					}
-				}
+				unsigned int k = 0;
 				pt.start();
-				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+				for (; k < REQUEST_NUM; k++) {
 					ct->Insert(rq[k]);
 					t += 4;
 					ct->SetTime(t);
-					if((k+1)%100 == 0) {
+					if((k+1)%20 == 0) {
 						pt.end();
 						file << i << "\tCT" <<"\t" << pt.getMicroseconds() <<  "\t" << pt.getCounts() << endl;
 						pt.start();
@@ -292,12 +283,13 @@ int main() {
 				//CILink
 				CILink* ci = new CILink(i,max_reserve_time);
 				unsigned int t = 0;
+				unsigned int k = 0;
 				pt.start();
-				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+				for (; k < REQUEST_NUM; k++) {
 					ci->Insert(rq[k]);
 					t += 4;
 					ci->SetTime(t);
-					if((k+1)%100 == 0) {
+					if((k+1)%20 == 0) {
 						pt.end();
 						file << i << "\tCI" << "\t" << pt.getMicroseconds() <<  "\t" << pt.getCounts() << endl;
 						pt.start();
@@ -511,7 +503,7 @@ int main() {
 	{
 		unsigned int REQUEST_NUM=100000;
 		Request* rq = new Request[REQUEST_NUM];
-		unsigned int max_reserve_time = 864000;
+		unsigned int max_reserve_time = 86400;
 		srand(0);
 		unsigned int *interval = new unsigned int[REQUEST_NUM];
 		for (unsigned int i = 0; i < REQUEST_NUM; i++) {
@@ -524,7 +516,7 @@ int main() {
 		file6 << "tnum/cost\tCTLink\tCIlink" << endl;
 		file6.close();
 		{
-			for (unsigned int i = 4; i <= 2048; i *= 2) {
+			for (unsigned int i = 256; i <= 8192; i *= 2) {
 				ofstream file("result6.log", ios::app);
 				file << i;
 				cout << i << endl;

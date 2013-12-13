@@ -206,6 +206,31 @@ bool CILink::clearIndex(unsigned int n) {
 	// Then if the head node is not the last node, replace the head with startNode and delete the original head node.
 	head = startNode;
 
+	/*
+	 // a way to not change the head node.
+	 if (head->next != NULL) {
+		if (head->next->t<et) {
+			startNode = head->next;
+			while (startNode->next != NULL) {
+				if (startNode->next->t >= et) {
+					startNode->pre = NULL;
+					break;
+				}
+				startNode = startNode->next;
+				delete startNode->pre;
+			}
+			// at this step, the startNode is the last node before end time.
+			// Then if the head node is not the last node, replace the head with startNode and delete the original head node.
+			head->t = startNode->t;
+			head->rs = startNode->rs;
+			head->next = startNode->next;
+			if (startNode->next != NULL) {
+				startNode->next->pre = head;
+			}
+			delete startNode;
+		}
+	}
+	 */
 	// 3rd. link head to the next index
 	this->cIndex[next].node = head;
 	// return true. there is not any other result.
