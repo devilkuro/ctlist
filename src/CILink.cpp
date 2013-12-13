@@ -71,6 +71,7 @@ void CILink::initCILink(unsigned int inum, unsigned int rmax) {
 	iStartIndex = 0;
 	cIndex = new CIndex[CI_INDEX_ARRAY_SIZE];
 	for(unsigned int i = 0;i<CI_INDEX_ARRAY_SIZE;i++){
+		cIndex[i].flag = false;
 		cIndex[i].node = NULL;
 	}
 	// initialize the head node.
@@ -79,6 +80,7 @@ void CILink::initCILink(unsigned int inum, unsigned int rmax) {
 	head->rs = 0;
 	head->pre = NULL;
 	head->next = NULL;
+	cIndex[0].flag = true;
 	cIndex[0].node = head;
 }
 
@@ -102,6 +104,7 @@ CINode* CILink::insertNode(unsigned int t, CINode* pre) {
 		unsigned int resultIndexLoc = getIndexLoc(t);
 		unsigned int preIndexLoc = getIndexLoc(pre->t);
 		if(preIndexLoc!=resultIndexLoc){
+			cIndex[resultIndexLoc].flag = true;
 			cIndex[resultIndexLoc].node = result;
 		}
 	}
@@ -121,7 +124,7 @@ bool CILink::accept(Request r, CINode*& pre2st, CINode*& pre2et) {
 	}
 	// find the first usable index.
 	indexLoc = getIndexLoc(st);
-	while(cIndex[indexLoc].node==NULL){
+	while(cIndex[indexLoc].flag == false){
 		// move index location forward.
 		if(indexLoc>0){
 			indexLoc--;
@@ -188,6 +191,7 @@ bool CILink::clearIndex(unsigned int n) {
 	unsigned int loc = n%CI_INDEX_ARRAY_SIZE;
 	unsigned int next = (n+1)%CI_INDEX_ARRAY_SIZE;
 	// 1st. reset the index
+	this->cIndex[loc].flag = false;
 	this->cIndex[loc].node = NULL;
 	// 2nd. free the nodes during index n.
 	// get the end time
@@ -232,6 +236,7 @@ bool CILink::clearIndex(unsigned int n) {
 	}
 	 */
 	// 3rd. link head to the next index
+	this->cIndex[next].flag = true;
 	this->cIndex[next].node = head;
 	// return true. there is not any other result.
 	return true;
