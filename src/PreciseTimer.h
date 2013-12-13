@@ -24,10 +24,12 @@ public:
     void end();    // stop timing
 
     long getCounts();	//get the time interval in counts.
-    long getMilliseconds();  // get the time inteval length in milliseconds
-    long getCountsEC();	//get the time interval in counts.
-    long getMillisecondsEC();  // get the time inteval length in milliseconds
-    long getSeconds();       // get the time inteval length in seconds
+    long getMicroseconds();  // get the time interval length in microseconds
+    long getMilliseconds();  // get the time interval length in milliseconds
+    long getSeconds();       // get the time interval length in seconds
+    long getCountsEC();        //get the time interval in counts.
+    long getMicrosecondsEC();  // get the time interval length in microseconds
+    long getMillisecondsEC();  // get the time interval length in milliseconds
 
 protected:
     bool initialized; // if the hardware supports high-resolution performance counter
@@ -85,6 +87,20 @@ long PreciseTimer::getCountsEC() {
 	} else {
 		return 0;
 	}
+}
+
+inline long PreciseTimer::getMicroseconds() {
+    if(gotTime && frequency.QuadPart)
+        return (counter_end.QuadPart - counter_start.QuadPart) * 1000000 / frequency.QuadPart;
+    else
+        return 0;
+}
+
+inline long PreciseTimer::getMicrosecondsEC() {
+    if(gotTime && frequency.QuadPart)
+        return (counter_end.QuadPart - counter_start.QuadPart-ecTime) * 1000000 / frequency.QuadPart;
+    else
+        return 0;
 }
 
 long PreciseTimer::getMillisecondsEC()
