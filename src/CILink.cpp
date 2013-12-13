@@ -111,6 +111,7 @@ CINode* CILink::insertNode(unsigned int t, CINode* pre) {
 bool CILink::accept(Request r, CINode*& pre2st, CINode*& pre2et) {
 	unsigned int st, et;
 	CINode* temp;
+	unsigned int indexLoc;
 
 	st = iCurrentTime + r.ts;
 	et = st + r.td;
@@ -119,16 +120,17 @@ bool CILink::accept(Request r, CINode*& pre2st, CINode*& pre2et) {
 		return false;
 	}
 	// find the first usable index.
-	unsigned int iCurrentIndexNum = iCurrentTime/CI_INDEX_INTERVAL;
-	unsigned int startIndexNum = st/CI_INDEX_INTERVAL;
-	while(cIndex[startIndexNum%CI_INDEX_ARRAY_SIZE].node==NULL){
+	indexLoc = getIndexLoc(st);
+	while(cIndex[indexLoc].node==NULL){
 		// move index location forward.
-		if(startIndexNum>iCurrentIndexNum){
-			startIndexNum--;
+		if(indexLoc>0){
+			indexLoc--;
+		}else{
+			indexLoc = CI_INDEX_ARRAY_SIZE-1;
 		}
 	}
 	// find the last node which is not after the start time.
-	temp = cIndex[startIndexNum%CI_INDEX_ARRAY_SIZE].node;
+	temp = cIndex[indexLoc].node;
 	if(temp->t>st){
 		pre2st = temp->pre;
 	}else{
