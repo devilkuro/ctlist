@@ -16,7 +16,8 @@
 //#define CT_TEST_1
 //#define CT_TEST_2
 #define CT_TEST_3
-//#define CT_TEST_4
+//#define CT_TEST_3_B
+#define CT_TEST_4
 //#define CT_TEST_5
 //#define CT_TEST_6
 //#define CT_TEST_0
@@ -245,7 +246,80 @@ int main() {
 	// experiment 3
 #ifdef CT_TEST_3
 	{
-		unsigned int REQUEST_NUM=2000;
+		unsigned int REQUEST_NUM=100000;
+		Request* rq = new Request[REQUEST_NUM];
+		// 1.initialize the log file
+		ofstream file4("result3.log");
+		file4 << "";
+		file4.close();
+		unsigned int max_reserve_time = 32768;
+		srand(0);
+		for (unsigned int i = 0; i < REQUEST_NUM; i++) {
+			rq[i].ts = H.U_Randint(1, max_reserve_time - 4);
+			rq[i].td = 4;
+			rq[i].bw = 1;
+		}
+		ofstream file("result3.log", ios::app);
+		for (int i = 4; i <= 4096; i+=4) {
+			{
+				//CTLink
+				CTLink* ct = new CTLink(max_reserve_time/i,max_reserve_time);
+				unsigned int t = 0;
+				// 1st. first round to fill the CTLink
+				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+					ct->Insert(rq[k]);
+					t += 4;
+					ct->SetTime(t);
+					// the CTLink is full.
+					if(t>max_reserve_time){
+						break;
+					}
+				}
+				pt.start();
+				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+					ct->Insert(rq[k]);
+					t += 4;
+					ct->SetTime(t);
+				}
+				pt.end();
+				file << i << "\tCT" <<"\t" << pt.getMicroseconds() <<  "\t" << pt.getCounts() << endl;
+				delete ct;
+			}
+		}
+
+		for (int i = 4; i <= 4096; i+=4) {
+			{
+				//CILink
+				CILink* ci = new CILink(max_reserve_time/i,max_reserve_time);
+				unsigned int t = 0;
+				// 1st. first round to fill the CTLink
+				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+					ci->Insert(rq[k]);
+					t += 4;
+					ci->SetTime(t);
+					// the CTLink is full.
+					if(t>max_reserve_time){
+						break;
+					}
+				}
+				pt.start();
+				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+					ci->Insert(rq[k]);
+					t += 4;
+					ci->SetTime(t);
+				}
+				pt.end();
+				file << i << "\tCI" << "\t" << pt.getMicroseconds() <<  "\t" << pt.getCounts() << endl;
+				delete ci;
+			}
+		}
+		file.close();
+	}
+#endif
+	// experiment 3 b
+#ifdef CT_TEST_3_B
+	{
+		unsigned int REQUEST_NUM=5000;
 		Request* rq = new Request[REQUEST_NUM];
 		// 1.initialize the log file
 		ofstream file3("result3.log");
@@ -260,49 +334,67 @@ int main() {
 		}
 		ofstream file("result3.log", ios::app);
 		for (int i = 512; i <= 8192; i*=2) {
-			{
-				//CTLink
-				CTLink* ct = new CTLink(i,max_reserve_time);
-				unsigned int t = 0;
-				unsigned int k = 0;
-				unsigned int x = 20;
-				pt.start();
-				for (; k < REQUEST_NUM; k++) {
-					ct->Insert(rq[k]);
-					t += 4;
-					ct->SetTime(t);
-					x--;
-					if(x==0) {
-						pt.end();
-						x=20;
-						file << i << "\tCT" <<"\t" << pt.getMicroseconds() <<  "\t" << pt.getCounts() << endl;
-						pt.start();
-					}
-				}
-				pt.end();
-				delete ct;
-			}
+			cout<< i<<endl;
 			{
 				//CILink
-				CILink* ci = new CILink(i,max_reserve_time);
+				CTLink* ct[1000];
+				for (int var = 0; var < 1000; ++var) {
+					ct[var] = new CTLink(i, max_reserve_time);
+				}
 				unsigned int t = 0;
 				unsigned int k = 0;
 				unsigned int x = 20;
 				pt.start();
 				for (; k < REQUEST_NUM; k++) {
-					ci->Insert(rq[k]);
-					t += 4;
-					ci->SetTime(t);
 					x--;
-					if(x==0) {
+					for (int var = 0; var < 1000; ++var) {
+						ct[var]->Insert(rq[k]);
+						t += 4;
+						ct[var]->SetTime(t);
+					}
+					if(x==0){
 						pt.end();
 						x=20;
-						file << i << "\tCI" << "\t" << pt.getMicroseconds() <<  "\t" << pt.getCounts() << endl;
+						file << i << "\tCT" << "\t" << pt.getMicroseconds()
+								<< "\t" << pt.getCounts() << endl;
 						pt.start();
 					}
 				}
 				pt.end();
-				delete ci;
+				for (int var = 0; var < 1000; ++var) {
+					delete ct[var];
+				}
+			}
+
+			{
+				//CILink
+				CILink* ci[1000];
+				for (int var = 0; var < 1000; ++var) {
+					ci[var] = new CILink(i, max_reserve_time);
+				}
+				unsigned int t = 0;
+				unsigned int k = 0;
+				unsigned int x = 20;
+				pt.start();
+				for (; k < REQUEST_NUM; k++) {
+					x--;
+					for (int var = 0; var < 1000; ++var) {
+						ci[var]->Insert(rq[k]);
+						t += 4;
+						ci[var]->SetTime(t);
+					}
+					if (x == 0) {
+						pt.end();
+						x = 20;
+						file << i << "\tCI" << "\t" << pt.getMicroseconds()
+								<< "\t" << pt.getCounts() << endl;
+						pt.start();
+					}
+				}
+				pt.end();
+				for (int var = 0; var < 1000; ++var) {
+					delete ci[var];
+				}
 			}
 		}
 		file.close();
