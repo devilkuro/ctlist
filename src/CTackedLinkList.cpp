@@ -564,13 +564,13 @@ int main() {
 			file5 << "";
 			file5.close();
 			//CTLink
-			ofstream file("result5.log", ios::app);
+			ofstream file("result5-CT.log", ios::app);
 			file << "CTLink" << endl;
 			file << "TIME\t" << "NUM\t" << "DIFF" << endl;
 			file.close();
 
 			ControlStack n;
-			n.logName = "result5.log";
+			n.logName = "result5-CT.log";
 			n.t = 0;
 			n.n = 0;
 			n.stopFlag = false;
@@ -601,13 +601,13 @@ int main() {
 		file5 << "";
 		file5.close();
 			//CTLink
-			ofstream file("result5.log", ios::app);
+			ofstream file("result5-CI.log", ios::app);
 			file << "CILink" << endl;
 			file << "TIME\t" << "NUM\t" << "DIFF" << endl;
 			file.close();
 
 			ControlStack n;
-			n.logName = "result5.log";
+			n.logName = "result5-CI.log";
 			n.t = 0;
 			n.n = 0;
 			n.stopFlag = false;
@@ -638,13 +638,13 @@ int main() {
 		file5 << "";
 		file5.close();
 			//CArrayList
-			ofstream file("result5.log", ios::app);
+			ofstream file("result5-CA.log", ios::app);
 			file << "CArrayList" << endl;
 			file << "TIME\t" << "NUM\t" << "DIFF" << endl;
 			file.close();
 
 			ControlStack n;
-			n.logName = "result5.log";
+			n.logName = "result5-CA.log";
 			n.t = 0;
 			n.n = 0;
 			n.stopFlag = false;
@@ -675,13 +675,13 @@ int main() {
 		file5 << "";
 		file5.close();
 			//Bplus
-			ofstream file("result5.log", ios::app);
+			ofstream file("result5-BP.log", ios::app);
 			file << "Bplus" << endl;
 			file << "TIME\t" << "NUM\t" << "DIFF" << endl;
 			file.close();
 
 			ControlStack n;
-			n.logName = "result5.log";
+			n.logName = "result5-BP.log";
 			n.t = 0;
 			n.n = 0;
 			n.stopFlag = false;
