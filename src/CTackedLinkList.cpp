@@ -17,7 +17,7 @@
 //#define CT_TEST_2
 #define CT_TEST_3
 //#define CT_TEST_3_B
-#define CT_TEST_4
+//#define CT_TEST_4
 //#define CT_TEST_5
 //#define CT_TEST_6
 //#define CT_TEST_0
@@ -245,6 +245,80 @@ int main() {
 
 	// experiment 3
 #ifdef CT_TEST_3
+	{
+		unsigned int REQUEST_NUM = 100000;
+		Request* rq = new Request[REQUEST_NUM];
+		// 1.initialize the log file
+		ofstream file4("result3.log");
+		file4 << "";
+		file4.close();
+		unsigned int max_reserve_time = 1048576;
+		srand(0);
+		for (unsigned int i = 0; i < REQUEST_NUM; i++) {
+			rq[i].td = 4;
+			rq[i].bw = 1;
+			rq[i].ts = H.U_Randint(1, max_reserve_time - rq[i].td);
+		}
+		ofstream file("result3.log", ios::app);
+		for (int i = 16; i <= 8192; i += 16) {
+			cout<< i <<endl;
+			{
+
+				//CTLink
+				CTLink* ct[1000];
+				for (int var = 0; var < 1000; ++var) {
+					ct[var] = new CTLink(i, max_reserve_time);
+				}
+				unsigned int t = 0;
+				unsigned int j = 0;
+				unsigned int k = 0;
+				pt.start();
+				for (int var = 0; var < 1000; ++var) {
+					t = 0;
+					for (j = 0; j < 20; j++, k++) {
+						ct[var]->Insert(rq[k]);
+						t += 4;
+						ct[var]->SetTime(t);
+					}
+				}
+				pt.end();
+				file << i << "\t" << pt.getMicroseconds() << "\t"
+						<< pt.getCounts();
+				for (int var = 0; var < 1000; ++var) {
+					delete ct[var];
+				}
+			}
+			{
+				//CILink
+				CILink* ci[1000];
+				for (int var = 0; var < 1000; ++var) {
+					ci[var] = new CILink(i, max_reserve_time);
+				}
+				unsigned int t = 0;
+				unsigned int j = 0;
+				unsigned int k = 0;
+				pt.start();
+				for (int var = 0; var < 1000; ++var) {
+					t = 0;
+					for (j = 0; j < 20; j++, k++) {
+						ci[var]->Insert(rq[k]);
+						t += 4;
+						ci[var]->SetTime(t);
+					}
+				}
+				pt.end();
+				file << "\t" << pt.getMicroseconds() << "\t" << pt.getCounts()
+						<< endl;
+				for (int var = 0; var < 1000; ++var) {
+					delete ci[var];
+				}
+			}
+		}
+		file.close();
+	}
+#endif
+	// experiment 3c
+#ifdef CT_TEST_3_C
 	{
 		unsigned int REQUEST_NUM=100000;
 		Request* rq = new Request[REQUEST_NUM];

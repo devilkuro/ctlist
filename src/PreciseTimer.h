@@ -98,7 +98,7 @@ inline long PreciseTimer::getMicroseconds() {
 
 inline long PreciseTimer::getMicrosecondsEC() {
     if(gotTime && frequency.QuadPart)
-        return (counter_end.QuadPart - counter_start.QuadPart-ecTime) * 1000000 / frequency.QuadPart;
+        return (counter_end.QuadPart - counter_start.QuadPart-ecTime)  / (frequency.QuadPart / 1000000);
     else
         return 0;
 }
