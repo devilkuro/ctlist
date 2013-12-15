@@ -15,10 +15,11 @@
 
 //#define CT_TEST_1
 //#define CT_TEST_2
-#define CT_TEST_3
+//#define CT_TEST_3
 //#define CT_TEST_3_B
+//#define CT_TEST_3_C
 //#define CT_TEST_4
-//#define CT_TEST_5
+#define CT_TEST_5
 //#define CT_TEST_6
 //#define CT_TEST_0
 
@@ -552,16 +553,16 @@ int main() {
 		unsigned int REQUEST_NUM=100000;
 		Request* rq = new Request[REQUEST_NUM];
 		// initialize the log file.
-		unsigned int max_reserve_time = 864000;
-		ofstream file5("result5.log");
-		file5 << "";
-		file5.close();
+		unsigned int max_reserve_time = 432000;
 		for (unsigned int i = 0; i < REQUEST_NUM; i++) {
-			rq[i].td = H.U_Randint(60, 3600);
-			rq[i].ts = H.U_Randint(1, max_reserve_time - rq[i].td);
+			rq[i].td = H.U_Randint(30, 1800);
 			rq[i].bw = 1;
+			rq[i].ts = H.U_Randint(1, max_reserve_time - rq[i].td);
 		}
 		{
+			ofstream file5("result5-CT.log");
+			file5 << "";
+			file5.close();
 			//CTLink
 			ofstream file("result5.log", ios::app);
 			file << "CTLink" << endl;
@@ -573,7 +574,7 @@ int main() {
 			n.t = 0;
 			n.n = 0;
 			n.stopFlag = false;
-			CTLink* ct = new CTLink(160000,max_reserve_time);
+			CTLink* ct = new CTLink(108000,max_reserve_time);
 			ct->iMaxResource = UINT_MAX;
 			HANDLE hThread2 = CreateThread(NULL, 0, RecordFor5, &n, 0,
 			NULL);
@@ -581,7 +582,7 @@ int main() {
 				ct->Insert(rq[k]);
 				ct->SetTime(n.t/10);
 				n.n++;
-				if (n.t < 200){
+				if (n.t < 2000){
 					if (k == REQUEST_NUM - 1) {
 						k = 0;
 					}
@@ -596,6 +597,46 @@ int main() {
 		// sleep 200ms to wait the RecordThread to stop
 		Sleep(200);
 		{
+		ofstream file5("result5-CI.log");
+		file5 << "";
+		file5.close();
+			//CTLink
+			ofstream file("result5.log", ios::app);
+			file << "CILink" << endl;
+			file << "TIME\t" << "NUM\t" << "DIFF" << endl;
+			file.close();
+
+			ControlStack n;
+			n.logName = "result5.log";
+			n.t = 0;
+			n.n = 0;
+			n.stopFlag = false;
+			CILink* ci = new CILink(108000,max_reserve_time);
+			ci->iMaxResource = UINT_MAX;
+			HANDLE hThread2 = CreateThread(NULL, 0, RecordFor5, &n, 0,
+			NULL);
+			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+				ci->Insert(rq[k]);
+				ci->SetTime(n.t/10);
+				n.n++;
+				if (n.t < 2000){
+					if (k == REQUEST_NUM - 1) {
+						k = 0;
+					}
+				} else {
+					n.stopFlag = true;
+					break;
+				}
+			}
+			CloseHandle(hThread2);
+			delete ci;
+		}
+		// sleep 200ms to wait the RecordThread to stop
+		Sleep(200);
+		{
+		ofstream file5("result5-CA.log");
+		file5 << "";
+		file5.close();
 			//CArrayList
 			ofstream file("result5.log", ios::app);
 			file << "CArrayList" << endl;
@@ -615,7 +656,7 @@ int main() {
 				ca->Insert(rq[k]);
 				ca->setTime(n.t/10);
 				n.n++;
-				if (n.t < 200){
+				if (n.t < 2000){
 					if (k == REQUEST_NUM - 1) {
 						k = 0;
 					}
@@ -630,6 +671,9 @@ int main() {
 		// sleep 200ms to wait the RecordThread to stop
 		Sleep(200);
 		{
+		ofstream file5("result5-BP.log");
+		file5 << "";
+		file5.close();
 			//Bplus
 			ofstream file("result5.log", ios::app);
 			file << "Bplus" << endl;
@@ -654,7 +698,7 @@ int main() {
 				bp->Insert(tmpR);
 				bp->Delete(n.t/10);
 				n.n++;
-				if (n.t < 200){
+				if (n.t < 2000){
 					if (k == REQUEST_NUM - 1) {
 						k = 0;
 					}
