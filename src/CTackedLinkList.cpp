@@ -252,12 +252,12 @@ int main() {
 		ofstream file4("result3.log");
 		file4 << "";
 		file4.close();
-		unsigned int max_reserve_time = 32768;
+		unsigned int max_reserve_time = 1048576;
 		srand(0);
 		for (unsigned int i = 0; i < REQUEST_NUM; i++) {
-			rq[i].ts = H.U_Randint(1, max_reserve_time - 4);
-			rq[i].td = 4;
+			rq[i].td = 128;
 			rq[i].bw = 1;
+			rq[i].ts = H.U_Randint(1, max_reserve_time - rq[i].td);
 		}
 		ofstream file("result3.log", ios::app);
 		for (int i = 4; i <= 4096; i+=4) {
@@ -266,23 +266,23 @@ int main() {
 				CTLink* ct = new CTLink(max_reserve_time/i,max_reserve_time);
 				unsigned int t = 0;
 				// 1st. first round to fill the CTLink
-				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
-					ct->Insert(rq[k]);
-					t += 4;
-					ct->SetTime(t);
-					// the CTLink is full.
-					if(t>max_reserve_time){
-						break;
-					}
-				}
+//				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+//					ct->Insert(rq[k]);
+//					t += 128;
+//					ct->SetTime(t);
+//					// the CTLink is full.
+//					if(t>max_reserve_time){
+//						break;
+//					}
+//				}
 				pt.start();
 				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
 					ct->Insert(rq[k]);
-					t += 4;
+					t += 128;
 					ct->SetTime(t);
 				}
 				pt.end();
-				file << i << "\tCT" <<"\t" << pt.getMicroseconds() <<  "\t" << pt.getCounts() << endl;
+				file << i << "\tCT" <<"\t" << pt.getMilliseconds() <<  "\t" << pt.getCounts() << endl;
 				delete ct;
 			}
 		}
@@ -293,23 +293,23 @@ int main() {
 				CILink* ci = new CILink(max_reserve_time/i,max_reserve_time);
 				unsigned int t = 0;
 				// 1st. first round to fill the CTLink
-				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
-					ci->Insert(rq[k]);
-					t += 4;
-					ci->SetTime(t);
-					// the CTLink is full.
-					if(t>max_reserve_time){
-						break;
-					}
-				}
+//				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+//					ci->Insert(rq[k]);
+//					t += 128;
+//					ci->SetTime(t);
+//					// the CTLink is full.
+//					if(t>max_reserve_time){
+//						break;
+//					}
+//				}
 				pt.start();
 				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
 					ci->Insert(rq[k]);
-					t += 4;
+					t += 128;
 					ci->SetTime(t);
 				}
 				pt.end();
-				file << i << "\tCI" << "\t" << pt.getMicroseconds() <<  "\t" << pt.getCounts() << endl;
+				file << i << "\tCI" << "\t" << pt.getMilliseconds() <<  "\t" << pt.getCounts() << endl;
 				delete ci;
 			}
 		}
@@ -440,7 +440,7 @@ int main() {
 					ct->SetTime(t);
 				}
 				pt.end();
-				file << i << "\tCT" <<"\t" << pt.getMicroseconds() <<  "\t" << pt.getCounts() << endl;
+				file << i << "\tCT" <<"\t" << pt.getMilliseconds() <<  "\t" << pt.getCounts() << endl;
 				delete ct;
 			}
 			{
@@ -464,7 +464,7 @@ int main() {
 					ci->SetTime(t);
 				}
 				pt.end();
-				file << i << "\tCI" << "\t" << pt.getMicroseconds() <<  "\t" << pt.getCounts() << endl;
+				file << i << "\tCI" << "\t" << pt.getMilliseconds() <<  "\t" << pt.getCounts() << endl;
 				delete ci;
 			}
 		}
