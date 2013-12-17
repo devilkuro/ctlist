@@ -31,6 +31,7 @@ template<class T> string m_toStr(T tmp) {
 
 struct ControlStack {
 	// synchronizer between main thread and record thread.
+	unsigned int multiple;
 	unsigned int n; // the num of requests processed
 	unsigned int t; // the seconds passed
 	string logName; // the name of the log file
@@ -40,6 +41,7 @@ struct ControlStack {
 DWORD WINAPI RecordFor5(LPVOID tmp) {
 	ControlStack* p = (ControlStack*) tmp;
 	unsigned int pre_num=0;
+	unsigned int interval = 1000/p->multiple;
 	while (1) {
 		if (p->stopFlag) {
 			break;
@@ -49,7 +51,7 @@ DWORD WINAPI RecordFor5(LPVOID tmp) {
 		file << p->t << "\t" << p->n << "\t" << p->n - pre_num << endl;
 		pre_num = p->n;
 		file.close();
-		Sleep(100); //ms
+		Sleep(interval); //ms
 	}
 	return 0;
 }
@@ -552,10 +554,16 @@ int main() {
 	{
 		unsigned int REQUEST_NUM=100000;
 		Request* rq = new Request[REQUEST_NUM];
-		// initialize the log file.
 		unsigned int max_reserve_time = 432000;
+		unsigned int index_num = 108000;
+		unsigned int td_down = 30;
+		unsigned int td_up = 1800;
+		unsigned int multiple = 5;
+		unsigned int record_num = 2000;
+
+		// initialize the log file.
 		for (unsigned int i = 0; i < REQUEST_NUM; i++) {
-			rq[i].td = H.U_Randint(30, 1800);
+			rq[i].td = H.U_Randint(td_down, td_up);
 			rq[i].bw = 1;
 			rq[i].ts = H.U_Randint(1, max_reserve_time - rq[i].td);
 		}
@@ -571,10 +579,11 @@ int main() {
 
 			ControlStack n;
 			n.logName = "result5-CT.log";
+			n.multiple = multiple;
 			n.t = 0;
 			n.n = 0;
 			n.stopFlag = false;
-			CTLink* ct = new CTLink(108000,max_reserve_time);
+			CTLink* ct = new CTLink(index_num,max_reserve_time);
 			ct->iMaxResource = UINT_MAX;
 			HANDLE hThread2 = CreateThread(NULL, 0, RecordFor5, &n, 0,
 			NULL);
@@ -582,7 +591,7 @@ int main() {
 				ct->Insert(rq[k]);
 				ct->SetTime(n.t/10);
 				n.n++;
-				if (n.t < 2000){
+				if (n.t < record_num){
 					if (k == REQUEST_NUM - 1) {
 						k = 0;
 					}
@@ -595,7 +604,7 @@ int main() {
 			delete ct;
 		}
 		// sleep 200ms to wait the RecordThread to stop
-		Sleep(200);
+		Sleep(2000/multiple);
 		{
 		ofstream file5("result5-CI.log");
 		file5 << "";
@@ -608,10 +617,11 @@ int main() {
 
 			ControlStack n;
 			n.logName = "result5-CI.log";
+			n.multiple = multiple;
 			n.t = 0;
 			n.n = 0;
 			n.stopFlag = false;
-			CILink* ci = new CILink(108000,max_reserve_time);
+			CILink* ci = new CILink(index_num,max_reserve_time);
 			ci->iMaxResource = UINT_MAX;
 			HANDLE hThread2 = CreateThread(NULL, 0, RecordFor5, &n, 0,
 			NULL);
@@ -619,7 +629,7 @@ int main() {
 				ci->Insert(rq[k]);
 				ci->SetTime(n.t/10);
 				n.n++;
-				if (n.t < 2000){
+				if (n.t < record_num){
 					if (k == REQUEST_NUM - 1) {
 						k = 0;
 					}
@@ -632,7 +642,7 @@ int main() {
 			delete ci;
 		}
 		// sleep 200ms to wait the RecordThread to stop
-		Sleep(200);
+		Sleep(2000/multiple);
 		{
 		ofstream file5("result5-CA.log");
 		file5 << "";
@@ -645,6 +655,7 @@ int main() {
 
 			ControlStack n;
 			n.logName = "result5-CA.log";
+			n.multiple = multiple;
 			n.t = 0;
 			n.n = 0;
 			n.stopFlag = false;
@@ -656,7 +667,7 @@ int main() {
 				ca->Insert(rq[k]);
 				ca->setTime(n.t/10);
 				n.n++;
-				if (n.t < 2000){
+				if (n.t < record_num){
 					if (k == REQUEST_NUM - 1) {
 						k = 0;
 					}
@@ -669,7 +680,7 @@ int main() {
 			delete ca;
 		}
 		// sleep 200ms to wait the RecordThread to stop
-		Sleep(200);
+		Sleep(2000/multiple);
 		{
 		ofstream file5("result5-BP.log");
 		file5 << "";
@@ -682,6 +693,7 @@ int main() {
 
 			ControlStack n;
 			n.logName = "result5-BP.log";
+			n.multiple = multiple;
 			n.t = 0;
 			n.n = 0;
 			n.stopFlag = false;
@@ -698,7 +710,7 @@ int main() {
 				bp->Insert(tmpR);
 				bp->Delete(n.t/10);
 				n.n++;
-				if (n.t < 2000){
+				if (n.t < record_num){
 					if (k == REQUEST_NUM - 1) {
 						k = 0;
 					}
@@ -710,6 +722,8 @@ int main() {
 			CloseHandle(hThread2);
 			delete bp;
 		}
+		// sleep 200ms to wait the RecordThread to stop
+		Sleep(2000/multiple);
 	}
 #endif
 
