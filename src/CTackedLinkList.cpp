@@ -14,11 +14,13 @@
 #include "PreciseTimer.h"
 
 //#define CT_TEST_1
+//#define CT_TEST_1_Z
 //#define CT_TEST_2
 //#define CT_TEST_3
 //#define CT_TEST_3_B
 //#define CT_TEST_3_C
 //#define CT_TEST_4
+//#define CT_TEST_4_F
 #define CT_TEST_5
 //#define CT_TEST_6
 //#define CT_TEST_0
@@ -110,7 +112,60 @@ int main() {
 		}
 	}
 #endif
-
+	// experiment 1z
+	#ifdef CT_TEST_1_Z
+		{
+			unsigned int REQUEST_NUM=100000;
+			Request* rq = new Request[REQUEST_NUM];
+			ofstream file2("result1z.log");
+			file2 << "T/t\t64t\t126t\t256t\t512t" << endl;
+			file2.close();
+			unsigned int max_reserve_time = 131072;
+			srand(0);
+			for (unsigned int j = 0; j < REQUEST_NUM; j++) {
+				rq[j].td = 1;
+				rq[j].bw = 1;
+				rq[j].ts = H.U_Randint(1, max_reserve_time - rq[j].td);
+			}
+			// i stands for T in cost formula
+			for (unsigned int i = 4; i <= 1024; i += 4) {
+				ofstream file("result1z.log", ios::app);
+				file << i;
+				cout << i << endl;
+				// j stands for t in cost formula
+				for (unsigned int j = 64; j <= 512; j *= 2) {
+					{
+						//CTLink
+						CTLink* ct = new CTLink(max_reserve_time / i,
+								max_reserve_time);
+						unsigned int t = 0;
+						// 1st. first round to fill the CTLink
+						for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+							ct->Insert(rq[k]);
+							t += j;
+							ct->SetTime(t);
+							// the CTLink is full.
+							if (t > max_reserve_time) {
+								break;
+							}
+						}
+						// 2nd. second round to test the performance
+						pt.start();
+						for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+							ct->Insert(rq[k]);
+							t += j;
+							ct->SetTime(t);
+						}
+						pt.end();
+						file << "\t" << pt.getMicroseconds() ;
+						delete ct;
+					}
+				}
+				file << endl;
+				file.close();
+			}
+		}
+	#endif
 	// experiment 1
 #ifdef CT_TEST_1
 	{
@@ -548,11 +603,80 @@ int main() {
 		file.close();
 	}
 #endif
-
+#ifdef CT_TEST_4_F
+	{
+		unsigned int REQUEST_NUM = 100000;
+		Request* rq = new Request[REQUEST_NUM];
+		// 1.initialize the log file
+		ofstream file4("result4f.log");
+		file4 << "";
+		file4.close();
+		unsigned int max_reserve_time = 1048576;
+		srand(0);
+		for (unsigned int i = 0; i < REQUEST_NUM; i++) {
+			rq[i].td = 4;
+			rq[i].bw = 1;
+			rq[i].ts = H.U_Randint(1, max_reserve_time - rq[i].td);
+		}
+		ofstream file("result4f.log", ios::app);
+		for (int i = 16; i <= 8192; i += 16) {
+			{
+				//CTLink
+				CTLink* ct = new CTLink(i,max_reserve_time);
+				unsigned int t = 0;
+				// 1st. first round to fill the CTLink
+				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+					ct->Insert(rq[k]);
+					t += 4;
+					ct->SetTime(t);
+					// the CTLink is full.
+					if(t>max_reserve_time) {
+						break;
+					}
+				}
+				pt.start();
+				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+					ct->Insert(rq[k]);
+					t += 4;
+					ct->SetTime(t);
+				}
+				pt.end();
+				file << i << "\t" << pt.getMilliseconds() ;
+				delete ct;
+			}
+			{
+				//CILink
+				CILink* ci = new CILink(i,max_reserve_time);
+				unsigned int t = 0;
+				// 1st. first round to fill the CTLink
+				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+					ci->Insert(rq[k]);
+					t += 4;
+					ci->SetTime(t);
+					// the CTLink is full.
+					if(t>max_reserve_time) {
+						break;
+					}
+				}
+				pt.start();
+				for (unsigned int k = 0; k < REQUEST_NUM; k++) {
+					ci->Insert(rq[k]);
+					t += 4;
+					ci->SetTime(t);
+				}
+				pt.end();
+				file <<"\t" << pt.getMilliseconds() ;
+				delete ci;
+			}
+			file<< endl;
+		}
+		file.close();
+	}
+#endif
 	// experiment 5
 #ifdef CT_TEST_5
 	{
-		unsigned int REQUEST_NUM=100000;
+		unsigned int REQUEST_NUM=1000000;
 		Request* rq = new Request[REQUEST_NUM];
 		unsigned int max_reserve_time = 432000;
 		unsigned int index_num = 108000;
@@ -589,7 +713,7 @@ int main() {
 			NULL);
 			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
 				ct->Insert(rq[k]);
-				ct->SetTime(n.t/10);
+				ct->SetTime(n.t/multiple);
 				n.n++;
 				if (n.t < record_num){
 					if (k == REQUEST_NUM - 1) {
@@ -627,7 +751,7 @@ int main() {
 			NULL);
 			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
 				ci->Insert(rq[k]);
-				ci->SetTime(n.t/10);
+				ci->SetTime(n.t/multiple);
 				n.n++;
 				if (n.t < record_num){
 					if (k == REQUEST_NUM - 1) {
@@ -665,7 +789,7 @@ int main() {
 			NULL);
 			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
 				ca->Insert(rq[k]);
-				ca->setTime(n.t/10);
+				ca->setTime(n.t/multiple);
 				n.n++;
 				if (n.t < record_num){
 					if (k == REQUEST_NUM - 1) {
@@ -706,9 +830,9 @@ int main() {
 			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
 				tmpR.bw = rq[k].bw;
 				tmpR.td = rq[k].td;
-				tmpR.ts = rq[k].ts+n.t/10;
+				tmpR.ts = rq[k].ts+n.t/multiple;
 				bp->Insert(tmpR);
-				bp->Delete(n.t/10);
+				bp->Delete(n.t/multiple);
 				n.n++;
 				if (n.t < record_num){
 					if (k == REQUEST_NUM - 1) {
