@@ -12,6 +12,7 @@
 #include "CArrayList.h"
 #include "Generator.h"
 #include "PreciseTimer.h"
+#include "ASMTimer.h"
 
 //#define CT_TEST_1
 //#define CT_TEST_1_Z
@@ -21,9 +22,9 @@
 //#define CT_TEST_3_C
 //#define CT_TEST_4
 //#define CT_TEST_4_F
-#define CT_TEST_5
+//#define CT_TEST_5
 //#define CT_TEST_6
-//#define CT_TEST_0
+#define CT_TEST_0
 
 template<class T> string m_toStr(T tmp) {
 	stringstream ss;
@@ -65,51 +66,14 @@ int main() {
 	// for test
 #ifdef CT_TEST_0
 	{
-		// 1.1st generate the request set.
-		srand(0);
-		for (unsigned int i = 0; i < REQUEST_NUM; i++) {
-			rq[i].ts = H.U_Randint(1, 2000 - 4);
-			rq[i].td = 4;
-			rq[i].bw = 1;
-		}
-		{
-			//CTLink
-			CTLink* ct = new CTLink(200,2000);
-			unsigned int t = 0;
-			cout << "CT:" << endl;
-			pt.start();
-			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
-				ct->Insert(rq[k]);
-				t += 4;
-				ct->SetTime(t);
-				if((k+1)%100 == 0) {
-					pt.end();
-					cout<< pt.getMicroseconds() << endl;
-					pt.start();
-				}
-			}
-			pt.end();
-			delete ct;
-		}
-		{
-			//CILink
-			CILink* ci = new CILink(200,2000);
-			unsigned int t = 0;
-			cout << "CI:" << endl;
-			pt.start();
-			for (unsigned int k = 0; k < REQUEST_NUM; k++) {
-				ci->Insert(rq[k]);
-				t += 4;
-				ci->SetTime(t);
-				if((k+1)%100 == 0) {
-					pt.end();
-					cout<< pt.getMicroseconds() << endl;
-					pt.start();
-				}
-			}
-			pt.end();
-			delete ci;
-		}
+		ASMTimer at;
+		cout<< at.getCounts()<< ":"<<at.getCountsNoEC()<<endl;
+		int a = 100;
+		at.start();
+		Sleep(a);
+
+		at.end();
+		cout<< at.getMilliseconds()	<< "ms"<<endl;
 	}
 #endif
 	// experiment 1z
