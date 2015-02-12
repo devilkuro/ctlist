@@ -1,7 +1,7 @@
 /*
  * CArrayList.h
  *
- *  Created on: 2013年10月8日
+ *  Created on: 2015-2-12
  *      Author: Fanjing-LAB
  */
 
@@ -9,24 +9,27 @@
 #define _CARRAYLIST_H_
 
 #include "common.h"
+#include "BaseAdmissionController.h"
 
-class CArrayList {
+class CArrayList :public BaseAdmissionController{
 public:
 	CArrayList();
-	CArrayList(unsigned int size);
+	CArrayList(unsigned int size, unsigned int scale);
 	virtual ~CArrayList();
 public:
-	bool Insert(Request r);
-	void setTime(unsigned int t);
-private:
-	bool accept(Request r);
-	unsigned int getIndex(unsigned int t);
+	bool insert(Request request);
+	void setTime(unsigned int time);
+	bool accept(Request request);
+	bool forceInsert(Request request);
+protected:
+	inline unsigned int getIndex(unsigned int t);
 public:
 	unsigned int max_resource;
 private:
-	unsigned int time;
-	unsigned int *resource;
-	unsigned int array_size;
+	unsigned int m_scale;
+	unsigned int m_time;
+	unsigned int *m_resource;
+	unsigned int m_array_size;
 };
 
 #endif /* _CARRAYLIST_H_ */
