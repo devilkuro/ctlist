@@ -91,16 +91,14 @@ inline void ASMTimer::end() {
         counter_end.LowPart = endLow;
         isTiming = false;
         gotTime = true;
-        std::cout<<counter_start.QuadPart<<std::endl;
-        std::cout<<counter_end.QuadPart<<std::endl;
+        std::cout << counter_start.QuadPart << std::endl;
+        std::cout << counter_end.QuadPart << std::endl;
     }
 }
-
 
 inline bool ASMTimer::available() {
     return initialized;
 }
-
 
 ASMTimer::~ASMTimer() {
 }
@@ -118,6 +116,4 @@ void ASMTimer::release() {
         ptr_singleton = NULL;
     }
 }
-
-
 

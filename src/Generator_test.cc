@@ -10,54 +10,54 @@
 //#define GN_OUT_DEBUG false
 
 #ifdef GN_DEBUG
-int main() {
+int main(){
 #ifdef GN_OUT_DEBUG
-	unsigned int size; //size of each block.
-	char* buff;
-	unsigned long length;//total size
-	Request* rq;
-	double* interval;
-	char* z;
-	clock_t t_start, t_write, t_read, t_total;
+    unsigned int size; //size of each block.
+    char* buff;
+    unsigned long length;//total size
+    Request* rq;
+    double* interval;
+    char* z;
+    clock_t t_start, t_write, t_read, t_total;
 
-	t_start = clock();
+    t_start = clock();
 #endif
-	Generator* gn = new Generator();
-	string fileName("output.dat");
-	gn->output(fileName.c_str(), MAX_REQUEST_NUM);
+    Generator* gn = new Generator();
+    string fileName("output.dat");
+    gn->output(fileName.c_str(), MAX_REQUEST_NUM);
 #ifdef GN_OUT_DEBUG
-	t_write = clock() - t_start;
+    t_write = clock() - t_start;
 
-	ifstream file("output.dat");
-	file.seekg(0, file.end);
-	length = file.tellg();
-	file.seekg(0, file.beg);
+    ifstream file("output.dat");
+    file.seekg(0, file.end);
+    length = file.tellg();
+    file.seekg(0, file.beg);
 
-	size = sizeof(double) + sizeof(Request);
-	buff = new char[length];
-	file.read(buff, length);
+    size = sizeof(double) + sizeof(Request);
+    buff = new char[length];
+    file.read(buff, length);
 
-	t_read = clock() - t_start - t_write;
+    t_read = clock() - t_start - t_write;
 
-	for (unsigned int i = 0; i < length / size; i++) {
-		interval = (double*) (buff + i * size);
-		rq = (Request*) (buff + i * size + sizeof(double));
-		if (i % 100000 == 0 && GN_OUT_DEBUG) {
-			cout << "read:: Request(" << rq->bw << " , " << rq->ts << " , "
-			<< rq->td << " ):" << *interval << "+" << *z + 0 << endl;
-		}
-	}
-	file.close();
+    for (unsigned int i = 0; i < length / size; i++){
+        interval = (double*) (buff + i * size);
+        rq = (Request*) (buff + i * size + sizeof(double));
+        if (i % 100000 == 0 && GN_OUT_DEBUG){
+            cout << "read:: Request(" << rq->bw << " , " << rq->ts << " , "
+            << rq->td << " ):" << *interval << "+" << *z + 0 << endl;
+        }
+    }
+    file.close();
 
-	delete(buff);
-	t_total = clock() - t_start;
-	cout << "function started at " << t_start << endl;
-	cout << "generate and write finished in " << t_write
-	<< " ms and read finished in " << t_read << " ms." << endl;
-	cout << "function finished in " << t_total << " ms." << endl;
+    delete(buff);
+    t_total = clock() - t_start;
+    cout << "function started at " << t_start << endl;
+    cout << "generate and write finished in " << t_write
+    << " ms and read finished in " << t_read << " ms." << endl;
+    cout << "function finished in " << t_total << " ms." << endl;
 #endif
 
-	delete(gn);
-	return 0;
+    delete(gn);
+    return 0;
 }
 #endif

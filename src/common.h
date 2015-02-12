@@ -17,5 +17,4 @@
 #define MAX 20000000
 #define MAX_REQUEST_NUM 20000000
 
-
 #endif /* _COMMON_H_ */

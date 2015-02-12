@@ -14,8 +14,7 @@
 
 #include <windows.h>
 
-class PreciseTimer
-{
+class PreciseTimer {
 public:
     PreciseTimer();  // default constructor, perform initializations
 
@@ -37,98 +36,93 @@ protected:
     bool gotTime;     // if the timer has stopped and successfully got the time
 
     long ecTime;	// the error correction time.
-    LARGE_INTEGER frequency;  // the current performance-counter frequency, in counts per second
+    LARGE_INTEGER frequency; // the current performance-counter frequency, in counts per second
     LARGE_INTEGER counter_start; // value of the performance counter at the moment when start() is called
     LARGE_INTEGER counter_end; // value of the performance counter at the moment when end() is called
 };
 
-PreciseTimer::PreciseTimer()
-{
+PreciseTimer::PreciseTimer() {
     initialized = QueryPerformanceFrequency(&frequency) ? true : false;
-    isTiming    = false;
-    gotTime     = false;
+    isTiming = false;
+    gotTime = false;
 
     counter_start.QuadPart = 0;
-    counter_end.QuadPart   = 0;
+    counter_end.QuadPart = 0;
 
     this->start();
     this->end();
     ecTime = getCounts();
 }
 
-bool PreciseTimer::available()
-{
+bool PreciseTimer::available() {
     return initialized;
 }
 
-void PreciseTimer::start()
-{
-    if(initialized && !isTiming)
-    {
+void PreciseTimer::start() {
+    if(initialized && !isTiming){
         isTiming = true;
-        gotTime  = false;
+        gotTime = false;
         QueryPerformanceCounter(&counter_start);
     }
 }
 
-void PreciseTimer::end()
-{
-    if(isTiming)
-    {
+void PreciseTimer::end() {
+    if(isTiming){
         QueryPerformanceCounter(&counter_end);
         isTiming = false;
-        gotTime  = true;
+        gotTime = true;
     }
 }
 
 long PreciseTimer::getCountsEC() {
-	if (gotTime) {
-		return (counter_end.QuadPart - counter_start.QuadPart-ecTime);
-	} else {
-		return 0;
-	}
+    if(gotTime){
+        return (counter_end.QuadPart - counter_start.QuadPart - ecTime);
+    }else{
+        return 0;
+    }
 }
 
 inline long PreciseTimer::getMicroseconds() {
     if(gotTime && frequency.QuadPart)
-        return (counter_end.QuadPart - counter_start.QuadPart) * 1000000 / frequency.QuadPart;
+        return (counter_end.QuadPart - counter_start.QuadPart) * 1000000
+                / frequency.QuadPart;
     else
         return 0;
 }
 
 inline long PreciseTimer::getMicrosecondsEC() {
     if(gotTime && frequency.QuadPart)
-        return (counter_end.QuadPart - counter_start.QuadPart-ecTime)  / (frequency.QuadPart / 1000000);
+        return (counter_end.QuadPart - counter_start.QuadPart - ecTime)
+                / (frequency.QuadPart / 1000000);
     else
         return 0;
 }
 
-long PreciseTimer::getMillisecondsEC()
-{
+long PreciseTimer::getMillisecondsEC() {
     if(gotTime && frequency.QuadPart)
-        return (counter_end.QuadPart - counter_start.QuadPart-ecTime) * 1000 / frequency.QuadPart;
+        return (counter_end.QuadPart - counter_start.QuadPart - ecTime) * 1000
+                / frequency.QuadPart;
     else
         return 0;
 }
 
 long PreciseTimer::getCounts() {
-	if (gotTime) {
-		return (counter_end.QuadPart - counter_start.QuadPart);
-	} else {
-		return 0;
-	}
+    if(gotTime){
+        return (counter_end.QuadPart - counter_start.QuadPart);
+    }else{
+        return 0;
+    }
 }
 
-long PreciseTimer::getMilliseconds()
-{
+long PreciseTimer::getMilliseconds() {
     if(gotTime && frequency.QuadPart)
-        return (counter_end.QuadPart - counter_start.QuadPart) * 1000 / frequency.QuadPart;
+        return (counter_end.QuadPart - counter_start.QuadPart) * 1000
+                / frequency.QuadPart;
     else
         return 0;
 }
 
-long PreciseTimer::getSeconds()
-{
+long PreciseTimer::getSeconds() {
     return getMilliseconds() / 1000;
 }
 

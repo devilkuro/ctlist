@@ -159,7 +159,7 @@ void StatisticsRecordTools::output(string name, string dir, string field,
             path = name;
         }
     }
-    fs.open(path.c_str(), std::fstream::out|openmode);
+    fs.open(path.c_str(), std::fstream::out | openmode);
     if(!fs.good()){
         std::cout << "error:" << std::endl;
         std::cout << "eof()\t" << fs.eof() << std::endl;
@@ -207,7 +207,6 @@ void StatisticsRecordTools::clean() {
 StatisticsRecordTools& StatisticsRecordTools::get() {
     return *ptr_singleton;
 }
-
 
 }  // namespace Fanjing
 

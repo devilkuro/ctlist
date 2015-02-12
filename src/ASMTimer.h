@@ -49,7 +49,8 @@ inline UINT64 ASMTimer::getCountsNoEC() {
 
 inline UINT64 ASMTimer::getCounts() {
     if(gotTime){
-        return (counter_end.QuadPart - counter_start.QuadPart - counter_ec.QuadPart);
+        return (counter_end.QuadPart - counter_start.QuadPart
+                - counter_ec.QuadPart);
     }else{
         return 0;
     }
@@ -57,7 +58,8 @@ inline UINT64 ASMTimer::getCounts() {
 
 inline UINT64 ASMTimer::getMilliseconds() {
     if(gotTime){
-        return ((counter_end.QuadPart - counter_start.QuadPart - counter_ec.QuadPart) / (frequency.QuadPart / 1000));
+        return ((counter_end.QuadPart - counter_start.QuadPart
+                - counter_ec.QuadPart) / (frequency.QuadPart / 1000));
     }else{
         return 0;
     }

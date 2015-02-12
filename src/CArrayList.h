@@ -11,25 +11,25 @@
 #include "common.h"
 #include "BaseAdmissionController.h"
 
-class CArrayList :public BaseAdmissionController{
+class CArrayList : public BaseAdmissionController {
 public:
-	CArrayList();
-	CArrayList(unsigned int size, unsigned int scale);
-	virtual ~CArrayList();
+    CArrayList();
+    CArrayList(unsigned int size, unsigned int scale);
+    virtual ~CArrayList();
 public:
-	bool insert(Request request);
-	void setTime(unsigned int time);
-	bool accept(Request request);
-	bool forceInsert(Request request);
+    bool insert(Request request);
+    void setTime(unsigned int time);
+    bool accept(Request request);
+    bool forceInsert(Request request);
 protected:
-	inline unsigned int getIndex(unsigned int t);
+    inline unsigned int getIndex(unsigned int t);
 public:
-	unsigned int max_resource;
+    unsigned int max_resource;
 private:
-	unsigned int m_scale;
-	unsigned int m_time;
-	unsigned int *m_resource;
-	unsigned int m_array_size;
+    unsigned int m_scale;
+    unsigned int m_time;
+    unsigned int *m_resource;
+    unsigned int m_array_size;
 };
 
 #endif /* _CARRAYLIST_H_ */

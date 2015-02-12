@@ -9,7 +9,6 @@
 #include <tchar.h>
 #include <limits.h>
 
-
 #include <time.h>
 #include <windows.h>
 #include <fstream>
