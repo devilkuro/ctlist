@@ -13,10 +13,10 @@ public:
     BaseAdmissionController();
     virtual ~BaseAdmissionController();
 
-    virtual void setTime(unsigned int time);
-    virtual bool accept(Request request);
-    virtual bool forceInsert(Request request);
-    virtual bool insert(Request request);
+    virtual void setTime(unsigned int time) = 0;
+    virtual bool accept(Request request) = 0;
+    virtual bool forceInsert(Request request) = 0;
+    virtual bool insert(Request request) = 0;
 };
 
 #endif /* BASEADMISSIONCONTROLLER_H_ */
