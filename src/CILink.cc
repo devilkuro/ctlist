@@ -130,7 +130,7 @@ bool CILink::accept(Request r, CINode*& pre2st, CINode*& pre2et) {
 //		}
 
         if(indexLoc > 0){
-            indexLoc = indexLoc - 1;
+            indexLoc = indexLoc - 1;    // backward traversal
         }else{
             indexLoc = CI_INDEX_ARRAY_SIZE - 1;
         }

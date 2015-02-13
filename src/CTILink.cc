@@ -37,13 +37,13 @@ CTILink::~CTILink() {
     delete[] (tack); //delete the tacks
 }
 
-bool CTILink::SetTime(unsigned int t) {
+bool CTILink::setTime(unsigned int time) {
     // maintain the current time and memory.
-    if(t <= iCurrentTime){
+    if(time <= iCurrentTime){
         return false;
     }
-    iCurrentTime = t;
-    unsigned int aliveTackLoc = t / CTI_TACK_INTERVAL;
+    iCurrentTime = time;
+    unsigned int aliveTackLoc = time / CTI_TACK_INTERVAL;
     if(aliveTackLoc < 1){
         return false;
     }
@@ -56,19 +56,19 @@ bool CTILink::SetTime(unsigned int t) {
     return true;
 }
 
-bool CTILink::Insert(Request r) {
+bool CTILink::insert(Request request) {
     // accept judgment.
-    if(r.td == 0){
+    if(request.td == 0){
         return true;
     }
-    CTINode* loc = accept(r);
+    CTINode* loc = accept(request);
     if(loc == NULL){
         // if not accepted, return FALSE.
         return false;
     }else{
         // if accepted, modify the resource of each node.
-        unsigned int st = iCurrentTime + r.ts;
-        unsigned int et = st + r.td;
+        unsigned int st = iCurrentTime + request.ts;
+        unsigned int et = st + request.td;
         // select the start point.
         CTINode* temp = insertNode(st, loc);
         CTINode* start = temp;
@@ -80,7 +80,7 @@ bool CTILink::Insert(Request r) {
         insertNode(et, temp);
         // after insertion of the node et, the node before et can be modified.
         for(temp = start; temp->t < et; temp = temp->next){
-            temp->rs = temp->rs + r.bw;
+            temp->rs = temp->rs + request.bw;
         }
     }
     return true;

@@ -36,8 +36,8 @@ public:
     unsigned int CTI_INDEX_THRESHOLD;
     unsigned int iMaxResource; //stands for the max available resource.
 public:
-    bool Insert(Request r); //return true if success.
-    bool SetTime(unsigned int t); //set the current time.
+    bool insert(Request request); //return true if success.
+    bool setTime(unsigned int time); //set the current time.
     bool Output(); // display the link list.
 private:
     unsigned int CTI_TACK_NUM;

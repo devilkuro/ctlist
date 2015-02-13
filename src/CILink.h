@@ -11,7 +11,7 @@
 #include "common.h"
 
 struct CINode {
-    unsigned int rs; // rs stands for the remainder resource.
+    unsigned int rs; // rs stands for the remainder resource after time t.
     unsigned int t; // t stands for the time of this node.
     CINode* pre; //point to pre node.
     CINode* next; //point to next node.
