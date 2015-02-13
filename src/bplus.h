@@ -14,11 +14,11 @@ const int m = 3;
 const int s1 = 2; // the num of the key in the first split node shold somehow bigger than other. i don't know the exact meaning of this comment, please refer to the chinese edition.
 const int s2 = 2;
 struct BNode {
-    int keynum;
-    int key[m + 1];
-    int record[m + 1];
-    struct BNode *ptr[m + 1];
-    struct BNode *parent;
+    int keynum; // key number
+    int key[m + 1]; // key
+    int record[m + 1];  // resouce
+    struct BNode *ptr[m + 1];   // children
+    struct BNode *parent;   // parent
     int seq;
     struct BNode *next;
 };

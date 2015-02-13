@@ -682,22 +682,29 @@ bool Bplus::Output() {
 }
 
 void Bplus::deleteBNode(BNode* b) {
+    /*
     if(b->key){
-        delete b->key;
+        delete[] b->key;
+        b->key = NULL;
     }
     if(b->record){
-        delete b->record;
+        delete[] b->record;
+        b->record = NULL;
     }
     if(b->ptr){
-        delete b->ptr;
+        delete[] b->ptr;
+        b->ptr = NULL;
     }
+    */
     if(b){
         delete b;
+        b = NULL;
     }
 }
 
 void Bplus::deleteResult(Result* r) {
     if(r){
         delete r;
+        r = NULL;
     }
 }
