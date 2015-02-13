@@ -8,7 +8,7 @@
 #include "iostream"
 
 ASMTimer* ASMTimer::ptr_singleton = NULL;
-inline ASMTimer::ASMTimer() {
+ASMTimer::ASMTimer() {
     unsigned long startHigh = 0;
     unsigned long startLow = 0;
     unsigned long endHigh = 0;
@@ -52,7 +52,7 @@ inline ASMTimer::ASMTimer() {
     counter_ec.QuadPart = getCountsNoEC();
 }
 
-inline void ASMTimer::start() {
+void ASMTimer::start() {
     if(initialized && !isTiming){
         isTiming = true;
         gotTime = false;
@@ -73,7 +73,7 @@ inline void ASMTimer::start() {
     }
 }
 
-inline void ASMTimer::end() {
+void ASMTimer::end() {
     if(isTiming){
         unsigned long endHigh = 0;
         unsigned long endLow = 0;
@@ -96,7 +96,7 @@ inline void ASMTimer::end() {
     }
 }
 
-inline bool ASMTimer::available() {
+bool ASMTimer::available() {
     return initialized;
 }
 

@@ -61,7 +61,7 @@ DWORD WINAPI RecordFor5(LPVOID tmp) {
 
 int main() {
     //Helper H;
-    PreciseTimer pt;
+    //PreciseTimer pt;
 
     // for test
     {
@@ -73,7 +73,6 @@ int main() {
         int a = 100;
         at->start();
         Sleep(a);
-
         at->end();
         cout << at->getMilliseconds() << "ms" << endl;
         at->release();
