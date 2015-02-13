@@ -25,7 +25,6 @@ protected:
     ULARGE_INTEGER frequency; // the current performance-counter frequency, in counts per second
     ULARGE_INTEGER counter_start; // value of the performance counter at the moment when start() is called
     ULARGE_INTEGER counter_end; // value of the performance counter at the moment when end() is called
-    ULARGE_INTEGER counter_ec;  // value of the error correction number.
 public:
     static ASMTimer * request();
     static void release();
@@ -34,35 +33,49 @@ public:
     void start();  // start timing
     void end();    // stop timing
 
-    UINT64 getCountsNoEC();	//get the time interval in counts
     UINT64 getCounts(); //get the time interval in counts
     UINT64 getMilliseconds();  // get the time interval length in milliseconds
 };
 
-inline UINT64 ASMTimer::getCountsNoEC() {
-    if(gotTime){
-        return (counter_end.QuadPart - counter_start.QuadPart);
-    }else{
-        return 0;
+inline void ASMTimer::start() {
+    if(initialized && !isTiming){
+        isTiming = true;
+        gotTime = false;
+        unsigned long startHigh = 0;
+        unsigned long startLow = 0;
+        __asm__ __volatile__(
+                ".intel_syntax noprefix\n\t"
+                "RDTSC\n\t"
+                "MOV        %0,     %%edx\n\t"
+                "MOV        %1,      %%eax\n\t"
+                ".att_syntax\n"
+                :"=r"(startHigh),"=r"(startLow)
+                :
+                : "%eax","%edx"
+        );
+        counter_start.HighPart = startHigh;
+        counter_start.LowPart = startLow;
     }
 }
 
-inline UINT64 ASMTimer::getCounts() {
-    if(gotTime){
-        return (counter_end.QuadPart - counter_start.QuadPart
-                - counter_ec.QuadPart);
-    }else{
-        return 0;
+inline void ASMTimer::end() {
+    if(isTiming){
+        unsigned long endHigh = 0;
+        unsigned long endLow = 0;
+        __asm__ __volatile__(
+                ".intel_syntax noprefix\n\t"
+                "RDTSC\n\t"
+                "MOV        %0,     %%edx\n\t"
+                "MOV        %1,     %%eax\n\t"
+                ".att_syntax\n"
+                :"=r"(endHigh),"=r"(endLow)
+                :
+                : "%eax","%edx"
+        );
+        counter_end.HighPart = endHigh;
+        counter_end.LowPart = endLow;
+        isTiming = false;
+        gotTime = true;
     }
 }
-
-inline UINT64 ASMTimer::getMilliseconds() {
-    if(gotTime){
-        return ((counter_end.QuadPart - counter_start.QuadPart
-                - counter_ec.QuadPart) / (frequency.QuadPart / 1000));
-    }else{
-        return 0;
-    }
-}
-
 #endif /* _ASMTIMER_H_ */

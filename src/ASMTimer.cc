@@ -47,53 +47,6 @@ ASMTimer::ASMTimer() {
     }
     isTiming = false;
     gotTime = false;
-    this->start();
-    this->end();
-    counter_ec.QuadPart = getCountsNoEC();
-}
-
-void ASMTimer::start() {
-    if(initialized && !isTiming){
-        isTiming = true;
-        gotTime = false;
-        unsigned long startHigh = 0;
-        unsigned long startLow = 0;
-        __asm__ __volatile__(
-                ".intel_syntax noprefix\n\t"
-                "RDTSC\n\t"
-                "MOV        %0,     %%edx\n\t"
-                "MOV        %1,      %%eax\n\t"
-                ".att_syntax\n"
-                :"=r"(startHigh),"=r"(startLow)
-                :
-                : "%eax","%edx"
-        );
-        counter_start.HighPart = startHigh;
-        counter_start.LowPart = startLow;
-    }
-}
-
-void ASMTimer::end() {
-    if(isTiming){
-        unsigned long endHigh = 0;
-        unsigned long endLow = 0;
-        __asm__ __volatile__(
-                ".intel_syntax noprefix\n\t"
-                "RDTSC\n\t"
-                "MOV        %0,     %%edx\n\t"
-                "MOV        %1,     %%eax\n\t"
-                ".att_syntax\n"
-                :"=r"(endHigh),"=r"(endLow)
-                :
-                : "%eax","%edx"
-        );
-        counter_end.HighPart = endHigh;
-        counter_end.LowPart = endLow;
-        isTiming = false;
-        gotTime = true;
-        std::cout << counter_start.QuadPart << std::endl;
-        std::cout << counter_end.QuadPart << std::endl;
-    }
 }
 
 bool ASMTimer::available() {
@@ -117,3 +70,19 @@ void ASMTimer::release() {
     }
 }
 
+UINT64 ASMTimer::getCounts() {
+    if(gotTime){
+        return (counter_end.QuadPart - counter_start.QuadPart);
+    }else{
+        return 0;
+    }
+}
+
+UINT64 ASMTimer::getMilliseconds() {
+    if(gotTime){
+        return ((counter_end.QuadPart - counter_start.QuadPart)
+                / (frequency.QuadPart / 1000));
+    }else{
+        return 0;
+    }
+}

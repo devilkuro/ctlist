@@ -66,10 +66,10 @@ int main() {
     // for test
     {
         ASMTimer* at = ASMTimer::request();
-        cout << at->getCounts() << ":" << at->getCountsNoEC() << endl;
+        cout << at->getCounts() << ":" << endl;
         at->start();
         at->end();
-        cout << at->getCounts() << ":" << at->getCountsNoEC() << endl;
+        cout << at->getCounts() << ":" << endl;
         int a = 100;
         at->start();
         Sleep(a);
