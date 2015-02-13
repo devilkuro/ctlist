@@ -29,12 +29,13 @@ public:
     static ASMTimer * request();
     static void release();
 
-    bool available();  // test if the very PreciseTimer instance can be used
+    const bool available() const; // test if the very PreciseTimer instance can be used
     void start();  // start timing
     void end();    // stop timing
 
-    UINT64 getCounts(); //get the time interval in counts
-    UINT64 getMilliseconds();  // get the time interval length in milliseconds
+    const UINT64 getCounts() const; //get the time interval in counts
+    const UINT64 getMilliseconds() const; // get the time interval length in milliseconds
+    const UINT64 getFrequency() const;
 };
 
 inline void ASMTimer::start() {

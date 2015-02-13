@@ -49,7 +49,7 @@ ASMTimer::ASMTimer() {
     gotTime = false;
 }
 
-bool ASMTimer::available() {
+const bool ASMTimer::available() const {
     return initialized;
 }
 
@@ -70,7 +70,7 @@ void ASMTimer::release() {
     }
 }
 
-UINT64 ASMTimer::getCounts() {
+const UINT64 ASMTimer::getCounts() const {
     if(gotTime){
         return (counter_end.QuadPart - counter_start.QuadPart);
     }else{
@@ -78,7 +78,11 @@ UINT64 ASMTimer::getCounts() {
     }
 }
 
-UINT64 ASMTimer::getMilliseconds() {
+const UINT64 ASMTimer::getFrequency() const {
+    return frequency.QuadPart;
+}
+
+const UINT64 ASMTimer::getMilliseconds() const {
     if(gotTime){
         return ((counter_end.QuadPart - counter_start.QuadPart)
                 / (frequency.QuadPart / 1000));

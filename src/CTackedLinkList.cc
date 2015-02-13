@@ -66,15 +66,14 @@ int main() {
     // for test
     {
         ASMTimer* at = ASMTimer::request();
-        cout << at->getCounts() << ":" << endl;
         at->start();
         at->end();
         cout << at->getCounts() << ":" << endl;
-        int a = 100;
+        int a = 200;
         at->start();
         Sleep(a);
         at->end();
-        cout << at->getMilliseconds() << "ms" << endl;
+        cout << at->getMilliseconds() << "ms@"<< at->getFrequency()/1000000000.0 <<"GHz"<< endl;
         at->release();
     }
 }
