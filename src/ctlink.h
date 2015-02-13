@@ -36,7 +36,7 @@ public:
     unsigned int iMaxResource; //stands for the max available resource.
 public:
     bool Insert(Request r); //return true if success.
-    bool SetTime(unsigned int t); //set the current time.
+    bool setTime(unsigned int t); //set the current time.
     bool Output(); // display the link list.
 private:
     unsigned int CT_TACK_NUM;

@@ -136,7 +136,7 @@ bool Bplus::Insert(Request a) {
             if(p->record[i - 1] + a.bw > RMAX)
                 return false;
             else if(true){
-                if(nowtd > (p->key[i] - a.ts))
+                if(nowtd > (p->key[i] - (int)a.ts))
                     nowtd -= (p->key[i] - a.ts);
                 else
                     flag = 1;
@@ -148,7 +148,7 @@ bool Bplus::Insert(Request a) {
             if(q->record[q->keynum - 1] + a.bw > RMAX)
                 return false;
             else{
-                if(nowtd > (p->key[i] - a.ts))
+                if(nowtd > (p->key[i] - (int)a.ts))
                     nowtd -= (p->key[i] - a.ts);
                 else
                     flag = 1;

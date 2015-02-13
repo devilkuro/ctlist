@@ -32,7 +32,7 @@ CTLink::~CTLink() {
     delete[] (tack); //delete the tacks
 }
 
-bool CTLink::SetTime(unsigned int t) {
+bool CTLink::setTime(unsigned int t) {
     // maintain the current time and memory.
     if(t <= iCurrentTime){
         return false;
