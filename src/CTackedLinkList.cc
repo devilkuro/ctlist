@@ -14,18 +14,6 @@
 #include "PreciseTimer.h"
 #include "ASMTimer.h"
 
-//#define CT_TEST_1
-//#define CT_TEST_1_Z
-//#define CT_TEST_2
-//#define CT_TEST_3
-//#define CT_TEST_3_B
-//#define CT_TEST_3_C
-//#define CT_TEST_4
-//#define CT_TEST_4_F
-//#define CT_TEST_5
-//#define CT_TEST_6
-#define CT_TEST_0
-
 template<class T> string m_toStr(T tmp) {
     stringstream ss;
     ss << tmp;
@@ -60,11 +48,34 @@ DWORD WINAPI RecordFor5(LPVOID tmp) {
 }
 
 int main() {
-    //Helper H;
-    //PreciseTimer pt;
+    enum ExperimentCode {
+        EX_ASM_TEST = 0,
+        EX_POISSON_TEST,
+        EX_ARRAY_TEST,
+        EX_LAST_FLAG
+    };
+    string flagStrArray[] = {
+            "EX_ASM_TEST",
+            "EX_POISSON_TEST",
+            "EX_ARRAY_TEST",
+            "EX_LAST_FLAG" };
+    bool *flagArray = new bool[EX_LAST_FLAG];
+    {
+        int flag = 0;
+        cout << "Input flag for each experiment: 1 for run, 0 for not." << endl;
+        for(int i = 0; i < EX_LAST_FLAG; ++i){
+            cout << flagStrArray[i] << endl;
+            cin >> flag;
+            if(flag == 1){
+                flagArray[i] = true;
+            }else if(flag == 0){
+                flagArray[i] = false;
+            }
+        }
+    }
 
     // for test
-    {
+    if(flagArray[EX_LAST_FLAG]){
         ASMTimer* at = ASMTimer::request();
         at->start();
         at->end();
@@ -73,8 +84,22 @@ int main() {
         at->start();
         Sleep(a);
         at->end();
-        cout << at->getMilliseconds() << "ms@"<< at->getFrequency()/1000000000.0 <<"GHz"<< endl;
+        cout << at->getMilliseconds() << "ms@"
+                << at->getFrequency() / 1000000000.0 << "GHz" << endl;
         at->release();
     }
+    if(flagArray[EX_POISSON_TEST]){
+        Helper h;
+        int n;
+        cout<<"generate time:"<<endl;
+        cin>>n;
+        for (int i = 0; i < n; ++i) {
+            cout<< h.P_Rand(20)<<endl;
+        }
+    }
+    if(flagArray[EX_ARRAY_TEST]){
+
+    }
+
 }
 
