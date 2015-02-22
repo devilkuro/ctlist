@@ -49,52 +49,37 @@ bool CTLink::setTime(unsigned int t) {
     return true;
 }
 
-bool CTLink::Insert(Request r) {
+bool CTLink::insert(Request request) {
     // accept judgment.
-    if(r.td == 0){
+    if(request.td == 0){
         return true;
     }
-    CTNode* next2st = NULL;
-    CTNode* next2et = NULL;
 
-    if(!accept(r, next2st, next2et)){
+    if(!accept(request)){
         // if not accepted, return FALSE.
         return false;
     }else{
-        // if accepted, modify the resource of each node.
-        unsigned int st = iCurrentTime + r.ts;
-        unsigned int et = st + r.td;
-        // select the start point.
-        CTNode* start = insertNode(st, next2st);
-        // find the next node to the et node.
-        // update at 1312072208: change the accept function to get end time node faster.
-        // insert et node.
-        insertNode(et, next2et);
-        // after insertion of the node et, the node before et can be modified.
-        for(; start->t < et; start = start->next){
-            start->rs = start->rs + r.bw;
-        }
+        forceInsert(request);
     }
     return true;
 }
 
-bool CTLink::accept(Request r, CTNode *& next2st, CTNode *& next2et) {
+bool CTLink::accept(Request request) {
     // update at 1309251613: this function has been changed into following function.
     // if request r can be accepted return the start node which is the first node after the start time
     // to avoid point to NULL, the tack array size should be two more than the tack number. one to record the start resource, one to record end point.
     // else if request r can not be accepted then return NULL.
     unsigned int st, et; // st stands for the start time of this request, et stands for the end time.
-    CTNode* temp = NULL; // result is used to store the result node. temp is used as temp node to mark the search start.
+    CTNode* temp = NULL; // temp is used as temp node to mark the search start.
     unsigned int tackLoc; // used to store the loc of tack and index, if there is an index.
-    st = iCurrentTime + r.ts;
-    et = st + r.td;
-
-    tackLoc = getTackLoc(st);
+    st = iCurrentTime + request.ts;
+    et = st + request.td;
     if(et > iCurrentTime + CT_MAX_RESERVE_TIME){ // request r is out of range.
         return false;
     }
+    tackLoc = getTackLoc(st);
     temp = tack[tackLoc].node;
-    //select start point to search. st->[temp->t,NULL)
+    // select start point to search. st->[temp->t,NULL)
     // select start point to judge. the result needs sp.t->[st,next), next node is the first node after sp.
     // since the judge process needs to use the node before start point, so start point is the first node after st.
     while(temp->t <= st){
@@ -108,11 +93,11 @@ bool CTLink::accept(Request r, CTNode *& next2st, CTNode *& next2et) {
     // Update at 1310012249: node->rs decides the resource after node->t
     // so if the rs of which node from the last one before st to last one before et is more than r.bw, request r can be accepted.
     // update at 1310201505: change the algorithmic logic to fix a bug that temp can be pointed to NULL.
-    if(temp->pre->rs + r.bw > iMaxResource){
+    if(temp->pre->rs + request.bw > iMaxResource){
         return false;
     }
     while(temp->t < et){
-        if(temp->rs + r.bw > iMaxResource){
+        if(temp->rs + request.bw > iMaxResource){
             return false;
         }
         temp = temp->next;
@@ -229,6 +214,8 @@ void CTLink::initCTLink(unsigned int tnum, unsigned int max) {
     iCurrentTackLoc = 0;
     iCurrentTime = 0;
     iMaxResource = MAX;
+    next2st = NULL;
+    next2et = NULL;
     tack = new CTTack[CT_TACK_ARRAY_SIZE];
     // 1st. initialize all tacks and their nodes.
     for(unsigned int i = 0; i < CT_TACK_ARRAY_SIZE; i++){
@@ -260,4 +247,21 @@ void CTLink::initCTLink(unsigned int tnum, unsigned int max) {
             tack[i].node->next = tack[(i + 1) % CT_TACK_ARRAY_SIZE].node;
         }
     }
+}
+
+bool CTLink::forceInsert(Request request) {
+    // if accepted, modify the resource of each node.
+    unsigned int st = iCurrentTime + request.ts;
+    unsigned int et = st + request.td;
+    // select the start point.
+    CTNode* start = insertNode(st, next2st);
+    // find the next node to the et node.
+    // update at 1312072208: change the accept function to get end time node faster.
+    // insert et node.
+    insertNode(et, next2et);
+    // after insertion of the node et, the node before et can be modified.
+    for(; start->t < et; start = start->next){
+        start->rs = start->rs + request.bw;
+    }
+    return true;
 }
