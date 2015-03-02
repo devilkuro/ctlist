@@ -9,6 +9,7 @@
 #define _CILINK_H_
 
 #include "common.h"
+#include "BaseAdmissionController.h"
 
 struct CINode {
     unsigned int rs; // rs stands for the remainder resource after time t.
@@ -23,7 +24,7 @@ struct CIndex {
 /*
  *
  */
-class CILink {
+class CILink:public BaseAdmissionController {
 public:
     CILink();
     CILink(unsigned int inum, unsigned int rmax);
@@ -32,9 +33,11 @@ public:
     // add public member variable here
     unsigned int iMaxResource; //stands for the max available resource.
 public:
-    bool Insert(Request r); //return true if success.
-    bool SetTime(unsigned int t); //set the current time.
-    bool Output(); // display the link list.
+    virtual void setTime(unsigned int t); //set the current time.
+    virtual bool accept(Request r); //to judge whether the request r can be accecpted or not
+    virtual bool forceInsert(Request r);
+    virtual bool insert(Request r); //return true if success.
+    virtual bool Output(); // display the link list.
 private:
     // add private member variable here
     // the number of usable index
@@ -58,9 +61,10 @@ private:
     // add private function here
     void initCILink(unsigned int inum, unsigned int rmax);
     CINode* insertNode(unsigned int t, CINode* loc); //insert target node into the link list, node loc stands for the first node before time t.
-    bool accept(Request r, CINode*& pre2st, CINode*& pre2et); //to judge whether the request r can be accecpted or not
     bool clearIndex(unsigned int n); // to clear index n.
     unsigned int getIndexLoc(unsigned int t);
+    CINode* pre2st;
+    CINode* pre2et;
 };
 
 #endif /* _CILINK_H_ */

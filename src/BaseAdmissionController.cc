@@ -1,7 +1,7 @@
 /*
  * BaseAdmissionController.cc
  *
- *  Created on: 2015年2月12日
+ *  Created on: 2015-2-12
  *      Author: Administrator
  */
 

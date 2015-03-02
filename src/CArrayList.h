@@ -22,7 +22,7 @@ public:
     bool accept(Request request);
     bool forceInsert(Request request);
 protected:
-    inline unsigned int getIndex(unsigned int t);
+    unsigned int getIndex(unsigned int t);
 public:
     unsigned int max_resource;
 private:

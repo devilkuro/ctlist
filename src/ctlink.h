@@ -9,6 +9,7 @@
 #define _CTLINK_H_
 
 #include "common.h"
+#include "BaseAdmissionController.h"
 
 struct CTNode {
     unsigned int rs; // rs stands for the remainder resource.
@@ -26,7 +27,7 @@ struct CTTack {
 //	CTNode** index; //this will point to the index of this tack if there is one, else this will be null.
 };
 
-class CTLink : public BaseAdmissionController{
+class CTLink : public BaseAdmissionController {
 public:
     CTLink();
     CTLink(unsigned int tnum, unsigned int rmax);
@@ -35,11 +36,11 @@ public:
     // add public member variable here
     unsigned int iMaxResource; //stands for the max available resource.
 public:
-    bool insert(Request request); //return true if success.
-    bool setTime(unsigned int t); //set the current time.
-    bool accept(Request request); //to judge whether the request r can be accecpted or not
-    bool forceInsert(Request request);
-    bool Output(); // display the link list.
+    virtual bool insert(Request request); //return true if success.
+    virtual void setTime(unsigned int t); //set the current time.
+    virtual bool accept(Request request); //to judge whether the request r can be accecpted or not
+    virtual bool forceInsert(Request request);
+    virtual bool Output(); // display the link list.
 private:
     unsigned int CT_TACK_NUM;
     unsigned int CT_MAX_RESERVE_TIME;

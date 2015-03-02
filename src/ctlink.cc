@@ -32,10 +32,10 @@ CTLink::~CTLink() {
     delete[] (tack); //delete the tacks
 }
 
-bool CTLink::setTime(unsigned int t) {
+void CTLink::setTime(unsigned int t) {
     // maintain the current time and memory.
     if(t <= iCurrentTime){
-        return false;
+        return;
     }
     iCurrentTime = t;
     unsigned int iCurrentTackNum = t / CT_TACK_INTERVAL;
@@ -46,7 +46,7 @@ bool CTLink::setTime(unsigned int t) {
         clearTack(iStartTack);
     }
     // only return true.
-    return true;
+    return;
 }
 
 bool CTLink::insert(Request request) {
@@ -159,8 +159,9 @@ bool CTLink::clearTack(unsigned int n) {
     // 1. clear all tack; 2. link this tack to the last tack.
     // Update at 1310012228: change n to n+CT_TACK_ARRAY_SIZE to avoid to mod a negative number.
     unsigned int loc = n % CT_TACK_ARRAY_SIZE;
-    unsigned int pre = (n + CT_TACK_ARRAY_SIZE - 1) % CT_TACK_ARRAY_SIZE;
-    unsigned int next = (n + 1) % CT_TACK_ARRAY_SIZE;
+    // update at 201503021017, remove mod operation to increase the efficiency
+    unsigned int pre = loc == 0 ? CT_TACK_ARRAY_SIZE - 1 : loc - 1;
+    unsigned int next = loc == CT_TACK_ARRAY_SIZE - 1 ? 0 : loc + 1;
     // clear this tack.
     // 1st. delete the node.
     unsigned int et = tack[next].node->t;

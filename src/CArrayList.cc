@@ -59,7 +59,7 @@ bool CArrayList::forceInsert(Request request) {
     return true;
 }
 
-inline unsigned int CArrayList::getIndex(unsigned int t) {
+unsigned int CArrayList::getIndex(unsigned int t) {
     return (t / m_scale) % m_array_size;
 }
 

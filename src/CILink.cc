@@ -25,29 +25,16 @@ CILink::~CILink() {
     delete[] (cIndex);
 }
 
-bool CILink::Insert(Request r) {
+bool CILink::insert(Request r) {
     // accept judgment.
     if(r.td == 0){
         return true;
     }
 
-    CINode* pre2st = NULL;
-    CINode* pre2et = NULL;
-    if(!accept(r, pre2st, pre2et)){
+    if(!accept(r)){
         return false;
     }else{
-        unsigned int st = iCurrentTime + r.ts;
-        unsigned int et = st + r.td;
-
-        CINode* start = insertNode(st, pre2st);
-        if(pre2et->t < start->t){
-            insertNode(et, start);
-        }else{
-            insertNode(et, pre2et);
-        }
-        for(; start->t < et; start = start->next){
-            start->rs = start->rs + r.bw;
-        }
+        forceInsert(r);
     }
     return true;
 }
@@ -108,7 +95,7 @@ CINode* CILink::insertNode(unsigned int t, CINode* pre) {
     return result;
 }
 
-bool CILink::accept(Request r, CINode*& pre2st, CINode*& pre2et) {
+bool CILink::accept(Request r) {
     unsigned int st, et;
     CINode* temp;
     unsigned int indexLoc;
@@ -123,12 +110,6 @@ bool CILink::accept(Request r, CINode*& pre2st, CINode*& pre2et) {
     indexLoc = getIndexLoc(st);
     while(cIndex[indexLoc].node == NULL){
         // move index location forward.
-//		unsigned int temp = et;
-//		for (int var = 0; var < 100; ++var) {
-//			temp *=2;
-//			et = temp/2;
-//		}
-
         if(indexLoc > 0){
             indexLoc = indexLoc - 1;    // backward traversal
         }else{
@@ -176,23 +157,24 @@ bool CILink::accept(Request r, CINode*& pre2st, CINode*& pre2et) {
     return true;
 }
 
-bool CILink::SetTime(unsigned int t) {
+void CILink::setTime(unsigned int t) {
     if(t <= iCurrentTime){
-        return false;
+        return;
     }
     iCurrentTime = t;
     unsigned int iCurrentIndexNum = iCurrentTime / CI_INDEX_INTERVAL;
     for(; iStartIndex + 1 < iCurrentIndexNum; iStartIndex++){
         clearIndex(iStartIndex);
     }
-    return true;
+    return;
 }
 
 // clear the index that unused. n means the index number which will be cleared.
 bool CILink::clearIndex(unsigned int n) {
     // 0th. get the index location
     unsigned int loc = n % CI_INDEX_ARRAY_SIZE;
-    unsigned int next = (n + 1) % CI_INDEX_ARRAY_SIZE;
+    // update at 201503021021, remove mod operation to increase the efficiency
+    unsigned int next = loc == CI_INDEX_ARRAY_SIZE - 1 ? 0 : loc + 1;
     // 1st. reset the index
     this->cIndex[loc].node = NULL;
     // 2nd. free the nodes during index n.
@@ -240,6 +222,22 @@ bool CILink::clearIndex(unsigned int n) {
     // 3rd. link head to the next index
     this->cIndex[next].node = head;
     // return true. there is not any other result.
+    return true;
+}
+
+bool CILink::forceInsert(Request r) {
+    unsigned int st = iCurrentTime + r.ts;
+    unsigned int et = st + r.td;
+
+    CINode* start = insertNode(st, pre2st);
+    if(pre2et->t < start->t){
+        insertNode(et, start);
+    }else{
+        insertNode(et, pre2et);
+    }
+    for(; start->t < et; start = start->next){
+        start->rs = start->rs + r.bw;
+    }
     return true;
 }
 

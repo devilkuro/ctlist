@@ -100,6 +100,5 @@ int main() {
     if(flagArray[EX_ARRAY_TEST]){
 
     }
-
 }
 
