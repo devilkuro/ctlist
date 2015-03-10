@@ -61,7 +61,7 @@ private:
     // add private function here
     void initCILink(unsigned int inum, unsigned int rmax);
     CINode* insertNode(unsigned int t, CINode* loc); //insert target node into the link list, node loc stands for the first node before time t.
-    bool clearIndex(unsigned int n); // to clear index n.
+    bool cleanIndex(unsigned int n); // to clear index n.
     unsigned int getIndexLoc(unsigned int t);
     CINode* pre2st;
     CINode* pre2et;

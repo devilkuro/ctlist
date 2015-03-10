@@ -164,61 +164,34 @@ void CILink::setTime(unsigned int t) {
     iCurrentTime = t;
     unsigned int iCurrentIndexNum = iCurrentTime / CI_INDEX_INTERVAL;
     for(; iStartIndex + 1 < iCurrentIndexNum; iStartIndex++){
-        clearIndex(iStartIndex);
+        cleanIndex(iStartIndex);
     }
     return;
 }
 
 // clear the index that unused. n means the index number which will be cleared.
-bool CILink::clearIndex(unsigned int n) {
+bool CILink::cleanIndex(unsigned int n) {
     // 0th. get the index location
     unsigned int loc = n % CI_INDEX_ARRAY_SIZE;
     // update at 201503021021, remove mod operation to increase the efficiency
     unsigned int next = loc == CI_INDEX_ARRAY_SIZE - 1 ? 0 : loc + 1;
     // 1st. reset the index
     this->cIndex[loc].node = NULL;
-    // 2nd. free the nodes during index n.
+    
+    // 2nd. delete the nodes during index n.
     // get the end time
     unsigned int et = (n + 1) * CI_INDEX_INTERVAL;
-    // find the last node before end time
-    CINode* startNode = head;
-    while(startNode->next != NULL){
-        if(startNode->next->t >= et){
-            startNode->pre = NULL;
-            break;
-        }
-        startNode = startNode->next;
-        delete startNode->pre;
+    // delete the nodes one more before end time
+    CINode* temp = head;
+    while(temp->next != NULL && temp->next->t < et){
+        temp = temp->next;
+        delete temp->pre;
     }
-    // at this step, the startNode is the last node before end time.
-    // Then if the head node is not the last node, replace the head with startNode and delete the original head node.
-    head = startNode;
-
-    /*
-     // a way to not change the head node.
-     if (head->next != NULL) {
-     if (head->next->t<et) {
-     startNode = head->next;
-     while (startNode->next != NULL) {
-     if (startNode->next->t >= et) {
-     startNode->pre = NULL;
-     break;
-     }
-     startNode = startNode->next;
-     delete startNode->pre;
-     }
-     // at this step, the startNode is the last node before end time.
-     // Then if the head node is not the last node, replace the head with startNode and delete the original head node.
-     head->t = startNode->t;
-     head->rs = startNode->rs;
-     head->next = startNode->next;
-     if (startNode->next != NULL) {
-     startNode->next->pre = head;
-     }
-     delete startNode;
-     }
-     }
-     */
+    temp->pre = NULL;
+    // at this step, the temp is the last node before end time.
+    // then replace the head with temp.
+    head = temp;
+    
     // 3rd. link head to the next index
     this->cIndex[next].node = head;
     // return true. there is not any other result.

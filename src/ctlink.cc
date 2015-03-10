@@ -43,7 +43,7 @@ void CTLink::setTime(unsigned int t) {
     // the tack is 1 smaller than iCurrentTack is to store the start resource, so if a node is 2 or more smaller than iCurrentTack, it needs to be cleared.
     // Update at 1310012316: change the algorithm to fix the bug.
     for(; iStartTack + 1 < iCurrentTackNum; iStartTack++){
-        clearTack(iStartTack);
+        cleanTack(iStartTack);
     }
     // only return true.
     return;
@@ -131,13 +131,13 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* next) {
         result = pre;
     }else{
         if(theTack->flag == false){
-            // situation 1: this tack has just one temporary node. then replace this temporary node with target node.
+            // situation 1: this tack has just one dummy node. then make this dummy node a real node.
             result = pre;
             result->t = t;
             theTack->flag = true;
         }else{
             // situation 2: this tack already has at last one normal node. so insert node before loc node.
-            // and after insert operation, if theTack->node == loc , then change theTack->node to this new node.
+            // and after insert operation, if theTack->node == next , then change theTack->node to this new node.
             result = new CTNode();
             result->t = t;
             result->pre = pre;
@@ -154,7 +154,7 @@ CTNode* CTLink::insertNode(unsigned int t, CTNode* next) {
     return result;
 }
 
-bool CTLink::clearTack(unsigned int n) {
+bool CTLink::cleanTack(unsigned int n) {
     // this function will clear this tack, and link this tack to last usable tack. n stands for the tack number.
     // 1. clear all tack; 2. link this tack to the last tack.
     // Update at 1310012228: change n to n+CT_TACK_ARRAY_SIZE to avoid to mod a negative number.
@@ -162,18 +162,19 @@ bool CTLink::clearTack(unsigned int n) {
     // update at 201503021017, remove mod operation to increase the efficiency
     unsigned int pre = loc == 0 ? CT_TACK_ARRAY_SIZE - 1 : loc - 1;
     unsigned int next = loc == CT_TACK_ARRAY_SIZE - 1 ? 0 : loc + 1;
+    CTNode* nextTackNode = tack[next].node;
     // clear this tack.
     // 1st. delete the node.
-    unsigned int et = tack[next].node->t;
-    // change the judgment statement from t < et to t != et.
+    // the start node of next tack tack[next].node;
+    // change the judgment statement from t < et to temp!=tack[next].node.
     // edited at 1311291157: do not delete the first node in the tack. this node will be used as the temporary tack node.
-    for(CTNode* temp = tack[loc].node->next; temp->t < et;){
+    for(CTNode* temp = tack[loc].node->next; temp!=nextTackNode;){
         temp = temp->next;
         delete (temp->pre);
     }
-    // fix the node next to this tack.
-    tack[next].node->pre = NULL;
-    // Important!! there is a big problem in this function. It is necessary to keep a live tack before current tack to record the start resource.
+    // fix pre point of the node next to this tack.
+    nextTackNode->pre = NULL;
+    // Important!! there is a critical issue in this function. It is necessary to keep a live tack before current tack to record the start resource.
     // THIS HAS BEEN FIXED AT 1309291826.
     // 2nd. delete the index if necessary.
     // link this tack to the last tack.

@@ -65,7 +65,8 @@ int main() {
         cout << "Input flag for each experiment: 1 for run, 0 for not." << endl;
         for(int i = 0; i < EX_LAST_FLAG; ++i){
             cout << flagStrArray[i] << endl;
-            cin >> flag;
+            //cin >> flag;
+            flag = 1;
             if(flag == 1){
                 flagArray[i] = true;
             }else if(flag == 0){
@@ -75,7 +76,7 @@ int main() {
     }
 
     // for test
-    if(flagArray[EX_LAST_FLAG]){
+    if(flagArray[EX_ASM_TEST]){
         ASMTimer* at = ASMTimer::request();
         at->start();
         at->end();
@@ -88,17 +89,84 @@ int main() {
                 << at->getFrequency() / 1000000000.0 << "GHz" << endl;
         at->release();
     }
-    if(flagArray[EX_POISSON_TEST]){
+    if(!flagArray[EX_POISSON_TEST]){
         Helper h;
         int n;
-        cout<<"generate time:"<<endl;
-        cin>>n;
-        for (int i = 0; i < n; ++i) {
-            cout<< h.P_Rand(20)<<endl;
+        cout << "generate time:" << endl;
+        cin >> n;
+        for(int i = 0; i < n; ++i){
+            cout << h.P_Rand(20) << endl;
         }
     }
-    if(flagArray[EX_ARRAY_TEST]){
+    if(!flagArray[EX_ARRAY_TEST]){
+        Generator* gn = new Generator();
+        gn->setGenerator(1, 20, 0, 3600, 8, 400, 1);
+        BaseAdmissionController* ct;
+        ASMTimer* timer = ASMTimer::request();
+        unsigned int t_total = 0;
+        unsigned int t_total1 = 0;
+        unsigned int t_setTime = 0;
+        unsigned int t_accept = 0;
+        unsigned int t_storage = 0;
+        unsigned int n_accetp0 = 0;
+        unsigned int n_accetp1 = 0;
+        unsigned int curTime = 0;
+        Request* r = new Request[100000];
 
+        for(int i = 0; i < 100000; i++){
+            gn->getNext(&r[i]);
+        }
+        for(int n = 0; n < 10; ++n){
+            //t_total = 0;
+            t_setTime = 0;
+            t_accept = 0;
+            t_storage = 0;
+            curTime = 0;
+            CTLink* ct0 = new CTLink(400, 4000);
+            ct0->iMaxResource = 100;
+            CILink* ci0 = new CILink(400, 4000);
+            ci0->iMaxResource = 100;
+            if(n % 2 == 0){
+                ct = dynamic_cast<BaseAdmissionController*>(ct0);
+            }else{
+                ct = dynamic_cast<BaseAdmissionController*>(ci0);
+            }
+            //Request temp;
+            bool flag = true;
+            for(int i = 0; i < 100000; i++){
+                curTime += 1;
+                timer->start();
+                ct->setTime(curTime);
+                timer->end();
+                t_setTime += timer->getCounts();
+                timer->start();
+                flag = ct->accept(r[i]);
+                timer->end();
+                t_accept += timer->getCounts();
+                if(flag){
+                    timer->start();
+                    ct->forceInsert(r[i]);
+                    timer->end();
+                    if(n % 2 == 0){
+                        n_accetp0++;
+                    }else{
+                        n_accetp1++;
+                    }
+                }
+                t_storage += timer->getCounts();
+            }
+            if(n % 2 == 0){
+                t_total += (t_setTime + t_storage + t_accept) / 10;
+            }else{
+                t_total1 += (t_setTime + t_storage + t_accept) / 10;
+            }
+            cout << (n % 2 == 0 ? "ct:" : "ci:") << endl;
+            cout << "settime: " << t_setTime << endl;
+            cout << "accept: " << t_accept << endl;
+            cout << "storage: " << t_storage << endl;
+        }
+        cout << "ct: " << t_total << "\t" << n_accetp0 << endl;
+        cout << "ci: " << t_total1 << "\t" << n_accetp1 << endl;
     }
 }
 
