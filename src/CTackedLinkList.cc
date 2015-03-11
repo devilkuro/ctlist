@@ -180,9 +180,12 @@ void exStartPhaseTest() {
 		// initialize the storages: 0~CArray,1~CIlink,2~CTlink
 		unsigned int max_range = g_TS_Up + g_TD_Limit;
 		unsigned int index_num = max_range / g_Interval_Avg / 4;
-		ct[0] = new CArrayList(max_range, 1);
+		ct[0] = new CArrayList(max_range+2, 1);
+		ct[0]->setResourceCap(100);
 		ct[1] = new CILink(index_num, max_range);
+		ct[1]->setResourceCap(100);
 		ct[2] = new CTLink(index_num, max_range);
+		ct[2]->setResourceCap(100);
 
 		// set temporary statistics variables
 		unsigned int t_SetTime[3] = { 0, 0, 0 };
@@ -205,9 +208,9 @@ void exStartPhaseTest() {
 		bool flag = false;
 		for (unsigned int ocn = 0; ocn < outCircleNum; ocn++) {
 			// inner circle for different storage types;
+			Sleep(1);
 			for (int n_type = 0; n_type < 3; ++n_type) {
 				// release cpu time
-				Sleep(50);
 				curTime = oldTime;
 				curCircleNum = startInnerCircle;
 				for (; curCircleNum < endInnerCircle; curCircleNum++) {

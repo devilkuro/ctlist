@@ -17,6 +17,7 @@ public:
     virtual bool accept(Request request) = 0;
     virtual bool forceInsert(Request request) = 0;
     virtual bool insert(Request request) = 0;
+    virtual void setResourceCap(unsigned int maxResource) = 0;
 };
 
 #endif /* BASEADMISSIONCONTROLLER_H_ */

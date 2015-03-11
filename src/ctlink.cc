@@ -268,3 +268,7 @@ bool CTLink::forceInsert(Request request) {
     }
     return true;
 }
+
+void CTLink::setResourceCap(unsigned int maxResource) {
+	iMaxResource = maxResource;
+}

@@ -40,6 +40,7 @@ public:
     virtual void setTime(unsigned int t); //set the current time.
     virtual bool accept(Request request); //to judge whether the request r can be accecpted or not
     virtual bool forceInsert(Request request);
+    virtual void setResourceCap(unsigned int maxResource);
     virtual bool Output(); // display the link list.
 private:
     unsigned int CT_TACK_NUM;

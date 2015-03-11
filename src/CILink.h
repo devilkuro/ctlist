@@ -37,6 +37,7 @@ public:
     virtual bool accept(Request r); //to judge whether the request r can be accecpted or not
     virtual bool forceInsert(Request r);
     virtual bool insert(Request r); //return true if success.
+    virtual void setResourceCap(unsigned int maxResource);
     virtual bool Output(); // display the link list.
 private:
     // add private member variable here

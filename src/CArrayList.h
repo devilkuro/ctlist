@@ -21,6 +21,7 @@ public:
     void setTime(unsigned int time);
     bool accept(Request request);
     bool forceInsert(Request request);
+    virtual void setResourceCap(unsigned int maxResource);
 protected:
     unsigned int getIndex(unsigned int t);
 public:

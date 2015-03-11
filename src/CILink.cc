@@ -218,3 +218,7 @@ bool CILink::forceInsert(Request r) {
 unsigned int CILink::getIndexLoc(unsigned int t) {
     return (t / CI_INDEX_INTERVAL) % CI_INDEX_ARRAY_SIZE;
 }
+
+void CILink::setResourceCap(unsigned int maxResource) {
+	iMaxResource = maxResource;
+}
