@@ -13,6 +13,8 @@
 #include "Generator.h"
 #include "PreciseTimer.h"
 #include "ASMTimer.h"
+#include "StatisticsRecordTools.h"
+//#include "stdlib.h"
 
 template<class T> string m_toStr(T tmp) {
     stringstream ss;
@@ -51,13 +53,15 @@ int main() {
     enum ExperimentCode {
         EX_ASM_TEST = 0,
         EX_POISSON_TEST,
-        EX_ARRAY_TEST,
+        EX_DEVELOP_TEST,
+        EX_START_PHASE_TEST,
         EX_LAST_FLAG
     };
     string flagStrArray[] = {
             "EX_ASM_TEST",
             "EX_POISSON_TEST",
-            "EX_ARRAY_TEST",
+            "EX_DEVELOP_TEST",
+            "EX_START_PHASE_TEST",
             "EX_LAST_FLAG" };
     bool *flagArray = new bool[EX_LAST_FLAG];
     {
@@ -76,7 +80,7 @@ int main() {
     }
 
     // for test
-    if(flagArray[EX_ASM_TEST]){
+    if(!flagArray[EX_ASM_TEST]){
         ASMTimer* at = ASMTimer::request();
         at->start();
         at->end();
@@ -98,12 +102,12 @@ int main() {
             cout << h.P_Rand(20) << endl;
         }
     }
-    if(!flagArray[EX_ARRAY_TEST]){
+    if(flagArray[EX_DEVELOP_TEST]){
         Generator* gn = new Generator();
-        gn->setGenerator(1, 20, 0, 3600, 8, 400, 1);
+        gn->setGenerator(1, 20, 0, 36000, 800, 4000, 10);
         BaseAdmissionController* ct;
         ASMTimer* timer = ASMTimer::request();
-        unsigned int t_total = 0;
+        unsigned int t_total0 = 0;
         unsigned int t_total1 = 0;
         unsigned int t_setTime = 0;
         unsigned int t_accept = 0;
@@ -112,20 +116,22 @@ int main() {
         unsigned int n_accetp1 = 0;
         unsigned int curTime = 0;
         Request* r = new Request[100000];
+        unsigned int* interval = new unsigned int[100000];
 
         for(int i = 0; i < 100000; i++){
-            gn->getNext(&r[i]);
+            interval[i] = gn->getNext(&r[i]);
         }
-        for(int n = 0; n < 10; ++n){
+        for(int n = 0; n < 20; ++n){
+            Sleep(50);
             //t_total = 0;
             t_setTime = 0;
             t_accept = 0;
             t_storage = 0;
             curTime = 0;
-            CTLink* ct0 = new CTLink(400, 4000);
-            ct0->iMaxResource = 100;
-            CILink* ci0 = new CILink(400, 4000);
-            ci0->iMaxResource = 100;
+            CTLink* ct0 = new CTLink(800, 40000);
+            ct0->iMaxResource = 200;
+            CILink* ci0 = new CILink(800, 40000);
+            ci0->iMaxResource = 200;
             if(n % 2 == 0){
                 ct = dynamic_cast<BaseAdmissionController*>(ct0);
             }else{
@@ -133,8 +139,8 @@ int main() {
             }
             //Request temp;
             bool flag = true;
-            for(int i = 0; i < 100000; i++){
-                curTime += 1;
+            for(int i = 0; i < 1000; i++){
+                curTime += interval[i];
                 timer->start();
                 ct->setTime(curTime);
                 timer->end();
@@ -156,7 +162,7 @@ int main() {
                 t_storage += timer->getCounts();
             }
             if(n % 2 == 0){
-                t_total += (t_setTime + t_storage + t_accept) / 10;
+                t_total0 += (t_setTime + t_storage + t_accept) / 10;
             }else{
                 t_total1 += (t_setTime + t_storage + t_accept) / 10;
             }
@@ -164,9 +170,25 @@ int main() {
             cout << "settime: " << t_setTime << endl;
             cout << "accept: " << t_accept << endl;
             cout << "storage: " << t_storage << endl;
+            delete ct0;
+            delete ci0;
         }
-        cout << "ct: " << t_total << "\t" << n_accetp0 << endl;
+        cout << "ct: " << t_total0 << "\t" << n_accetp0 << endl;
         cout << "ci: " << t_total1 << "\t" << n_accetp1 << endl;
+        delete interval;
+        delete[] r;
+    }
+    if(!flagArray[EX_START_PHASE_TEST]){
+        // statistics parameters
+        unsigned int s_Interval;
+        // requests parameters
+        unsigned int g_BW_Down = 1;
+        unsigned int g_BW_Up = 20;
+        unsigned int g_TS_Down = 0;
+        unsigned int g_TS_Up = 36000;
+        unsigned int g_TD_Avg = 80;
+        unsigned int g_TD_Limit = 4000;
+        unsigned int g_Interval_Avg = 10;
     }
 }
 

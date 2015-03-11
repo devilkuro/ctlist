@@ -15,6 +15,7 @@ CILink::CILink(unsigned int inum, unsigned int rmax) {
 }
 
 CILink::~CILink() {
+    cout<<"~CILink"<<endl;
     // free the link list
     while(head != NULL){
         CINode* temp = head;

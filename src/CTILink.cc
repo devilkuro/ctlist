@@ -15,6 +15,7 @@ CTILink::CTILink(unsigned int tnum, unsigned int inum, unsigned int max) {
 }
 
 CTILink::~CTILink() {
+    cout<<"~CTILink"<<endl;
     // get the first alive tack, the one before iCurrentTime
     unsigned int aliveTackLoc = iCurrentTime / CTI_TACK_INTERVAL;
     if(aliveTackLoc < 1){

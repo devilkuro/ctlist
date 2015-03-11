@@ -15,6 +15,7 @@ CTLink::CTLink(unsigned int tnum, unsigned int rmax) {
 }
 
 CTLink::~CTLink() {
+    cout<<"~CTLink"<<endl;
     // get the first alive tack, the one before iCurrentTime
     unsigned int iStartTackNum = iCurrentTime / CT_TACK_INTERVAL;
     if(iStartTackNum < 1){
