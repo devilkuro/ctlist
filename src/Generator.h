@@ -18,6 +18,8 @@ class Generator {
 public:
     Generator();
     virtual ~Generator();
+private:
+    Helper hp;
 public:
     unsigned int bw_down;
     unsigned int bw_up;
@@ -29,7 +31,7 @@ public:
 public:
     void setGenerator(unsigned int bw_down, unsigned int bw_up,
             unsigned int ts_down, unsigned int ts_up, unsigned int td_ave,
-            unsigned int td_limit, unsigned int interval);
+            unsigned int td_limit, unsigned int interval, unsigned int seed = 0);
     bool output(const char* fileName, unsigned int t); // create a file to record the request list. Return true if succeed.
     unsigned int getNext(Request* rq); //generate a request and return the interval before this request.
 };

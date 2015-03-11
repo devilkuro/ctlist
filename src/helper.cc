@@ -62,3 +62,7 @@ double Helper::E_Rand(double Lamda) {
 
     return e;
 }
+
+void Helper::setSeed(unsigned int seed) {
+    srand(seed);
+}

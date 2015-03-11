@@ -104,7 +104,7 @@ int main() {
     }
     if(flagArray[EX_DEVELOP_TEST]){
         Generator* gn = new Generator();
-        gn->setGenerator(1, 20, 0, 36000, 800, 4000, 10);
+        gn->setGenerator(1, 20, 0, 36000, 800, 36000, 10);
         BaseAdmissionController* ct;
         ASMTimer* timer = ASMTimer::request();
         unsigned int t_total0 = 0;
@@ -121,16 +121,17 @@ int main() {
         for(int i = 0; i < 100000; i++){
             interval[i] = gn->getNext(&r[i]);
         }
-        for(int n = 0; n < 20; ++n){
+        cout<<r[1000].bw<<endl;
+        for(int n = 0; n < 2; ++n){
             Sleep(50);
             //t_total = 0;
             t_setTime = 0;
             t_accept = 0;
             t_storage = 0;
             curTime = 0;
-            CTLink* ct0 = new CTLink(800, 40000);
+            CTLink* ct0 = new CTLink(720, 72000);
             ct0->iMaxResource = 200;
-            CILink* ci0 = new CILink(800, 40000);
+            CILink* ci0 = new CILink(720, 72000);
             ci0->iMaxResource = 200;
             if(n % 2 == 0){
                 ct = dynamic_cast<BaseAdmissionController*>(ct0);

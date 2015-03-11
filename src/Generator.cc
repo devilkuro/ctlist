@@ -16,6 +16,7 @@ Generator::Generator() {
     td_ave = 100;
     td_limit = 100;
     interval = 100;
+    hp.setSeed(0);
 }
 
 Generator::~Generator() {
@@ -53,7 +54,6 @@ bool Generator::output(const char* fileName, unsigned int t) {
 }
 
 unsigned int Generator::getNext(Request* rq) {
-    Helper hp;
     rq->bw = hp.U_Randint(bw_down, bw_up);
     rq->ts = hp.U_Randint(ts_down, ts_up);
     rq->td = (unsigned int) hp.E_Rand(1.0 / td_ave) % td_limit;
@@ -62,7 +62,7 @@ unsigned int Generator::getNext(Request* rq) {
 
 void Generator::setGenerator(unsigned int bw_down, unsigned int bw_up,
         unsigned int ts_down, unsigned int ts_up, unsigned int td_ave,
-        unsigned int td_limit, unsigned int interval) {
+        unsigned int td_limit, unsigned int interval,unsigned int seed) {
     this->bw_down = bw_down;
     this->bw_up = bw_up;
     this->ts_down = ts_down;
@@ -70,4 +70,5 @@ void Generator::setGenerator(unsigned int bw_down, unsigned int bw_up,
     this->td_ave = td_ave;
     this->td_limit = td_limit;
     this->interval = interval;
+    hp.setSeed(seed);
 }
