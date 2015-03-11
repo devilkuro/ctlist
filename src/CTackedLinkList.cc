@@ -207,10 +207,10 @@ void exStartPhaseTest() {
 		unsigned int curTime = 0;
 		bool flag = false;
 		for (unsigned int ocn = 0; ocn < outCircleNum; ocn++) {
-			// inner circle for different storage types;
+			// release cpu time
 			Sleep(1);
+			// inner circle for different storage types;
 			for (int n_type = 0; n_type < 3; ++n_type) {
-				// release cpu time
 				curTime = oldTime;
 				curCircleNum = startInnerCircle;
 				for (; curCircleNum < endInnerCircle; curCircleNum++) {
@@ -235,7 +235,6 @@ void exStartPhaseTest() {
 						t_nAccept[n_type]++;
 					}
 				}
-				curTime = oldTime;
 				curCircleNum = startInnerCircle;
 			}
 			// statistics process
