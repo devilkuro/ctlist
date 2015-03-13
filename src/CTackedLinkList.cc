@@ -50,19 +50,19 @@ DWORD WINAPI RecordFor5(LPVOID tmp) {
     return 0;
 }
 void exASMTest() {
-	ASMTimer* at = ASMTimer::request();
-	at->start();
-	at->end();
-	cout << at->getCounts() << ":" << endl;
-	int a = 200;
-	at->start();
-	Sleep(a);
-	at->end();
-	cout << at->getMilliseconds() << "ms@" << at->getFrequency() / 1000000000.0
-			<< "GHz" << endl;
-	at->release();
+    ASMTimer* at = ASMTimer::request();
+    at->start();
+    at->end();
+    cout << at->getCounts() << ":" << endl;
+    int a = 200;
+    at->start();
+    Sleep(a);
+    at->end();
+    cout << at->getMilliseconds() << "ms@" << at->getFrequency() / 1000000000.0
+            << "GHz" << endl;
+    at->release();
 }
-void exPoissonTest(){
+void exPoissonTest() {
     Helper h;
     int n;
     cout << "generate time:" << endl;
@@ -71,7 +71,7 @@ void exPoissonTest(){
         cout << h.P_Rand(20) << endl;
     }
 }
-void exDevelopTest(){
+void exDevelopTest() {
     Generator* gn = new Generator();
     gn->setGenerator(1, 20, 0, 36000, 800, 36000, 10);
     BaseAdmissionController* ct;
@@ -90,7 +90,7 @@ void exDevelopTest(){
     for(int i = 0; i < 100000; i++){
         interval[i] = gn->getNext(&r[i]);
     }
-    cout<<r[1000].bw<<endl;
+    cout << r[1000].bw << endl;
     for(int n = 0; n < 2; ++n){
         Sleep(50);
         //t_total = 0;
@@ -150,138 +150,154 @@ void exDevelopTest(){
     delete gn;
 }
 void exStartPhaseTest() {
-	// statistics parameters
-	unsigned int s_Interval = 100;
-	unsigned int s_Request_Num = 10000;
-	// requests parameters
-	unsigned int g_BW_Down = 1;
-	unsigned int g_BW_Up = 20;
-	unsigned int g_TS_Down = 0;
-	unsigned int g_TS_Up = 36000;
-	unsigned int g_TD_Avg = 128;
-	unsigned int g_TD_Limit = 512;
-	unsigned int g_Interval_Avg = 10;
-	// initialize the test units
-	BaseAdmissionController* ct[3];
-	ASMTimer* timer = ASMTimer::request();
-	StatisticsRecordTools* staTool = StatisticsRecordTools::request();
-	Generator* gn = new Generator();
-	Request* r = new Request[s_Request_Num];
-	unsigned int* interval = new unsigned int[s_Request_Num];
-	// run the experiment under n_round different settings : TD max~ 512,4096,32768
-	for (int n_round = 0; n_round < 3;
-			++n_round, g_TD_Avg *= 8, g_TD_Limit *= 8) {
-		gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Avg,
-				g_TD_Limit, g_Interval_Avg);
-		// set requests and the intervals
-		for (unsigned int i = 0; i < s_Request_Num; i++) {
-			interval[i] = gn->getNext(&r[i]);
-		}
-		// initialize the storages: 0~CArray,1~CIlink,2~CTlink
-		unsigned int max_range = g_TS_Up + g_TD_Limit;
-		unsigned int index_num = max_range / g_Interval_Avg / 4;
-		ct[0] = new CArrayList(max_range+2, 1);
-		ct[0]->setResourceCap(100);
-		ct[1] = new CILink(index_num, max_range);
-		ct[1]->setResourceCap(100);
-		ct[2] = new CTLink(index_num, max_range);
-		ct[2]->setResourceCap(100);
+    // statistics parameters
+    unsigned int s_Interval = 100;
+    unsigned int s_Request_Num = 10000;
+    // requests parameters
+    unsigned int g_BW_Down = 1;
+    unsigned int g_BW_Up = 20;
+    unsigned int g_TS_Down = 0;
+    unsigned int g_TS_Up = 36000;
+    unsigned int g_TD_Avg = 128;
+    unsigned int g_TD_Limit = 512;
+    unsigned int g_Interval_Avg = 10;
+    // initialize the test units
+    BaseAdmissionController* ct[3];
+    ASMTimer* timer = ASMTimer::request();
+    StatisticsRecordTools* stool = StatisticsRecordTools::request();
+    Generator* gn = new Generator();
+    Request* r = new Request[s_Request_Num];
+    unsigned int* interval = new unsigned int[s_Request_Num];
+    double r_radio = 0.8;
+    // run the experiment under n_round different settings : TD max~ 512,4096,32768
+    for(int n_round = 0; n_round < 3;
+            ++n_round, g_TD_Avg *= 8, g_TD_Limit *= 8){
+        gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Avg,
+                g_TD_Limit, g_Interval_Avg);
+        unsigned int max_resource = (g_BW_Down+g_BW_Up)/2*g_TD_Avg/g_Interval_Avg*r_radio;
+        // set requests and the intervals
+        for(unsigned int i = 0; i < s_Request_Num; i++){
+            interval[i] = gn->getNext(&r[i]);
+        }
+        // initialize the storages: 0~CArray,1~CIlink,2~CTlink
+        unsigned int max_range = g_TS_Up + g_TD_Limit;
+        unsigned int index_num = max_range / g_Interval_Avg / 4;
+        ct[0] = new CArrayList(max_range, 1);
+        ct[0]->setResourceCap(max_resource);
+        ct[1] = new CILink(index_num, max_range);
+        ct[1]->setResourceCap(max_resource);
+        ct[2] = new CTLink(index_num, max_range);
+        ct[2]->setResourceCap(max_resource);
 
-		// set temporary statistics variables
-		unsigned int t_SetTime[3] = { 0, 0, 0 };
-		unsigned int t_Accept[3] = { 0, 0, 0 };
-		unsigned int t_Storage[3] = { 0, 0, 0 };
-		unsigned int t_TSetTime[3] = { 0, 0, 0 };
-		unsigned int t_TAccept[3] = { 0, 0, 0 };
-		unsigned int t_TStorage[3] = { 0, 0, 0 };
-		unsigned int t_Total[3] = { 0, 0, 0 };
-		unsigned int t_nAccept[3] = { 0, 0, 0 };
+        // set temporary statistics variables
+        unsigned int t_SetTime[3] = { 0, 0, 0 };
+        unsigned int t_Accept[3] = { 0, 0, 0 };
+        unsigned int t_Storage[3] = { 0, 0, 0 };
+        unsigned int t_TSetTime[3] = { 0, 0, 0 };
+        unsigned int t_TAccept[3] = { 0, 0, 0 };
+        unsigned int t_TStorage[3] = { 0, 0, 0 };
+        unsigned int t_Total[3] = { 0, 0, 0 };
+        unsigned int t_nAccept[3] = { 0, 0, 0 };
 
-		// (s_Request_Num+s_Interval-1)/s_Interval rounds out circle
-		unsigned int outCircleNum = (s_Request_Num + s_Interval - 1)
-				/ s_Interval;
-		unsigned int endInnerCircle = s_Interval;
-		unsigned int startInnerCircle = 0;
-		unsigned int curCircleNum = 0;
-		unsigned int oldTime = 0;
-		unsigned int curTime = 0;
-		bool flag = false;
-		for (unsigned int ocn = 0; ocn < outCircleNum; ocn++) {
-			// release cpu time
-			Sleep(1);
-			// inner circle for different storage types;
-			for (int n_type = 0; n_type < 3; ++n_type) {
-				curTime = oldTime;
-				curCircleNum = startInnerCircle;
-				for (; curCircleNum < endInnerCircle; curCircleNum++) {
-					if (curCircleNum >= s_Request_Num) {
-						cout << "ERROR!!" << endl;
-					}
-					// run and statistics
-					curTime += interval[curCircleNum];
-					timer->start();
-					ct[n_type]->setTime(curTime);
-					timer->end();
-					t_SetTime[n_type] += timer->getCounts();
-					timer->start();
-					flag = ct[n_type]->accept(r[curCircleNum]);
-					timer->end();
-					t_Accept[n_type] += timer->getCounts();
-					if (flag) {
-						timer->start();
-						ct[n_type]->forceInsert(r[curCircleNum]);
-						timer->end();
-						t_Storage[n_type] += timer->getCounts();
-						t_nAccept[n_type]++;
-					}
-				}
-				curCircleNum = startInnerCircle;
-			}
-			// statistics process
-			for (int n_type = 0; n_type < 3; ++n_type) {
-				stringstream ss;
-				ss << "cost per " << s_Interval
-						<< " rounds:type,round,settime,accept,storage,total";
-				string name = ss.str();
-				ss.str("");
-				staTool->changeName(name) << n_type << ocn << t_SetTime[n_type]
-						<< t_Accept[n_type] << t_Storage[n_type]
-						<<t_SetTime[n_type] + t_Accept[n_type]
-								+ t_Storage[n_type] << staTool->endl;
-				t_TSetTime[n_type] += t_SetTime[n_type];
-				t_TAccept[n_type] += t_Accept[n_type];
-				t_TStorage[n_type] += t_Storage[n_type];
-				t_SetTime[n_type] = 0;
-				t_Accept[n_type] = 0;
-				t_Storage[n_type] = 0;
-				t_Total[n_type] = t_TSetTime[n_type] + t_TAccept[n_type]
-						+ t_TStorage[n_type];
-				ss << "cost until " << endInnerCircle
-						<< " rounds:type,round,settime,accept,storage,naccept,total";
-				name = ss.str();
-				ss.str("");
-				staTool->changeName(name) << n_type << ocn << t_TSetTime[n_type]
-						<< t_TAccept[n_type] << t_TStorage[n_type]
-						<<  t_nAccept[n_type]<<t_Total[n_type] << staTool->endl;
-			}
-			oldTime = curTime;
-			startInnerCircle = endInnerCircle;
-			endInnerCircle =
-					endInnerCircle + s_Interval > s_Request_Num ?
-							s_Request_Num : endInnerCircle + s_Interval;
-		}
-		for (int n_type = 0; n_type < 3; ++n_type) {
-			stringstream ss;
-			ss << "finally cost at " << n_round
-					<< " n_round:type,n_round,g_TD_Limit,settime,accept,storage,naccept,total";
-			string name = ss.str();
-			ss.str("");
-			staTool->changeName(name) << n_type << n_round << g_TD_Limit
-					<< t_TSetTime[n_type] << t_TAccept[n_type]
-					<< t_TStorage[n_type] << t_nAccept[n_type]<<t_Total[n_type] << staTool->endl;
-		}
-	}
-	staTool->output("experiment-startphase.txt", "results");
+        // (s_Request_Num+s_Interval-1)/s_Interval rounds out circle
+        unsigned int outCircleNum = (s_Request_Num + s_Interval - 1)
+                / s_Interval;
+        unsigned int endInnerCircle = s_Interval;
+        unsigned int startInnerCircle = 0;
+        unsigned int curCircleNum = 0;
+        unsigned int oldTime = 0;
+        unsigned int curTime = 0;
+        bool flag = false;
+        for(unsigned int ocn = 0; ocn < outCircleNum; ocn++){
+            // release cpu time
+            Sleep(1);
+            // inner circle for different storage types;
+            for(int n_type = 0; n_type < 3; ++n_type){
+                curTime = oldTime;
+                curCircleNum = startInnerCircle;
+                for(; curCircleNum < endInnerCircle; curCircleNum++){
+                    if(curCircleNum >= s_Request_Num){
+                        cout << "ERROR!!" << endl;
+                    }
+                    // run and statistics
+                    curTime += interval[curCircleNum];
+                    timer->start();
+                    ct[n_type]->setTime(curTime);
+                    timer->end();
+                    t_SetTime[n_type] += timer->getCounts();
+                    timer->start();
+                    flag = ct[n_type]->accept(r[curCircleNum]);
+                    timer->end();
+                    t_Accept[n_type] += timer->getCounts();
+                    if(flag){
+                        timer->start();
+                        ct[n_type]->forceInsert(r[curCircleNum]);
+                        timer->end();
+                        t_Storage[n_type] += timer->getCounts();
+                        t_nAccept[n_type]++;
+                    }
+                }
+                curCircleNum = startInnerCircle;
+            }
+            // end the loop
+            oldTime = curTime;
+            startInnerCircle = endInnerCircle;
+            endInnerCircle =
+                    endInnerCircle + s_Interval > s_Request_Num ? s_Request_Num :
+                            endInnerCircle + s_Interval;
+            // release cpu time
+            Sleep(1);
+            // statistics process
+            stringstream ss;
+            string name;
+            ss
+                    << "cost of ocn rounds:n_round,limit,outCircleNum(ocn),round(endInnerCircle)";
+            for(int n_type = 0; n_type < 3; ++n_type){
+                ss << ",settime-" << n_type << ",accept-" << n_type
+                        << ",storage-" << n_type << ",naccept-" << n_type
+                        << ",total-" << n_type << "";
+            }
+            name = ss.str();
+            ss.str("");
+            stool->changeName(name) << n_round <<g_TD_Limit<< ocn<<endInnerCircle;
+            for(int n_type = 0; n_type < 3; ++n_type){
+                stool->get() << t_SetTime[n_type] << t_Accept[n_type]
+                        << t_Storage[n_type] << t_nAccept[n_type]
+                        << t_SetTime[n_type] + t_Accept[n_type]
+                                + t_Storage[n_type];
+            }
+            stool->get() << stool->endl;
+            // set statistics variables
+            for(int n_type = 0; n_type < 3; ++n_type){
+                t_TSetTime[n_type] += t_SetTime[n_type];
+                t_TAccept[n_type] += t_Accept[n_type];
+                t_TStorage[n_type] += t_Storage[n_type];
+                t_SetTime[n_type] = 0;
+                t_Accept[n_type] = 0;
+                t_Storage[n_type] = 0;
+                t_Total[n_type] = t_TSetTime[n_type] + t_TAccept[n_type]
+                        + t_TStorage[n_type];
+            }
+        }
+        stringstream ss;
+        string name;
+        ss << "finally cost until n_round:n_round,g_TD_Limit";
+        for(int n_type = 0; n_type < 3; ++n_type){
+            ss << ",settime-" << n_type << ",accept-" << n_type << ",storage-"
+                    << n_type << ",naccept-" << n_type << ",total-" << n_type
+                    << "";
+        }
+        name = ss.str();
+        ss.str("");
+        stool->changeName(name) << n_round << g_TD_Limit;
+        for(int n_type = 0; n_type < 3; ++n_type){
+            stool->get() << t_TSetTime[n_type] << t_TAccept[n_type]
+                    << t_TStorage[n_type] << t_nAccept[n_type]
+                    << t_Total[n_type];
+        }
+        stool->get() << stool->endl;
+    }
+    stool->output("experiment-startphase.txt", "results");
 }
 int main() {
     enum ExperimentCode {
@@ -315,16 +331,16 @@ int main() {
 
     // for test
     if(!flagArray[EX_ASM_TEST]){
-    	exASMTest();
+        exASMTest();
     }
     if(!flagArray[EX_POISSON_TEST]){
-    	exPoissonTest();
+        exPoissonTest();
     }
-    if(flagArray[EX_DEVELOP_TEST]){
-    	exDevelopTest();
+    if(!flagArray[EX_DEVELOP_TEST]){
+        exDevelopTest();
     }
     if(flagArray[EX_START_PHASE_TEST]){
-    	exStartPhaseTest();
+        exStartPhaseTest();
     }
 }
 

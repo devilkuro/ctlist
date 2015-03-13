@@ -66,7 +66,8 @@ public:
             std::fstream::openmode openmode = std::fstream::out);
     void outputAll(string name, string dir = "",
             std::fstream::openmode openmode = std::fstream::out);
-
+    void outputSeparate(string name, string dir = "",
+            std::fstream::openmode openmode = std::fstream::out);
     virtual void initialize();
     virtual void finish();
 

@@ -208,5 +208,30 @@ StatisticsRecordTools& StatisticsRecordTools::get() {
     return *ptr_singleton;
 }
 
+void StatisticsRecordTools::outputSeparate(string name, string dir,
+        std::fstream::openmode openmode) {
+    for(GlobalStatisticsMap::iterator it = globalStatisticsMap.begin();
+            it != globalStatisticsMap.end(); it++){
+        std::fstream fs;
+        string path;
+        if(dir != ""){
+            path = dir + "\\" + name;
+        }else{
+            if(m_default_dir_name != ""){
+                path = m_default_dir_name + "\\" + name;
+            }else{
+                path = name;
+            }
+        }
+        fs.open(path.c_str(), std::fstream::out | openmode);
+        if(!fs.good()){
+            std::cout << "error:" << std::endl;
+            std::cout << "eof()\t" << fs.eof() << std::endl;
+            std::cout << "fail()\t" << fs.fail() << std::endl;
+            std::cout << "bad()\t" << fs.bad() << std::endl;
+        }
+        // TODO add file print process
+    }
+}
 }  // namespace Fanjing
 
