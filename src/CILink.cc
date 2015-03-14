@@ -132,6 +132,7 @@ bool CILink::accept(Request r) {
     }
     // decide to accept or not.
     temp = pre2st;
+    // FIXME when temp->next == NULL, the temp->rs + r.bw > iMaxResource will be skipped, make the request be accepted wrong.
     while(temp->next != NULL){
         // if the resource if not enough, return NULL.
         if(temp->rs + r.bw > iMaxResource){
@@ -152,6 +153,7 @@ bool CILink::accept(Request r) {
             pre2et = temp;
         }
     }else{
+
         pre2et = temp;
     }
 
