@@ -153,6 +153,9 @@ void exStartPhaseTest() {
     // statistics parameters
     unsigned int s_Interval = 100;
     unsigned int s_Request_Num = 10000;
+    // try to minimum sample error which is cause by the time slot of the process
+    unsigned int n_repeatTimes = 5; // repeat times of each statistics;
+    unsigned int n_sample = 3;  // the number of samples
     // requests parameters
     unsigned int g_BW_Down = 1;
     unsigned int g_BW_Up = 20;
@@ -162,9 +165,11 @@ void exStartPhaseTest() {
     unsigned int g_TD_Limit = 512;
     unsigned int g_Interval_Avg = 10;
     // initialize the test units
-    BaseAdmissionController* ct[3];
+    BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
+            * n_sample];
     ASMTimer* timer = ASMTimer::request();
     StatisticsRecordTools* stool = StatisticsRecordTools::request();
+    stool->setDefaultDir("results");
     Generator* gn = new Generator();
     Request* r = new Request[s_Request_Num];
     unsigned int* interval = new unsigned int[s_Request_Num];
@@ -174,7 +179,8 @@ void exStartPhaseTest() {
             ++n_round, g_TD_Avg *= 8, g_TD_Limit *= 8){
         gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Avg,
                 g_TD_Limit, g_Interval_Avg);
-        unsigned int max_resource = (g_BW_Down+g_BW_Up)/2*g_TD_Avg/g_Interval_Avg*r_radio;
+        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Avg
+                / g_Interval_Avg * r_radio;
         // set requests and the intervals
         for(unsigned int i = 0; i < s_Request_Num; i++){
             interval[i] = gn->getNext(&r[i]);
@@ -182,22 +188,38 @@ void exStartPhaseTest() {
         // initialize the storages: 0~CArray,1~CIlink,2~CTlink
         unsigned int max_range = g_TS_Up + g_TD_Limit;
         unsigned int index_num = max_range / g_Interval_Avg / 4;
-        ct[0] = new CArrayList(max_range, 1);
-        ct[0]->setResourceCap(max_resource);
-        ct[1] = new CILink(index_num, max_range);
-        ct[1]->setResourceCap(max_resource);
-        ct[2] = new CTLink(index_num, max_range);
-        ct[2]->setResourceCap(max_resource);
+        for(unsigned int n = 0; n < n_repeatTimes; ++n){
+            ct[n * n_sample + 0] = new CArrayList(max_range, 1);
+            ct[n * n_sample + 0]->setResourceCap(max_resource);
+            ct[n * n_sample + 1] = new CILink(index_num, max_range);
+            ct[n * n_sample + 1]->setResourceCap(max_resource);
+            ct[n * n_sample + 2] = new CTLink(index_num, max_range);
+            ct[n * n_sample + 2]->setResourceCap(max_resource);
+        }
 
         // set temporary statistics variables
-        unsigned int t_SetTime[3] = { 0, 0, 0 };
-        unsigned int t_Accept[3] = { 0, 0, 0 };
-        unsigned int t_Storage[3] = { 0, 0, 0 };
-        unsigned int t_TSetTime[3] = { 0, 0, 0 };
-        unsigned int t_TAccept[3] = { 0, 0, 0 };
-        unsigned int t_TStorage[3] = { 0, 0, 0 };
-        unsigned int t_Total[3] = { 0, 0, 0 };
-        unsigned int t_nAccept[3] = { 0, 0, 0 };
+        unsigned int *t_SetTime = new unsigned int[n_sample];
+        memset(t_SetTime,0,n_sample*sizeof(unsigned int));
+        unsigned int *t_Accept = new unsigned int[n_sample];
+        memset(t_Accept,0,n_sample*sizeof(unsigned int));
+        unsigned int *t_Storage = new unsigned int[n_sample];
+        memset(t_Storage,0,n_sample*sizeof(unsigned int));
+        unsigned int *t_MinSetTime = new unsigned int[n_sample];
+        memset(t_MinSetTime,0,n_sample*sizeof(unsigned int));
+        unsigned int *t_MinAccept = new unsigned int[n_sample];
+        memset(t_MinAccept,0,n_sample*sizeof(unsigned int));
+        unsigned int *t_MinStorage = new unsigned int[n_sample];
+        memset(t_MinStorage,0,n_sample*sizeof(unsigned int));
+        unsigned int *t_TSetTime = new unsigned int[n_sample];
+        memset(t_TSetTime,0,n_sample*sizeof(unsigned int));
+        unsigned int *t_TAccept = new unsigned int[n_sample];
+        memset(t_TAccept,0,n_sample*sizeof(unsigned int));
+        unsigned int *t_TStorage = new unsigned int[n_sample];
+        memset(t_TStorage,0,n_sample*sizeof(unsigned int));
+        unsigned int *t_Total = new unsigned int[n_sample];
+        memset(t_Total,0,n_sample*sizeof(unsigned int));
+        unsigned int *t_nAccept = new unsigned int[n_sample];
+        memset(t_nAccept,0,n_sample*sizeof(unsigned int));
 
         // (s_Request_Num+s_Interval-1)/s_Interval rounds out circle
         unsigned int outCircleNum = (s_Request_Num + s_Interval - 1)
@@ -210,34 +232,90 @@ void exStartPhaseTest() {
         bool flag = false;
         for(unsigned int ocn = 0; ocn < outCircleNum; ocn++){
             // release cpu time
-            Sleep(1);
+            Sleep(5);
             // inner circle for different storage types;
-            for(int n_type = 0; n_type < 3; ++n_type){
-                curTime = oldTime;
-                curCircleNum = startInnerCircle;
-                for(; curCircleNum < endInnerCircle; curCircleNum++){
-                    if(curCircleNum >= s_Request_Num){
-                        cout << "ERROR!!" << endl;
-                    }
-                    // run and statistics
-                    curTime += interval[curCircleNum];
-                    timer->start();
-                    ct[n_type]->setTime(curTime);
-                    timer->end();
-                    t_SetTime[n_type] += timer->getCounts();
-                    timer->start();
-                    flag = ct[n_type]->accept(r[curCircleNum]);
-                    timer->end();
-                    t_Accept[n_type] += timer->getCounts();
-                    if(flag){
+            for(unsigned int n_repeat = 0; n_repeat < n_repeatTimes; ++n_repeat){
+                for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
+                    curTime = oldTime;
+                    curCircleNum = startInnerCircle;
+                    for(; curCircleNum < endInnerCircle; curCircleNum++){
+                        if(curCircleNum >= s_Request_Num){
+                            cout << "ERROR!!" << endl;
+                        }
+                        // run and statistics
+                        curTime += interval[curCircleNum];
                         timer->start();
-                        ct[n_type]->forceInsert(r[curCircleNum]);
+                        ct[n_type]->setTime(curTime);
                         timer->end();
-                        t_Storage[n_type] += timer->getCounts();
-                        t_nAccept[n_type]++;
+                        t_SetTime[n_type] += timer->getCounts();
+                        timer->start();
+                        flag = ct[n_type]->accept(r[curCircleNum]);
+                        timer->end();
+                        t_Accept[n_type] += timer->getCounts();
+                        if(flag){
+                            timer->start();
+                            ct[n_type]->forceInsert(r[curCircleNum]);
+                            timer->end();
+                            t_Storage[n_type] += timer->getCounts();
+                            // the accept time just add once
+                            if (n_repeat == 0) {
+                                t_nAccept[n_type] ++;
+                            }
+                        }
+                    }
+                    curCircleNum = startInnerCircle;
+                    if(n_repeat != 0){
+                        t_MinSetTime[n_type] =
+                                t_MinSetTime[n_type] < t_SetTime[n_type] ? t_MinSetTime[n_type] :
+                                        t_SetTime[n_type];
+                        t_MinAccept[n_type] =
+                                t_MinAccept[n_type] < t_Accept[n_type] ? t_MinAccept[n_type] :
+                                        t_Accept[n_type];
+                        t_MinStorage[n_type] =
+                                t_MinStorage[n_type] < t_Storage[n_type] ? t_MinStorage[n_type] :
+                                        t_Storage[n_type];
+                    }else{
+                        t_MinSetTime[n_type] = t_SetTime[n_type];
+                        t_MinAccept[n_type] = t_Accept[n_type];
+                        t_MinStorage[n_type] = t_Storage[n_type];
                     }
                 }
-                curCircleNum = startInnerCircle;
+                for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
+                    t_SetTime[n_type] = 0;
+                    t_Accept[n_type] = 0;
+                    t_Storage[n_type] = 0;
+                }
+            }
+            // release cpu time
+            Sleep(5);
+            // statistics process
+            stringstream ss;
+            string name;
+            ss
+                    << "cost of ocn rounds:n_round,limit,outCircleNum(ocn),round(endInnerCircle)";
+            for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
+                ss << ",settime-" << n_type << ",accept-" << n_type
+                        << ",storage-" << n_type << ",naccept-" << n_type
+                        << ",total-" << n_type << "";
+            }
+            name = ss.str();
+            ss.str("");
+            stool->changeName(name) << n_round << g_TD_Limit << ocn
+                    << endInnerCircle;
+            for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
+                stool->get() << t_MinSetTime[n_type] << t_MinAccept[n_type]
+                        << t_MinStorage[n_type] << t_nAccept[n_type]
+                        << t_MinSetTime[n_type] + t_MinAccept[n_type]
+                                + t_MinStorage[n_type];
+            }
+            stool->get() << stool->endl;
+            // set statistics variables
+            for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
+                t_TSetTime[n_type] += t_MinSetTime[n_type];
+                t_TAccept[n_type] += t_MinAccept[n_type];
+                t_TStorage[n_type] += t_MinStorage[n_type];
+                t_Total[n_type] = t_TSetTime[n_type] + t_TAccept[n_type]
+                        + t_TStorage[n_type];
             }
             // end the loop
             oldTime = curTime;
@@ -245,39 +323,6 @@ void exStartPhaseTest() {
             endInnerCircle =
                     endInnerCircle + s_Interval > s_Request_Num ? s_Request_Num :
                             endInnerCircle + s_Interval;
-            // release cpu time
-            Sleep(1);
-            // statistics process
-            stringstream ss;
-            string name;
-            ss
-                    << "cost of ocn rounds:n_round,limit,outCircleNum(ocn),round(endInnerCircle)";
-            for(int n_type = 0; n_type < 3; ++n_type){
-                ss << ",settime-" << n_type << ",accept-" << n_type
-                        << ",storage-" << n_type << ",naccept-" << n_type
-                        << ",total-" << n_type << "";
-            }
-            name = ss.str();
-            ss.str("");
-            stool->changeName(name) << n_round <<g_TD_Limit<< ocn<<endInnerCircle;
-            for(int n_type = 0; n_type < 3; ++n_type){
-                stool->get() << t_SetTime[n_type] << t_Accept[n_type]
-                        << t_Storage[n_type] << t_nAccept[n_type]
-                        << t_SetTime[n_type] + t_Accept[n_type]
-                                + t_Storage[n_type];
-            }
-            stool->get() << stool->endl;
-            // set statistics variables
-            for(int n_type = 0; n_type < 3; ++n_type){
-                t_TSetTime[n_type] += t_SetTime[n_type];
-                t_TAccept[n_type] += t_Accept[n_type];
-                t_TStorage[n_type] += t_Storage[n_type];
-                t_SetTime[n_type] = 0;
-                t_Accept[n_type] = 0;
-                t_Storage[n_type] = 0;
-                t_Total[n_type] = t_TSetTime[n_type] + t_TAccept[n_type]
-                        + t_TStorage[n_type];
-            }
         }
         stringstream ss;
         string name;
@@ -297,7 +342,8 @@ void exStartPhaseTest() {
         }
         stool->get() << stool->endl;
     }
-    stool->output("experiment-startphase.txt", "results");
+    stool->output("experiment-startphase.txt");
+    stool->outputSeparate("experiment.txt");
 }
 int main() {
     enum ExperimentCode {
@@ -329,7 +375,7 @@ int main() {
         }
     }
 
-    // for test
+// for test
     if(!flagArray[EX_ASM_TEST]){
         exASMTest();
     }
