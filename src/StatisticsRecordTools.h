@@ -56,17 +56,17 @@ public:
     StatisticsRecordTools& operator<<(uint64_t num);
     StatisticsRecordTools& operator<<(string str);
 
-    StatisticsRecordTools& changeName(string name);
+    StatisticsRecordTools& changeName(string name, string title = "");
     StatisticsRecordTools& get();
 
     void setDefaultDir(string dir);
     void eof();
     void clean();
-    void output(string name, string dir = "", string field = "*",
+    void output(string name, string dir = "", string field = "",
             std::fstream::openmode openmode = std::fstream::out);
     void outputAll(string name, string dir = "",
             std::fstream::openmode openmode = std::fstream::out);
-    void outputSeparate(string name, string dir = "",
+    void outputSeparate(string name, string dir = "", string field = "",
             std::fstream::openmode openmode = std::fstream::out);
     virtual void initialize();
     virtual void finish();
@@ -74,6 +74,7 @@ public:
     static gs_eofType endl;
 protected:
     GlobalStatisticsMap globalStatisticsMap;
+    std::map<string, string> titleMap;
     std::list<StatisticsRecordUnit::DataUnit> unitData;
     string m_name;
     string m_default_dir_name;
@@ -81,6 +82,11 @@ private:
     static StatisticsRecordTools* ptr_singleton;
     StatisticsRecordTools();
     virtual ~StatisticsRecordTools();
+
+    string getValidFileName(string name);
+    string getFileName(string name);
+    string getSuffix(string name);
+    string getTitleFromName(string name);
 };
 
 }  // namespace Fanjing

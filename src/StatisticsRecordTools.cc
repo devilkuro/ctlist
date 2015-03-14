@@ -102,13 +102,15 @@ StatisticsRecordTools& StatisticsRecordTools::operator <<(double num) {
     return *ptr_singleton;
 }
 
-StatisticsRecordTools& StatisticsRecordTools::changeName(string name) {
+StatisticsRecordTools& StatisticsRecordTools::changeName(string name,
+        string title) {
     GlobalStatisticsMap::iterator it;
     m_name = name;
     it = globalStatisticsMap.find(m_name);
     if(it == globalStatisticsMap.end()){
         GlobalStatisticsList* list = new GlobalStatisticsList();
         globalStatisticsMap[m_name] = list;
+        titleMap[m_name] = title;
     }
     unitData.clear();
     return *ptr_singleton;
@@ -168,16 +170,108 @@ void StatisticsRecordTools::output(string name, string dir, string field,
     }
     for(GlobalStatisticsMap::iterator it = globalStatisticsMap.begin();
             it != globalStatisticsMap.end(); it++){
-        if(field == "*" || it->first == field){
+        if(field == "" || it->first == field){
             for(GlobalStatisticsList::iterator lit = it->second->begin();
                     lit != it->second->end(); lit++){
-                fs << it->first << "," << (*lit)->toString() << std::endl;
+                fs
+                        << it->first
+                                + (titleMap[it->first] == "" ? "" :
+                                        (":" + titleMap[it->first])) << ","
+                        << (*lit)->toString() << std::endl;
             }
         }
     }
     fs.close();
 }
 
+void StatisticsRecordTools::outputSeparate(string name, string dir,
+        string field, std::fstream::openmode openmode) {
+    for(GlobalStatisticsMap::iterator it = globalStatisticsMap.begin();
+            it != globalStatisticsMap.end(); it++){
+        if(field == "" || it->first == field){
+            std::fstream fs;
+            string path;
+            string sname = getFileName(name) + "-" + getValidFileName(it->first)
+                    + getSuffix(name);
+            if(dir != ""){
+                path = dir + "\\" + sname;
+            }else{
+                if(m_default_dir_name != ""){
+                    path = m_default_dir_name + "\\" + sname;
+                }else{
+                    path = sname;
+                }
+            }
+            fs.open(path.c_str(), std::fstream::out | openmode);
+            if(!fs.good()){
+                std::cout << "error:" << std::endl;
+                std::cout << "eof()\t" << fs.eof() << std::endl;
+                std::cout << "fail()\t" << fs.fail() << std::endl;
+                std::cout << "bad()\t" << fs.bad() << std::endl;
+            }
+            // print title
+
+            if(titleMap[it->first] == ""){
+                fs << getTitleFromName(it->first) << std::endl;
+            }else{
+                fs << titleMap[it->first] << std::endl;
+            }
+            // print each entry
+            for(GlobalStatisticsList::iterator lit = it->second->begin();
+                    lit != it->second->end(); lit++){
+                fs << (*lit)->toString() << std::endl;
+            }
+        }
+    }
+}
+string StatisticsRecordTools::getTitleFromName(string name) {
+    unsigned int n_first = name.find_first_of(':');
+    unsigned int n_last = name.find_last_of(':');
+    if(n_first != name.npos && n_first == n_last
+            && n_first < name.length() - 1){
+        return name.substr(n_first + 1);
+    }
+    return "";
+}
+string StatisticsRecordTools::getValidFileName(string name) {
+    // get the longest valid file name from string.
+    string invalidChar = "/\\*?<>:|,\"";
+    unsigned int invalidPos = name.length();
+    for(unsigned int i = 0; i < invalidChar.length(); ++i){
+        unsigned int pos = name.find(invalidChar.at(i));
+        invalidPos = invalidPos < pos ? invalidPos : pos;
+    }
+    if(invalidPos != name.npos && invalidPos != 0){
+        return name.substr(0, invalidPos);
+    }
+    return "";
+}
+
+string StatisticsRecordTools::getFileName(string name) {
+    unsigned int pos = name.find_last_of('.');
+    if(pos != name.npos){
+        if(pos != 0){
+            return name.substr(0, pos);
+        }else{
+            return "default";
+        }
+    }else{
+        return name;
+    }
+}
+
+string StatisticsRecordTools::getSuffix(string name) {
+    unsigned int pos = name.find_last_of('.');
+    if(pos != name.npos){
+        if(pos != 0){
+            return name.substr(pos);
+        }else{
+            return ".txt";
+        }
+    }else{
+        return "";
+    }
+}
 StatisticsRecordTools* StatisticsRecordTools::request() {
     if(ptr_singleton == NULL){
         ptr_singleton = new StatisticsRecordTools();
@@ -202,36 +296,11 @@ void StatisticsRecordTools::clean() {
         delete (it->second);
     }
     globalStatisticsMap.clear();
+    titleMap.clear();
 }
 
 StatisticsRecordTools& StatisticsRecordTools::get() {
     return *ptr_singleton;
 }
 
-void StatisticsRecordTools::outputSeparate(string name, string dir,
-        std::fstream::openmode openmode) {
-    for(GlobalStatisticsMap::iterator it = globalStatisticsMap.begin();
-            it != globalStatisticsMap.end(); it++){
-        std::fstream fs;
-        string path;
-        if(dir != ""){
-            path = dir + "\\" + name;
-        }else{
-            if(m_default_dir_name != ""){
-                path = m_default_dir_name + "\\" + name;
-            }else{
-                path = name;
-            }
-        }
-        fs.open(path.c_str(), std::fstream::out | openmode);
-        if(!fs.good()){
-            std::cout << "error:" << std::endl;
-            std::cout << "eof()\t" << fs.eof() << std::endl;
-            std::cout << "fail()\t" << fs.fail() << std::endl;
-            std::cout << "bad()\t" << fs.bad() << std::endl;
-        }
-        // TODO add file print process
-    }
-}
 }  // namespace Fanjing
-
