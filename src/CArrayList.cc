@@ -109,10 +109,10 @@ bool CArrayList::accept(Request request) {
         unsigned int et = st + request.td;
         unsigned int tl = getIndex(m_time);
         unsigned int sl = getIndex(st);
-        unsigned int el = getIndex(et + m_scale - 1);// take over entire time slot every time
+        unsigned int el = getIndex(et + m_scale - 1); // take over entire time slot every time
         if(sl >= tl){
             // the start local is after the time local.
-            if(el >= tl){
+            if(el > tl){
                 // the start local and the end local are both after the time local.
                 // in this situation, just compare each time point one by one.
                 for(; sl < el; sl++){
@@ -148,5 +148,5 @@ bool CArrayList::accept(Request request) {
 }
 
 void CArrayList::setResourceCap(unsigned int maxResource) {
-	max_resource = maxResource;
+    max_resource = maxResource;
 }

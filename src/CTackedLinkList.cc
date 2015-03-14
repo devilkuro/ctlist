@@ -163,7 +163,7 @@ void exStartPhaseTest() {
     unsigned int g_TS_Up = 36000;
     unsigned int g_TD_Avg = 128;
     unsigned int g_TD_Limit = 512;
-    unsigned int g_Interval_Avg = 10;
+    unsigned int g_Interval_Avg = 70;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample];
@@ -231,13 +231,19 @@ void exStartPhaseTest() {
         unsigned int curTime = 0;
         bool flag = false;
         for(unsigned int ocn = 0; ocn < outCircleNum; ocn++){
-            // release cpu time
-            Sleep(5);
             // inner circle for different storage types;
             for(unsigned int n_repeat = 0; n_repeat < n_repeatTimes; ++n_repeat){
                 for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
+                    // release cpu before each loop
+                    Sleep(5);
                     curTime = oldTime;
                     curCircleNum = startInnerCircle;
+//                    if(curCircleNum == 67){
+//                        cout<<"debugInfo-accept:"
+//                                <<curTime<<","
+//                                <<r[curCircleNum].ts<<","
+//                                <<r[curCircleNum].td<<endl;
+//                    }
                     for(; curCircleNum < endInnerCircle; curCircleNum++){
                         if(curCircleNum >= s_Request_Num){
                             cout << "ERROR!!" << endl;
@@ -245,16 +251,16 @@ void exStartPhaseTest() {
                         // run and statistics
                         curTime += interval[curCircleNum];
                         timer->start();
-                        ct[n_type]->setTime(curTime);
+                        ct[n_repeat*n_sample+n_type]->setTime(curTime);
                         timer->end();
                         t_SetTime[n_type] += timer->getCounts();
                         timer->start();
-                        flag = ct[n_type]->accept(r[curCircleNum]);
+                        flag = ct[n_repeat*n_sample+n_type]->accept(r[curCircleNum]);
                         timer->end();
                         t_Accept[n_type] += timer->getCounts();
                         if(flag){
                             timer->start();
-                            ct[n_type]->forceInsert(r[curCircleNum]);
+                            ct[n_repeat*n_sample+n_type]->forceInsert(r[curCircleNum]);
                             timer->end();
                             t_Storage[n_type] += timer->getCounts();
                             // the accept time just add once
@@ -263,6 +269,18 @@ void exStartPhaseTest() {
                             }
                         }
                     }
+//                    if(n_type == 2){
+//                        if(t_nAccept[0]!=t_nAccept[1]||t_nAccept[0]!=t_nAccept[2]){
+//                            cout<<"debugInfo-accept:"
+//                                    <<curTime<<","
+//                                    <<r[curCircleNum].ts<<","
+//                                    <<r[curCircleNum].td<<endl;
+//                        }
+//                    }
+//                    cout<<"debugInfo:curCN,n_repeat,n_type,"
+//                            <<curCircleNum<<","
+//                            <<n_repeat<<","
+//                            <<n_type<<","<<endl;
                     curCircleNum = startInnerCircle;
                     if(n_repeat != 0){
                         t_MinSetTime[n_type] =
@@ -286,8 +304,6 @@ void exStartPhaseTest() {
                     t_Storage[n_type] = 0;
                 }
             }
-            // release cpu time
-            Sleep(5);
             // statistics process
             stringstream ss;
             string name;
