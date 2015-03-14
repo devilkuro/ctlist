@@ -111,9 +111,6 @@ bool CILink::accept(Request r) {
     indexLoc = getIndexLoc(st);
     while(cIndex[indexLoc].node == NULL){
         // move index location forward.
-        if(indexLoc==iCurrentIndex){
-            cout<<"error...in cilst"<<endl;
-        }
         if(indexLoc > 0){
             indexLoc = indexLoc - 1;    // backward traversal
         }else{
@@ -198,6 +195,7 @@ bool CILink::cleanIndex(unsigned int n) {
     
     // 3rd. link head to the next index
     this->cIndex[next].node = head;
+    iCurrentIndex = next;
     // return true. there is not any other result.
     return true;
 }
