@@ -242,12 +242,12 @@ void exStartPhaseTest() {
                         if(curCircleNum >= s_Request_Num){
                             cout << "ERROR!!" << endl;
                         }
-                        if(curCircleNum == 67){
-                            cout<<"debugInfo-accept:"
-                                    <<curTime<<","
-                                    <<r[curCircleNum].ts<<","
-                                    <<r[curCircleNum].td<<endl;
-                        }
+//                        if(curCircleNum == 1104){
+//                            cout<<"debugInfo-accept:"
+//                                    <<curTime<<","
+//                                    <<r[curCircleNum].ts<<","
+//                                    <<r[curCircleNum].td<<endl;
+//                        }
                         // run and statistics
                         curTime += interval[curCircleNum];
                         timer->start();

@@ -97,13 +97,14 @@ CINode* CILink::insertNode(unsigned int t, CINode* pre) {
 }
 
 bool CILink::accept(Request r) {
+    // Warning: if r.td == 0 && r.bw + res[st] > max, this will return false;
     unsigned int st, et;
     CINode* temp;
     unsigned int indexLoc;
 
     st = iCurrentTime + r.ts;
     et = st + r.td;
-    // TODO: need to be confirmed twice. > or >=
+    // FIXME_fixed: need to be confirmed twice. > or >=
     if(et > iCurrentTime + CI_MAX_RESERVE_TIME){
         return false;
     }
@@ -132,7 +133,16 @@ bool CILink::accept(Request r) {
     }
     // decide to accept or not.
     temp = pre2st;
-    // FIXME when temp->next == NULL, the temp->rs + r.bw > iMaxResource will be skipped, make the request be accepted wrong.
+    // FIXME_fixed at 2015-3-16:
+    // when temp->next == NULL,
+    // the temp->rs + r.bw > iMaxResource will be skipped,
+    // make the request accepted wrong.
+    // Fix the FIXME_fixed at 2015-3-16
+    if(temp->next == NULL){
+        if(temp->rs + r.bw > iMaxResource){
+            return false;
+        }
+    }
     while(temp->next != NULL){
         // if the resource if not enough, return NULL.
         if(temp->rs + r.bw > iMaxResource){
@@ -153,7 +163,6 @@ bool CILink::accept(Request r) {
             pre2et = temp;
         }
     }else{
-
         pre2et = temp;
     }
 

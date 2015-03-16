@@ -57,6 +57,10 @@ unsigned int Generator::getNext(Request* rq) {
     rq->bw = hp.U_Randint(bw_down, bw_up);
     rq->ts = hp.U_Randint(ts_down, ts_up);
     rq->td = (unsigned int) hp.E_Rand(1.0 / td_ave) % td_limit;
+    // fixed at 201503161648.
+    if(rq->td<1){
+        rq->td = 1;
+    }
     return (unsigned int) hp.P_Rand(interval);
 }
 

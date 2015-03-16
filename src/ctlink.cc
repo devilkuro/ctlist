@@ -66,6 +66,8 @@ bool CTLink::insert(Request request) {
 }
 
 bool CTLink::accept(Request request) {
+    // Warning: if r.td == 0 && r.bw + res[st] > max, this will return false;
+
     // update at 1309251613: this function has been changed into following function.
     // if request r can be accepted return the start node which is the first node after the start time
     // to avoid point to NULL, the tack array size should be two more than the tack number. one to record the start resource, one to record end point.
