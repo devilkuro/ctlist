@@ -29,14 +29,15 @@ CArrayList::CArrayList(unsigned int rmax, unsigned int scale) {
 
 bool CArrayList::accept(Request request) {
     // et is the first none effected time, el is the first none effected slot
-    if(request.ts + request.td + m_scale - 1 > m_array_size * m_scale){
+    if(request.ts + request.td + (m_scale - 1) + (m_scale - 1)
+            > m_array_size * m_scale){
         return false;
     }else{
         unsigned int st = m_time + request.ts;
         unsigned int et = st + request.td;
         unsigned int tl = getIndex(m_time);
         unsigned int sl = getIndex(st);
-        unsigned int el = getIndex((et-1) + m_scale - 1 + m_scale); // the end pos is next slot of the last modified time
+        unsigned int el = getIndex(et + m_scale - 1); // the end pos is next slot of the last modified time
 
         if(sl >= tl){
             // the start local is after the time local.
@@ -81,10 +82,10 @@ bool CArrayList::forceInsert(Request request) {
     unsigned int et = st + request.td;			// end time
     unsigned int tl = getIndex(m_time);			// current time location
     unsigned int sl = getIndex(st);				// start time location
-    unsigned int el = getIndex((et-1) + m_scale - 1 + m_scale); // the end pos is next slot of the last modified time
+    unsigned int el = getIndex(et + m_scale - 1); // the end pos is next slot of the last modified time
     if(sl >= tl){
         // the start local is after the time local.
-        if(el >= tl){
+        if(el > tl){
             // the start local and the end local are both after the time local.
             // in this situation, just modify each time point one by one.
             for(; sl < el; sl++){
@@ -137,7 +138,9 @@ void CArrayList::setTime(unsigned int time) {
         unsigned int tl = getIndex(m_time);
         unsigned int el = getIndex(time);
         unsigned int size_uint = sizeof(unsigned int);
-        if(el > tl){
+        if(el == tl){
+            m_time = time;
+        }else if(el > tl){
             // the end local is after the time local.
             // in this situation, just reset the point from time local to end local.
             memset(m_resource + tl, 0, (el - tl) * size_uint);

@@ -239,17 +239,20 @@ void exStartPhaseTest() {
         unsigned int oldTime = 0;
         unsigned int curTime = 0;
         bool flag = false;
+        bool debugFlag = false;
+        unsigned int debugInt = 0;
         // initial fill up phase
-        if(true){
+        if(false){
             // pre-filled up if necessary
             unsigned int n_num = n_repeatTimes * n_sample;
             unsigned int n_prefillup_num = 10000;
-            if(n_prefillup_num>s_Request_Num){
+            if(n_prefillup_num > s_Request_Num){
                 n_prefillup_num = s_Request_Num;
             }
             for(unsigned int n = 0; n < n_num; ++n){
                 curTime = oldTime;
-                for (unsigned int n_pfup = 0; n_pfup < n_prefillup_num; ++n_pfup) {
+                for(unsigned int n_pfup = 0; n_pfup < n_prefillup_num;
+                        ++n_pfup){
                     curTime += interval[n_pfup];
                     ct[n]->setTime(curTime);
                     flag = ct[n]->accept(r[n_pfup]);
@@ -273,6 +276,7 @@ void exStartPhaseTest() {
                     for(; curCircleNum < endInnerCircle; curCircleNum++){
                         if(curCircleNum >= s_Request_Num){
                             cout << "ERROR!!" << endl;
+                            return;
                         }
 //                        if(curCircleNum == 1104){
 //                            cout<<"debugInfo-accept:"
@@ -300,6 +304,24 @@ void exStartPhaseTest() {
                             // the accept time just add once
                             if(n_repeat == 0){
                                 t_nAccept[n_type]++;
+                            }
+                        }
+                        // debug 2015-3-17
+                        if(n_repeat == 1 && n_type == 4){
+                            if(t_nAccept[0] != t_nAccept[1]
+                                    || t_nAccept[0] != t_nAccept[2]){
+                                if(!debugFlag){
+                                    cout << n_type << "," << curCircleNum << ":"
+                                            << t_nAccept[0] << ","
+                                            << t_nAccept[1] << ","
+                                            << t_nAccept[2] << "," << endl;
+                                    Sleep(1000);
+                                    debugFlag = true;
+                                }else{
+                                    if(curCircleNum == 0){
+                                        debugFlag = false;
+                                    }
+                                }
                             }
                         }
                     }
