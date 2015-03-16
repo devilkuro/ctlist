@@ -16,7 +16,9 @@ CArrayList::CArrayList() {
     memset(m_resource, 0, m_array_size * sizeof(unsigned int));
 }
 
-CArrayList::CArrayList(unsigned int size, unsigned int scale) {
+CArrayList::CArrayList(unsigned int rmax, unsigned int scale) {
+    // scale - 1 is reserved, (n+scale-1)/scale is the slots number for time n.
+    unsigned int size = (rmax + (scale - 1) + (scale - 1)) / scale;
     this->m_array_size = size;
     this->m_scale = scale;
     this->m_time = 0;
@@ -25,12 +27,61 @@ CArrayList::CArrayList(unsigned int size, unsigned int scale) {
     memset(m_resource, 0, m_array_size * sizeof(unsigned int));
 }
 
+bool CArrayList::accept(Request request) {
+    // et is the first none effected time, el is the first none effected slot
+    if(request.ts + request.td + m_scale - 1 > m_array_size * m_scale){
+        return false;
+    }else{
+        unsigned int st = m_time + request.ts;
+        unsigned int et = st + request.td;
+        unsigned int tl = getIndex(m_time);
+        unsigned int sl = getIndex(st);
+        unsigned int el = getIndex((et-1) + m_scale - 1 + m_scale); // the end pos is next slot of the last modified time
+
+        if(sl >= tl){
+            // the start local is after the time local.
+            if(el > tl){
+                // the start local and the end local are both after the time local.
+                // in this situation, just compare each time point one by one.
+                for(; sl < el; sl++){
+                    if(m_resource[sl] + request.bw > max_resource){
+                        return false;
+                    }
+                }
+            }else{
+                // the start local is after the time local, but the end local is before the time local.
+                // in this situation, compare each time point in two parts.
+                for(; sl < m_array_size; sl++){
+                    if(m_resource[sl] + request.bw > max_resource){
+                        return false;
+                    }
+                }
+                for(sl = 0; sl < el; sl++){
+                    if(m_resource[sl] + request.bw > max_resource){
+                        return false;
+                    }
+                }
+            }
+        }else{
+            // the start local is before the time local.
+            // in this situation, just compare each time point from start local to end local one by one.
+            for(; sl < el; sl++){
+                if(m_resource[sl] + request.bw > max_resource){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+}
+
 bool CArrayList::forceInsert(Request request) {
+    // et is the first none effected time, el is the first none effected slot
     unsigned int st = m_time + request.ts;		// start time
     unsigned int et = st + request.td;			// end time
     unsigned int tl = getIndex(m_time);			// current time location
     unsigned int sl = getIndex(st);				// start time location
-    unsigned int el = getIndex(et + m_scale - 1);	// end time location
+    unsigned int el = getIndex((et-1) + m_scale - 1 + m_scale); // the end pos is next slot of the last modified time
     if(sl >= tl){
         // the start local is after the time local.
         if(el >= tl){
@@ -98,52 +149,6 @@ void CArrayList::setTime(unsigned int time) {
             memset(m_resource, 0, el * size_uint);
             m_time = time;
         }
-    }
-}
-
-bool CArrayList::accept(Request request) {
-    if(request.ts + request.td + m_scale - 1 > m_array_size * m_scale){
-        return false;
-    }else{
-        unsigned int st = m_time + request.ts;
-        unsigned int et = st + request.td;
-        unsigned int tl = getIndex(m_time);
-        unsigned int sl = getIndex(st);
-        unsigned int el = getIndex(et + m_scale - 1); // take over entire time slot every time
-        if(sl >= tl){
-            // the start local is after the time local.
-            if(el > tl){
-                // the start local and the end local are both after the time local.
-                // in this situation, just compare each time point one by one.
-                for(; sl < el; sl++){
-                    if(m_resource[sl] + request.bw > max_resource){
-                        return false;
-                    }
-                }
-            }else{
-                // the start local is after the time local, but the end local is before the time local.
-                // in this situation, compare each time point in two parts.
-                for(; sl < m_array_size; sl++){
-                    if(m_resource[sl] + request.bw > max_resource){
-                        return false;
-                    }
-                }
-                for(sl = 0; sl < el; sl++){
-                    if(m_resource[sl] + request.bw > max_resource){
-                        return false;
-                    }
-                }
-            }
-        }else{
-            // the start local is before the time local.
-            // in this situation, just compare each time point from start local to end local one by one.
-            for(; sl < el; sl++){
-                if(m_resource[sl] + request.bw > max_resource){
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 }
 

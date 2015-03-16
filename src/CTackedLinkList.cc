@@ -155,7 +155,7 @@ void exStartPhaseTest() {
     unsigned int s_Request_Num = 10000;
     // try to minimum sample error which is cause by the time slot of the process
     unsigned int n_repeatTimes = 5; // repeat times of each statistics;
-    unsigned int n_sample = 3;  // the number of samples
+    unsigned int n_sample = 5;  // the number of samples
     // requests parameters
     unsigned int g_BW_Down = 1;
     unsigned int g_BW_Up = 20;
@@ -163,7 +163,7 @@ void exStartPhaseTest() {
     unsigned int g_TS_Up = 36000;
     unsigned int g_TD_Avg = 128;
     unsigned int g_TD_Limit = 512;
-    unsigned int g_Interval_Avg = 70;
+    unsigned int g_Interval_Avg = 10;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample];
@@ -187,39 +187,48 @@ void exStartPhaseTest() {
         }
         // initialize the storages: 0~CArray,1~CIlink,2~CTlink
         unsigned int max_range = g_TS_Up + g_TD_Limit;
-        unsigned int index_num = max_range / g_Interval_Avg / 4;
+        unsigned int index_num = max_range / g_Interval_Avg / 8;
         for(unsigned int n = 0; n < n_repeatTimes; ++n){
-            ct[n * n_sample + 0] = new CArrayList(max_range, 1);
-            ct[n * n_sample + 0]->setResourceCap(max_resource);
-            ct[n * n_sample + 1] = new CILink(index_num, max_range);
-            ct[n * n_sample + 1]->setResourceCap(max_resource);
-            ct[n * n_sample + 2] = new CTLink(index_num, max_range);
-            ct[n * n_sample + 2]->setResourceCap(max_resource);
+            unsigned int n_no = 0;
+            ct[n * n_sample + n_no] = new CArrayList(max_range, 1);
+            ct[n * n_sample + n_no]->setResourceCap(max_resource);
+            n_no++;
+            ct[n * n_sample + n_no] = new CArrayList(max_range, 2);
+            ct[n * n_sample + n_no]->setResourceCap(max_resource);
+            n_no++;
+            ct[n * n_sample + n_no] = new CArrayList(max_range, 8);
+            ct[n * n_sample + n_no]->setResourceCap(max_resource);
+            n_no++;
+            ct[n * n_sample + n_no] = new CILink(index_num, max_range);
+            ct[n * n_sample + n_no]->setResourceCap(max_resource);
+            n_no++;
+            ct[n * n_sample + n_no] = new CTLink(index_num, max_range);
+            ct[n * n_sample + n_no]->setResourceCap(max_resource);
         }
 
         // set temporary statistics variables
         unsigned int *t_SetTime = new unsigned int[n_sample];
-        memset(t_SetTime,0,n_sample*sizeof(unsigned int));
+        memset(t_SetTime, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_Accept = new unsigned int[n_sample];
-        memset(t_Accept,0,n_sample*sizeof(unsigned int));
+        memset(t_Accept, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_Storage = new unsigned int[n_sample];
-        memset(t_Storage,0,n_sample*sizeof(unsigned int));
+        memset(t_Storage, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_MinSetTime = new unsigned int[n_sample];
-        memset(t_MinSetTime,0,n_sample*sizeof(unsigned int));
+        memset(t_MinSetTime, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_MinAccept = new unsigned int[n_sample];
-        memset(t_MinAccept,0,n_sample*sizeof(unsigned int));
+        memset(t_MinAccept, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_MinStorage = new unsigned int[n_sample];
-        memset(t_MinStorage,0,n_sample*sizeof(unsigned int));
+        memset(t_MinStorage, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_TSetTime = new unsigned int[n_sample];
-        memset(t_TSetTime,0,n_sample*sizeof(unsigned int));
+        memset(t_TSetTime, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_TAccept = new unsigned int[n_sample];
-        memset(t_TAccept,0,n_sample*sizeof(unsigned int));
+        memset(t_TAccept, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_TStorage = new unsigned int[n_sample];
-        memset(t_TStorage,0,n_sample*sizeof(unsigned int));
+        memset(t_TStorage, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_Total = new unsigned int[n_sample];
-        memset(t_Total,0,n_sample*sizeof(unsigned int));
+        memset(t_Total, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_nAccept = new unsigned int[n_sample];
-        memset(t_nAccept,0,n_sample*sizeof(unsigned int));
+        memset(t_nAccept, 0, n_sample * sizeof(unsigned int));
 
         // (s_Request_Num+s_Interval-1)/s_Interval rounds out circle
         unsigned int outCircleNum = (s_Request_Num + s_Interval - 1)
@@ -230,12 +239,35 @@ void exStartPhaseTest() {
         unsigned int oldTime = 0;
         unsigned int curTime = 0;
         bool flag = false;
+        // initial fill up phase
+        if(true){
+            // pre-filled up if necessary
+            unsigned int n_num = n_repeatTimes * n_sample;
+            unsigned int n_prefillup_num = 10000;
+            if(n_prefillup_num>s_Request_Num){
+                n_prefillup_num = s_Request_Num;
+            }
+            for(unsigned int n = 0; n < n_num; ++n){
+                curTime = oldTime;
+                for (unsigned int n_pfup = 0; n_pfup < n_prefillup_num; ++n_pfup) {
+                    curTime += interval[n_pfup];
+                    ct[n]->setTime(curTime);
+                    flag = ct[n]->accept(r[n_pfup]);
+                    if(flag){
+                        ct[n]->forceInsert(r[n_pfup]);
+                    }
+                }
+            }
+            oldTime = curTime;
+        }
+        Sleep(5);
         for(unsigned int ocn = 0; ocn < outCircleNum; ocn++){
             // inner circle for different storage types;
-            for(unsigned int n_repeat = 0; n_repeat < n_repeatTimes; ++n_repeat){
+            for(unsigned int n_repeat = 0; n_repeat < n_repeatTimes;
+                    ++n_repeat){
                 for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
                     // release cpu before each loop
-                    Sleep(5);
+                    // Sleep(5);
                     curTime = oldTime;
                     curCircleNum = startInnerCircle;
                     for(; curCircleNum < endInnerCircle; curCircleNum++){
@@ -251,21 +283,23 @@ void exStartPhaseTest() {
                         // run and statistics
                         curTime += interval[curCircleNum];
                         timer->start();
-                        ct[n_repeat*n_sample+n_type]->setTime(curTime);
+                        ct[n_repeat * n_sample + n_type]->setTime(curTime);
                         timer->end();
                         t_SetTime[n_type] += timer->getCounts();
                         timer->start();
-                        flag = ct[n_repeat*n_sample+n_type]->accept(r[curCircleNum]);
+                        flag = ct[n_repeat * n_sample + n_type]->accept(
+                                r[curCircleNum]);
                         timer->end();
                         t_Accept[n_type] += timer->getCounts();
                         if(flag){
                             timer->start();
-                            ct[n_repeat*n_sample+n_type]->forceInsert(r[curCircleNum]);
+                            ct[n_repeat * n_sample + n_type]->forceInsert(
+                                    r[curCircleNum]);
                             timer->end();
                             t_Storage[n_type] += timer->getCounts();
                             // the accept time just add once
-                            if (n_repeat == 0) {
-                                t_nAccept[n_type] ++;
+                            if(n_repeat == 0){
+                                t_nAccept[n_type]++;
                             }
                         }
                     }
@@ -343,7 +377,7 @@ void exStartPhaseTest() {
         stringstream ss;
         string name;
         ss << "finally cost until n_round:n_round,g_TD_Limit";
-        for(int n_type = 0; n_type < 3; ++n_type){
+        for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
             ss << ",settime-" << n_type << ",accept-" << n_type << ",storage-"
                     << n_type << ",naccept-" << n_type << ",total-" << n_type
                     << "";
@@ -351,7 +385,7 @@ void exStartPhaseTest() {
         name = ss.str();
         ss.str("");
         stool->changeName(name) << n_round << g_TD_Limit;
-        for(int n_type = 0; n_type < 3; ++n_type){
+        for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
             stool->get() << t_TSetTime[n_type] << t_TAccept[n_type]
                     << t_TStorage[n_type] << t_nAccept[n_type]
                     << t_Total[n_type];
@@ -366,19 +400,19 @@ int main() {
         EX_ASM_TEST = 0,
         EX_POISSON_TEST,
         EX_DEVELOP_TEST,
-        EX_START_PHASE_TEST,
+        EX_COMMON_TEST,
         EX_LAST_FLAG
     };
     string flagStrArray[] = {
             "EX_ASM_TEST",
             "EX_POISSON_TEST",
             "EX_DEVELOP_TEST",
-            "EX_START_PHASE_TEST",
+            "EX_COMMON_TEST",
             "EX_LAST_FLAG" };
     bool *flagArray = new bool[EX_LAST_FLAG];
     {
         int flag = 0;
-        cout << "Input flag for each experiment: 1 for run, 0 for not." << endl;
+        // cout << "Input flag for each experiment: 1 for run, 0 for not." << endl;
         for(int i = 0; i < EX_LAST_FLAG; ++i){
             cout << flagStrArray[i] << endl;
             //cin >> flag;
@@ -401,7 +435,7 @@ int main() {
     if(!flagArray[EX_DEVELOP_TEST]){
         exDevelopTest();
     }
-    if(flagArray[EX_START_PHASE_TEST]){
+    if(flagArray[EX_COMMON_TEST]){
         exStartPhaseTest();
     }
 }
