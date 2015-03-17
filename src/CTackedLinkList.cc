@@ -62,13 +62,12 @@ void exASMTest() {
             << "GHz" << endl;
     at->release();
 }
-void exPoissonTest() {
+void exHelperTest() {
     Helper h;
-    int n;
-    cout << "generate time:" << endl;
-    cin >> n;
+    int n = 20;
+    cout << h.F_Rand(2,pow(2,n)) << endl;
     for(int i = 0; i < n; ++i){
-        cout << h.P_Rand(20) << endl;
+        cout << h.F_Rand(2,pow(2,10)) << endl;
     }
 }
 void exDevelopTest() {
@@ -149,21 +148,21 @@ void exDevelopTest() {
     delete[] r;
     delete gn;
 }
-void exStartPhaseTest() {
+void exCommonTest() {
     // statistics parameters
     unsigned int s_Interval = 100;
     unsigned int s_Request_Num = 10000;
     // try to minimum sample error which is cause by the time slot of the process
     unsigned int n_repeatTimes = 5; // repeat times of each statistics;
-    unsigned int n_sample = 5;  // the number of samples
+    unsigned int n_sample = 4;  // the number of samples
     // requests parameters
     unsigned int g_BW_Down = 1;
     unsigned int g_BW_Up = 20;
     unsigned int g_TS_Down = 0;
     unsigned int g_TS_Up = 36000;
-    unsigned int g_TD_Avg = 128;
-    unsigned int g_TD_Limit = 512;
-    unsigned int g_Interval_Avg = 10;
+    unsigned int g_TD_Down = 1;
+    unsigned int g_TD_Up = 512;
+    unsigned int g_Interval_Avg = 50;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample];
@@ -176,24 +175,21 @@ void exStartPhaseTest() {
     double r_radio = 0.8;
     // run the experiment under n_round different settings : TD max~ 512,4096,32768
     for(int n_round = 0; n_round < 3;
-            ++n_round, g_TD_Avg *= 8, g_TD_Limit *= 8){
-        gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Avg,
-                g_TD_Limit, g_Interval_Avg);
-        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Avg
+            ++n_round, g_TD_Down *= 8, g_TD_Up *= 8){
+        gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Down,
+                g_TD_Up, g_Interval_Avg);
+        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up/6.17
                 / g_Interval_Avg * r_radio;
         // set requests and the intervals
         for(unsigned int i = 0; i < s_Request_Num; i++){
             interval[i] = gn->getNext(&r[i]);
         }
-        // initialize the storages: 0~CArray,1~CIlink,2~CTlink
-        unsigned int max_range = g_TS_Up + g_TD_Limit;
-        unsigned int index_num = max_range / g_Interval_Avg / 8;
+        // initialize the storages: 0~CArray,1~CArray8,2~CIlink,3~CTlink
+        unsigned int max_range = g_TS_Up + g_TD_Up;
+        unsigned int index_num = max_range / g_Interval_Avg / 4;
         for(unsigned int n = 0; n < n_repeatTimes; ++n){
             unsigned int n_no = 0;
             ct[n * n_sample + n_no] = new CArrayList(max_range, 1);
-            ct[n * n_sample + n_no]->setResourceCap(max_resource);
-            n_no++;
-            ct[n * n_sample + n_no] = new CArrayList(max_range, 2);
             ct[n * n_sample + n_no]->setResourceCap(max_resource);
             n_no++;
             ct[n * n_sample + n_no] = new CArrayList(max_range, 8);
@@ -239,8 +235,8 @@ void exStartPhaseTest() {
         unsigned int oldTime = 0;
         unsigned int curTime = 0;
         bool flag = false;
-        bool debugFlag = false;
-        unsigned int debugInt = 0;
+        //bool debugFlag = false;
+        //unsigned int debugInt = 0;
         // initial fill up phase
         if(false){
             // pre-filled up if necessary
@@ -307,23 +303,23 @@ void exStartPhaseTest() {
                             }
                         }
                         // debug 2015-3-17
-                        if(n_repeat == 1 && n_type == 4){
-                            if(t_nAccept[0] != t_nAccept[1]
-                                    || t_nAccept[0] != t_nAccept[2]){
-                                if(!debugFlag){
-                                    cout << n_type << "," << curCircleNum << ":"
-                                            << t_nAccept[0] << ","
-                                            << t_nAccept[1] << ","
-                                            << t_nAccept[2] << "," << endl;
-                                    Sleep(1000);
-                                    debugFlag = true;
-                                }else{
-                                    if(curCircleNum == 0){
-                                        debugFlag = false;
-                                    }
-                                }
-                            }
-                        }
+//                        if(n_repeat == 1 && n_type == 4){
+//                            if(t_nAccept[0] != t_nAccept[1]
+//                                    || t_nAccept[0] != t_nAccept[2]){
+//                                if(!debugFlag){
+//                                    cout << n_type << "," << curCircleNum << ":"
+//                                            << t_nAccept[0] << ","
+//                                            << t_nAccept[1] << ","
+//                                            << t_nAccept[2] << "," << endl;
+//                                    Sleep(1000);
+//                                    debugFlag = true;
+//                                }else{
+//                                    if(curCircleNum == 0){
+//                                        debugFlag = false;
+//                                    }
+//                                }
+//                            }
+//                        }
                     }
 //                    if(n_type == 2){
 //                        if(t_nAccept[0]!=t_nAccept[1]||t_nAccept[0]!=t_nAccept[2]){
@@ -364,7 +360,7 @@ void exStartPhaseTest() {
             stringstream ss;
             string name;
             ss
-                    << "cost of ocn rounds:n_round,limit,outCircleNum(ocn),round(endInnerCircle)";
+                    << "cost of ocn rounds-"<<g_TD_Up<<":n_round,limit,outCircleNum(ocn),round(endInnerCircle)";
             for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
                 ss << ",settime-" << n_type << ",accept-" << n_type
                         << ",storage-" << n_type << ",naccept-" << n_type
@@ -372,7 +368,7 @@ void exStartPhaseTest() {
             }
             name = ss.str();
             ss.str("");
-            stool->changeName(name) << n_round << g_TD_Limit << ocn
+            stool->changeName(name) << n_round << g_TD_Up << ocn
                     << endInnerCircle;
             for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
                 stool->get() << t_MinSetTime[n_type] << t_MinAccept[n_type]
@@ -406,7 +402,7 @@ void exStartPhaseTest() {
         }
         name = ss.str();
         ss.str("");
-        stool->changeName(name) << n_round << g_TD_Limit;
+        stool->changeName(name) << n_round << g_TD_Up;
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
             stool->get() << t_TSetTime[n_type] << t_TAccept[n_type]
                     << t_TStorage[n_type] << t_nAccept[n_type]
@@ -414,20 +410,19 @@ void exStartPhaseTest() {
         }
         stool->get() << stool->endl;
     }
-    stool->output("experiment-startphase.txt");
-    stool->outputSeparate("experiment.txt");
+    stool->outputSeparate("EX_COMMON_TEST.txt");
 }
 int main() {
     enum ExperimentCode {
         EX_ASM_TEST = 0,
-        EX_POISSON_TEST,
+        EX_HELPER_TEST,
         EX_DEVELOP_TEST,
         EX_COMMON_TEST,
         EX_LAST_FLAG
     };
     string flagStrArray[] = {
             "EX_ASM_TEST",
-            "EX_POISSON_TEST",
+            "EX_HELPER_TEST",
             "EX_DEVELOP_TEST",
             "EX_COMMON_TEST",
             "EX_LAST_FLAG" };
@@ -451,14 +446,14 @@ int main() {
     if(!flagArray[EX_ASM_TEST]){
         exASMTest();
     }
-    if(!flagArray[EX_POISSON_TEST]){
-        exPoissonTest();
+    if(!flagArray[EX_HELPER_TEST]){
+        exHelperTest();
     }
     if(!flagArray[EX_DEVELOP_TEST]){
         exDevelopTest();
     }
     if(flagArray[EX_COMMON_TEST]){
-        exStartPhaseTest();
+        exCommonTest();
     }
 }
 

@@ -25,8 +25,8 @@ public:
     unsigned int bw_up;
     unsigned int ts_down;
     unsigned int ts_up;
-    unsigned int td_ave;
-    unsigned int td_limit;
+    unsigned int td_down;
+    unsigned int td_up;
     unsigned int interval;
 public:
     void setGenerator(unsigned int bw_down, unsigned int bw_up,

@@ -14,10 +14,10 @@ double Helper::P_Rand(double Lamda) {
     /*
      algorithm poisson random number (Knuth):
      init:
-         Let L ← e−λ, k ← 0 and p ← 1.
+     Let L ← e−λ, k ← 0 and p ← 1.
      do:
-         k ← k + 1.
-         Generate uniform random number u in [0,1] and let p ← p × u.
+     k ← k + 1.
+     Generate uniform random number u in [0,1] and let p ← p × u.
      while p > L.
      return k − 1.
      */
@@ -33,12 +33,12 @@ double Helper::P_Rand(double Lamda) {
     /*
      algorithm Poisson generator based upon the inversion by sequential search:
      init:
-         Let x ← 0, p ← e−λ, s ← p.
-         Generate uniform random number u in [0,1].
+     Let x ← 0, p ← e−λ, s ← p.
+     Generate uniform random number u in [0,1].
      do:
-         x ← x + 1.
-         p ← p * λ / x.
-         s ← s + p.
+     x ← x + 1.
+     p ← p * λ / x.
+     s ← s + p.
      while u > s.
      return x.
      */
@@ -65,4 +65,15 @@ double Helper::E_Rand(double Lamda) {
 
 void Helper::setSeed(unsigned int seed) {
     srand(seed);
+}
+
+double Helper::F_Rand(double a, double b) {
+    if(a <= 0){
+        a = 1;
+    }
+    double limit_a = log(a);
+    double limit_b = log(b);
+    double x;
+    x = (double) rand() / RAND_MAX;
+    return pow(M_E, (limit_a + (limit_b - limit_a) * x));
 }
