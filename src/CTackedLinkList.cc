@@ -634,8 +634,11 @@ void exUnlanceTest(string filename) {
         unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up / 6.17
                 / g_Interval_Avg * r_radio;
         // set requests and the intervals
+        unsigned int generatedTime = 0;
         for(unsigned int i = 0; i < s_Request_Num; i++){
-            interval[i] = gn->getNext(&r[i]);
+            interval[i] = 10;
+            // FIXME needs to edit these codes.
+            gn->getNext(&r[i]);
         }
         // initialize the storages: 0~CArray,1~CArray8,2~CIlink,3~CTlink
         unsigned int max_range = g_TS_Up + g_TD_Up;
