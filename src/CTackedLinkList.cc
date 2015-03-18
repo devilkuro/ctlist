@@ -616,7 +616,7 @@ void exUnlanceTest(string filename) {
     unsigned int g_TD_Down = 1;
     unsigned int g_TD_Up = 512;
     unsigned int g_Interval_Avg = 10;
-    unsigned int g_Index_Interval = 200;
+    unsigned int g_Index_Interval = g_Interval_Avg * 4;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample];
@@ -639,7 +639,7 @@ void exUnlanceTest(string filename) {
         }
         // initialize the storages: 0~CArray,1~CArray8,2~CIlink,3~CTlink
         unsigned int max_range = g_TS_Up + g_TD_Up;
-        unsigned int index_num = max_range / g_Interval_Avg / 4;
+        unsigned int index_num = max_range / g_Index_Interval;
         for(unsigned int n = 0; n < n_repeatTimes; ++n){
             unsigned int n_no = 0;
             ct[n * n_sample + n_no] = new CArrayList(max_range, 1);
@@ -834,6 +834,8 @@ int main() {
         EX_DEVELOP_TEST,
         EX_COMMON_TEST,
         EX_START_PHASE,
+        EX_UNBLANCE,
+        EX_MULTILINK,
         EX_LAST_FLAG
     };
     string flagStrArray[] = {
@@ -842,6 +844,8 @@ int main() {
             "EX_DEVELOP_TEST",
             "EX_COMMON_TEST",
             "EX_START_PHASE",
+            "EX_UNBLANCE",
+            "EX_MULTILINK",
             "EX_LAST_FLAG" };
     bool *flagArray = new bool[EX_LAST_FLAG];
     {
@@ -872,8 +876,14 @@ int main() {
     if(!flagArray[EX_COMMON_TEST]){
         exCommonTest(flagStrArray[EX_COMMON_TEST]);
     }
-    if(flagArray[EX_START_PHASE]){
+    if(!flagArray[EX_START_PHASE]){
         exStartPhaseTest(flagStrArray[EX_START_PHASE]);
+    }
+    if(flagArray[EX_UNBLANCE]){
+        exUnlanceTest(flagStrArray[EX_UNBLANCE]);
+    }
+    if(flagArray[EX_MULTILINK]){
+        exStartPhaseTest(flagStrArray[EX_MULTILINK]);
     }
 }
 
