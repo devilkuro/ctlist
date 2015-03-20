@@ -54,6 +54,7 @@ double Helper::P_Rand(double Lamda) {
 }
 
 double Helper::E_Rand(double Lamda) {
+    // E: 1/Lamda
     double e, r;
     r = (double) rand() / RAND_MAX;
     e = -log(r) / Lamda;
