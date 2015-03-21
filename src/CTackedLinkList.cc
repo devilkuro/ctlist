@@ -391,7 +391,7 @@ void exStartPhaseTest(string filename) {
     unsigned int g_TS_Up = 86400;
     unsigned int g_TD_Down = 1;
     unsigned int g_TD_Up = 512;
-    unsigned int g_Interval_Avg = 10;
+    unsigned int g_Interval_Avg = 50;
     unsigned int g_Index_Interval = g_Interval_Avg * 4;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
@@ -445,19 +445,28 @@ void exStartPhaseTest(string filename) {
             }
         }
 
-        // set temporary statistics variables
+        // set temporary step-by-step statistics variables
         unsigned int *t_SetTime = new unsigned int[n_sample];
         memset(t_SetTime, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_Accept = new unsigned int[n_sample];
         memset(t_Accept, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_Storage = new unsigned int[n_sample];
         memset(t_Storage, 0, n_sample * sizeof(unsigned int));
+        // min step-by-step statistics variables
         unsigned int *t_MinSetTime = new unsigned int[n_sample];
         memset(t_MinSetTime, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_MinAccept = new unsigned int[n_sample];
         memset(t_MinAccept, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_MinStorage = new unsigned int[n_sample];
         memset(t_MinStorage, 0, n_sample * sizeof(unsigned int));
+        // multiple step-by-step statistics variables
+        unsigned int *t_MultiMinSetTime = new unsigned int[n_sample];
+        memset(t_MultiMinSetTime, 0, n_sample * sizeof(unsigned int));
+        unsigned int *t_MultiMinAccept = new unsigned int[n_sample];
+        memset(t_MultiMinAccept, 0, n_sample * sizeof(unsigned int));
+        unsigned int *t_MultiMinStorage = new unsigned int[n_sample];
+        memset(t_MultiMinStorage, 0, n_sample * sizeof(unsigned int));
+        // total statistics variables
         unsigned int *t_TSetTime = new unsigned int[n_sample];
         memset(t_TSetTime, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_TAccept = new unsigned int[n_sample];
@@ -465,6 +474,7 @@ void exStartPhaseTest(string filename) {
         unsigned int *t_TStorage = new unsigned int[n_sample];
         memset(t_TStorage, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_Total = new unsigned int[n_sample];
+        // accumulative statistics variables
         memset(t_Total, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_nAccept = new unsigned int[n_sample];
         memset(t_nAccept, 0, n_sample * sizeof(unsigned int));
@@ -502,26 +512,28 @@ void exStartPhaseTest(string filename) {
         Sleep(5);
         for(unsigned int ocn = 0; ocn < outCircleNum; ocn++){
             // inner circle for different storage types;
-            for(unsigned int i_repeatTimes = 0; i_repeatTimes < n_repeatTimes;
-                    ++i_repeatTimes){
-                for(unsigned int i_sample = 0; i_sample < n_sample; ++i_sample){
-                    // release cpu before each loop
-                    // Sleep(5);
-                    curTime = oldTime;
-                    curCircleNum = startInnerCircle;
-                    for(; curCircleNum < endInnerCircle; curCircleNum++){
-                        if(curCircleNum >= s_Request_Num){
-                            cout << "ERROR!!" << endl;
-                            return;
-                        }
-                        // for each circle, run multiple times with different
-                        // requests: request[i_Request_Num*s_Request_Num+i_multiple]
-                        // to get the average cost in average situation.
-                        for(int i_multiple = 0; i_multiple < n_multiple;
-                                ++i_multiple){
-                            // run and statistics
-                            curTime += interval[curCircleNum * s_Request_Num
-                                    + i_multiple];
+            // for each circle, run multiple times with different
+            // requests: request[i_Request_Num*s_Request_Num+i_multiple]
+            // to get the average cost in average situation.
+            // release cpu before each loop
+            // Sleep(5);
+            curCircleNum = startInnerCircle;
+            for(; curCircleNum < endInnerCircle; curCircleNum++){
+                if(curCircleNum >= s_Request_Num){
+                    cout << "ERROR!!" << endl;
+                    return;
+                }
+                for(unsigned int i_multiple = 0; i_multiple < n_multiple;
+                        ++i_multiple){
+                    // run and statistics
+                    for(unsigned int i_repeatTimes = 0;
+                            i_repeatTimes < n_repeatTimes; ++i_repeatTimes){
+                        for(unsigned int i_sample = 0; i_sample < n_sample;
+                                ++i_sample){
+                            // FIXME: needs to reset curTime before each multiple.
+                            curTime = oldTime;
+                            // using same interval in each one of multiple
+                            curTime += interval[curCircleNum];
                             timer->start();
                             ct[i_repeatTimes * n_sample * n_multiple
                                     + i_sample * n_multiple + i_multiple]->setTime(
@@ -549,33 +561,45 @@ void exStartPhaseTest(string filename) {
                                     t_nAccept[i_sample]++;
                                 }
                             }
+                            if(i_repeatTimes != 0){
+                                t_MinSetTime[i_sample] =
+                                        t_MinSetTime[i_sample]
+                                                < t_SetTime[i_sample] ? t_MinSetTime[i_sample] :
+                                                t_SetTime[i_sample];
+                                t_MinAccept[i_sample] =
+                                        t_MinAccept[i_sample]
+                                                < t_Accept[i_sample] ? t_MinAccept[i_sample] :
+                                                t_Accept[i_sample];
+                                t_MinStorage[i_sample] =
+                                        t_MinStorage[i_sample]
+                                                < t_Storage[i_sample] ? t_MinStorage[i_sample] :
+                                                t_Storage[i_sample];
+                            }else{
+                                t_MinSetTime[i_sample] = t_SetTime[i_sample];
+                                t_MinAccept[i_sample] = t_Accept[i_sample];
+                                t_MinStorage[i_sample] = t_Storage[i_sample];
+                            }
+                            t_MultiMinSetTime[i_sample] +=
+                                    t_MinSetTime[i_sample];
+                            t_MultiMinAccept[i_sample] += t_MinAccept[i_sample];
+                            t_MultiMinStorage[i_sample] +=
+                                    t_MinStorage[i_sample];
                         }
-                        t_SetTime[i_sample] = t_SetTime[i_sample] / n_multiple;
-                        t_Accept[i_sample] = t_Accept[i_sample] / n_multiple;
-                        t_Storage[i_sample] = t_Storage[i_sample] / n_multiple;
                     }
-                    curCircleNum = startInnerCircle;
-                    if(i_repeatTimes != 0){
-                        t_MinSetTime[i_sample] =
-                                t_MinSetTime[i_sample] < t_SetTime[i_sample] ? t_MinSetTime[i_sample] :
-                                        t_SetTime[i_sample];
-                        t_MinAccept[i_sample] =
-                                t_MinAccept[i_sample] < t_Accept[i_sample] ? t_MinAccept[i_sample] :
-                                        t_Accept[i_sample];
-                        t_MinStorage[i_sample] =
-                                t_MinStorage[i_sample] < t_Storage[i_sample] ? t_MinStorage[i_sample] :
-                                        t_Storage[i_sample];
-                    }else{
-                        t_MinSetTime[i_sample] = t_SetTime[i_sample];
-                        t_MinAccept[i_sample] = t_Accept[i_sample];
-                        t_MinStorage[i_sample] = t_Storage[i_sample];
+                    for(unsigned int i_sample = 0; i_sample < n_sample;
+                            ++i_sample){
+                        t_MultiMinSetTime[i_sample] =
+                                t_MultiMinSetTime[i_sample] / n_multiple;
+                        t_MultiMinAccept[i_sample] = t_MultiMinAccept[i_sample]
+                                / n_multiple;
+                        t_MultiMinStorage[i_sample] =
+                                t_MultiMinStorage[i_sample] / n_multiple;
+                        t_SetTime[i_sample] = 0;
+                        t_Accept[i_sample] = 0;
+                        t_Storage[i_sample] = 0;
                     }
                 }
-                for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-                    t_SetTime[n_type] = 0;
-                    t_Accept[n_type] = 0;
-                    t_Storage[n_type] = 0;
-                }
+                oldTime = curTime;
             }
             // statistics process
             stringstream ss;
@@ -607,7 +631,6 @@ void exStartPhaseTest(string filename) {
                         + t_TStorage[n_type];
             }
             // end the loop
-            oldTime = curTime;
             startInnerCircle = endInnerCircle;
             endInnerCircle =
                     endInnerCircle + s_Interval > s_Request_Num ? s_Request_Num :
