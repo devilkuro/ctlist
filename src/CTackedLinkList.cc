@@ -601,7 +601,6 @@ void exStartPhaseTest(string filename) {
     stool->outputSeparate(filename + ".txt");
 }
 void exUnlanceTest(string filename) {
-    // FIXME chenge the code
     // statistics parameters
     unsigned int s_Interval = 100;
     unsigned int s_Request_Num = 10000;
@@ -615,7 +614,7 @@ void exUnlanceTest(string filename) {
     unsigned int g_TS_Up = 86400;
     unsigned int g_TD_Down = 8;
     unsigned int g_TD_Up = 4096;
-    unsigned int g_Interval_Avg = 3600/55;
+    unsigned int g_Interval_Avg = 3600 / 55;
     unsigned int g_Index_Interval = g_Interval_Avg * 4;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
@@ -648,8 +647,7 @@ void exUnlanceTest(string filename) {
                                     (2 * M_PI * generatedTime / m_dayTime)
                                             - M_PI_2);
             interval[i] = hp.E_Rand(m_curDensity / 3600);
-            generatedTime+=interval[i];
-            // FIXME needs to edit these codes.
+            generatedTime += interval[i];
             gn->getNext(&r[i]);
         }
         // initialize the storages: 0~CArray,1~CArray8,2~CIlink,3~CTlink
@@ -806,7 +804,7 @@ void exUnlanceTest(string filename) {
                         << t_MinSetTime[n_type] + t_MinAccept[n_type]
                                 + t_MinStorage[n_type];
             }
-            stool->get() <<curTime<< stool->endl;
+            stool->get() << curTime << stool->endl;
             // set statistics variables
             for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
                 t_TSetTime[n_type] += t_MinSetTime[n_type];
@@ -843,6 +841,7 @@ void exUnlanceTest(string filename) {
     stool->outputSeparate(filename + ".txt");
 }
 void exMultiLinkTest(string filename) {
+    // FIXME chenge the code
     // statistics parameters
     unsigned int s_Interval = 100;
     unsigned int s_Request_Num = 10000;
