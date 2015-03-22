@@ -379,7 +379,7 @@ void exStartPhaseTest(string filename) {
     unsigned int s_Interval = 1;
     unsigned int s_Request_Num = 100;
     // try to minimum sample error which is cause by the time slot of the process
-    unsigned int n_repeatTimes = 10; // repeat times of each statistics;
+    unsigned int n_repeatTimes = 5; // repeat times of each statistics;
     unsigned int n_sample = 4;  // the number of samples
     unsigned int n_multiple = 100;
     unsigned int n_prefillup_num = 10000;
@@ -402,7 +402,7 @@ void exStartPhaseTest(string filename) {
     Generator* gn = new Generator();
     Request* r = new Request[n_TotalRequest_Num];
     unsigned int* interval = new unsigned int[n_TotalRequest_Num];
-    double r_radio = 0.8;
+    double r_radio = 1.0;
     // run the experiment under n_round different settings : TD max~ 512,4096,32768
     for(int n_round = 0; n_round < 1; ++n_round){
         gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Down,
@@ -466,6 +466,13 @@ void exStartPhaseTest(string filename) {
         memset(t_MultiMinAccept, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_MultiMinStorage = new unsigned int[n_sample];
         memset(t_MultiMinStorage, 0, n_sample * sizeof(unsigned int));
+        // out-circle multiple statistics variables
+        unsigned int *t_OutMultiMinSetTime = new unsigned int[n_sample];
+        memset(t_OutMultiMinSetTime, 0, n_sample * sizeof(unsigned int));
+        unsigned int *t_OutMultiMinAccept = new unsigned int[n_sample];
+        memset(t_OutMultiMinAccept, 0, n_sample * sizeof(unsigned int));
+        unsigned int *t_OutMultiMinStorage = new unsigned int[n_sample];
+        memset(t_OutMultiMinStorage, 0, n_sample * sizeof(unsigned int));
         // total statistics variables
         unsigned int *t_TSetTime = new unsigned int[n_sample];
         memset(t_TSetTime, 0, n_sample * sizeof(unsigned int));
@@ -509,7 +516,6 @@ void exStartPhaseTest(string filename) {
             }
             oldTime = curTime;
         }
-        Sleep(5);
         for(unsigned int ocn = 0; ocn < outCircleNum; ocn++){
             // inner circle for different storage types;
             // for each circle, run multiple times with different
@@ -526,10 +532,10 @@ void exStartPhaseTest(string filename) {
                 for(unsigned int i_multiple = 0; i_multiple < n_multiple;
                         ++i_multiple){
                     // run and statistics
-                    for(unsigned int i_repeatTimes = 0;
-                            i_repeatTimes < n_repeatTimes; ++i_repeatTimes){
-                        for(unsigned int i_sample = 0; i_sample < n_sample;
-                                ++i_sample){
+                    for(unsigned int i_sample = 0; i_sample < n_sample;
+                            ++i_sample){
+                        for(unsigned int i_repeatTimes = 0;
+                                i_repeatTimes < n_repeatTimes; ++i_repeatTimes){
                             // FIXME: needs to reset curTime before each multiple.
                             curTime = oldTime;
                             // using same interval in each one of multiple
@@ -539,29 +545,33 @@ void exStartPhaseTest(string filename) {
                                     + i_sample * n_multiple + i_multiple]->setTime(
                                     curTime);
                             timer->end();
-                            t_SetTime[i_sample] += timer->getCounts();
+                            t_SetTime[i_sample] = timer->getCounts();
                             timer->start();
                             flag =
                                     ct[i_repeatTimes * n_sample * n_multiple
                                             + i_sample * n_multiple + i_multiple]->accept(
-                                            r[curCircleNum * s_Request_Num
+                                            r[curCircleNum * n_multiple
                                                     + i_multiple]);
                             timer->end();
-                            t_Accept[i_sample] += timer->getCounts();
+                            t_Accept[i_sample] = timer->getCounts();
                             if(flag){
                                 timer->start();
                                 ct[i_repeatTimes * n_sample * n_multiple
                                         + i_sample * n_multiple + i_multiple]->forceInsert(
-                                        r[curCircleNum * s_Request_Num
+                                        r[curCircleNum * n_multiple
                                                 + i_multiple]);
                                 timer->end();
-                                t_Storage[i_sample] += timer->getCounts();
+                                t_Storage[i_sample] = timer->getCounts();
                                 // the accept time just add once
                                 if(i_repeatTimes == 0){
                                     t_nAccept[i_sample]++;
                                 }
                             }
-                            if(i_repeatTimes != 0){
+                            if(i_repeatTimes == 0){
+                                t_MinSetTime[i_sample] = t_SetTime[i_sample];
+                                t_MinAccept[i_sample] = t_Accept[i_sample];
+                                t_MinStorage[i_sample] = t_Storage[i_sample];
+                            }else{
                                 t_MinSetTime[i_sample] =
                                         t_MinSetTime[i_sample]
                                                 < t_SetTime[i_sample] ? t_MinSetTime[i_sample] :
@@ -574,11 +584,15 @@ void exStartPhaseTest(string filename) {
                                         t_MinStorage[i_sample]
                                                 < t_Storage[i_sample] ? t_MinStorage[i_sample] :
                                                 t_Storage[i_sample];
-                            }else{
-                                t_MinSetTime[i_sample] = t_SetTime[i_sample];
-                                t_MinAccept[i_sample] = t_Accept[i_sample];
-                                t_MinStorage[i_sample] = t_Storage[i_sample];
                             }
+                        }
+                        if(i_multiple == 0){
+                            t_MultiMinSetTime[i_sample] =
+                                    t_MinSetTime[i_sample];
+                            t_MultiMinAccept[i_sample] = t_MinAccept[i_sample];
+                            t_MultiMinStorage[i_sample] =
+                                    t_MinStorage[i_sample];
+                        }else{
                             t_MultiMinSetTime[i_sample] +=
                                     t_MinSetTime[i_sample];
                             t_MultiMinAccept[i_sample] += t_MinAccept[i_sample];
@@ -586,20 +600,21 @@ void exStartPhaseTest(string filename) {
                                     t_MinStorage[i_sample];
                         }
                     }
-                    for(unsigned int i_sample = 0; i_sample < n_sample;
-                            ++i_sample){
-                        t_MultiMinSetTime[i_sample] =
-                                t_MultiMinSetTime[i_sample] / n_multiple;
-                        t_MultiMinAccept[i_sample] = t_MultiMinAccept[i_sample]
-                                / n_multiple;
-                        t_MultiMinStorage[i_sample] =
-                                t_MultiMinStorage[i_sample] / n_multiple;
-                        t_SetTime[i_sample] = 0;
-                        t_Accept[i_sample] = 0;
-                        t_Storage[i_sample] = 0;
-                    }
                 }
                 oldTime = curTime;
+                for(unsigned int i_sample = 0; i_sample < n_sample; ++i_sample){
+                    t_MultiMinSetTime[i_sample] = t_MultiMinSetTime[i_sample]
+                            / n_multiple;
+                    t_MultiMinAccept[i_sample] = t_MultiMinAccept[i_sample]
+                            / n_multiple;
+                    t_MultiMinStorage[i_sample] = t_MultiMinStorage[i_sample]
+                            / n_multiple;
+                    t_OutMultiMinSetTime[i_sample] +=
+                            t_MultiMinSetTime[i_sample];
+                    t_OutMultiMinAccept[i_sample] += t_MultiMinAccept[i_sample];
+                    t_OutMultiMinStorage[i_sample] +=
+                            t_MultiMinStorage[i_sample];
+                }
             }
             // statistics process
             stringstream ss;
@@ -615,20 +630,29 @@ void exStartPhaseTest(string filename) {
             ss.str("");
             stool->changeName(name) << n_round << g_TD_Up << ocn
                     << endInnerCircle;
-            for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-                stool->get() << t_MinSetTime[n_type] << t_MinAccept[n_type]
-                        << t_MinStorage[n_type] << t_nAccept[n_type]
-                        << t_MinSetTime[n_type] + t_MinAccept[n_type]
-                                + t_MinStorage[n_type];
+            for(unsigned int i_sample = 0; i_sample < n_sample; ++i_sample){
+                // outMultiMinXXX: the total average min XXX time of one inner circle.
+                // nAccept: the total accepted requests; nAccept/multiple: the average accepted requests for one multiple.
+                // at last, reset outMultiMinXXX.
+                stool->get() << t_OutMultiMinSetTime[i_sample]
+                        << t_OutMultiMinAccept[i_sample]
+                        << t_OutMultiMinStorage[i_sample]
+                        << t_nAccept[i_sample] / n_multiple
+                        << t_OutMultiMinSetTime[i_sample]
+                                + t_OutMultiMinAccept[i_sample]
+                                + t_OutMultiMinStorage[i_sample];
+                t_OutMultiMinSetTime[i_sample] = 0;
+                t_OutMultiMinAccept[i_sample] = 0;
+                t_OutMultiMinStorage[i_sample] = 0;
             }
             stool->get() << stool->endl;
             // set statistics variables
-            for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-                t_TSetTime[n_type] += t_MinSetTime[n_type];
-                t_TAccept[n_type] += t_MinAccept[n_type];
-                t_TStorage[n_type] += t_MinStorage[n_type];
-                t_Total[n_type] = t_TSetTime[n_type] + t_TAccept[n_type]
-                        + t_TStorage[n_type];
+            for(unsigned int i_sample = 0; i_sample < n_sample; ++i_sample){
+                t_TSetTime[i_sample] += t_MinSetTime[i_sample];
+                t_TAccept[i_sample] += t_MinAccept[i_sample];
+                t_TStorage[i_sample] += t_MinStorage[i_sample];
+                t_Total[i_sample] = t_TSetTime[i_sample] + t_TAccept[i_sample]
+                        + t_TStorage[i_sample];
             }
             // end the loop
             startInnerCircle = endInnerCircle;
@@ -1171,7 +1195,7 @@ int main() {
     if(!flagArray[EX_COMMON_TEST]){
         exCommonTest(flagStrArray[EX_COMMON_TEST]);
     }
-    if(flagArray[EX_START_PHASE]){
+    if(!flagArray[EX_START_PHASE]){
         exStartPhaseTest(flagStrArray[EX_START_PHASE]);
     }
     if(!flagArray[EX_UNBLANCE]){
