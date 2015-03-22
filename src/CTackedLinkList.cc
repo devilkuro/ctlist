@@ -923,70 +923,104 @@ void exUnlanceTest(string filename) {
 void exMultiLinkTest(string filename) {
     // FIXME chenge the code
     // statistics parameters
-    unsigned int s_Interval = 100;
-    unsigned int s_Request_Num = 10000;
+    unsigned int s_Interval = 1;
+    unsigned int s_Request_Num = 100;
     // try to minimum sample error which is cause by the time slot of the process
     unsigned int n_repeatTimes = 5; // repeat times of each statistics;
     unsigned int n_sample = 4;  // the number of samples
+    unsigned int n_multiple = 100;
+    unsigned int n_prefillup_num = 10000;
+    unsigned int n_TotalRequest_Num = s_Request_Num * n_multiple;
     // requests parameters
     unsigned int g_BW_Down = 1;
     unsigned int g_BW_Up = 20;
     unsigned int g_TS_Down = 0;
-    unsigned int g_TS_Up = 36000;
+    unsigned int g_TS_Up = 86400;
     unsigned int g_TD_Down = 1;
     unsigned int g_TD_Up = 512;
     unsigned int g_Interval_Avg = 50;
+    unsigned int g_Index_Interval = g_Interval_Avg * 4;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
-            * n_sample];
+            * n_sample * n_multiple];
     ASMTimer* timer = ASMTimer::request();
     StatisticsRecordTools* stool = StatisticsRecordTools::request();
     stool->setDefaultDir("results");
     Generator* gn = new Generator();
-    Request* r = new Request[s_Request_Num];
-    unsigned int* interval = new unsigned int[s_Request_Num];
-    double r_radio = 0.8;
+    Request* r = new Request[n_TotalRequest_Num];
+    unsigned int* interval = new unsigned int[n_TotalRequest_Num];
+    double r_radio = 1.0;
     // run the experiment under n_round different settings : TD max~ 512,4096,32768
-    for(int n_round = 0; n_round < 3; ++n_round, g_TD_Down *= 8, g_TD_Up *= 8){
+    for(int n_round = 0; n_round < 1; ++n_round){
         gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Down,
                 g_TD_Up, g_Interval_Avg);
         unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up / 6.17
                 / g_Interval_Avg * r_radio;
         // set requests and the intervals
-        for(unsigned int i = 0; i < s_Request_Num; i++){
+        for(unsigned int i = 0; i < n_TotalRequest_Num; i++){
             interval[i] = gn->getNext(&r[i]);
         }
         // initialize the storages: 0~CArray,1~CArray8,2~CIlink,3~CTlink
         unsigned int max_range = g_TS_Up + g_TD_Up;
-        unsigned int index_num = max_range / g_Interval_Avg / 4;
-        for(unsigned int n = 0; n < n_repeatTimes; ++n){
-            unsigned int n_no = 0;
-            ct[n * n_sample + n_no] = new CArrayList(max_range, 1);
-            ct[n * n_sample + n_no]->setResourceCap(max_resource);
-            n_no++;
-            ct[n * n_sample + n_no] = new CArrayList(max_range, 8);
-            ct[n * n_sample + n_no]->setResourceCap(max_resource);
-            n_no++;
-            ct[n * n_sample + n_no] = new CILink(index_num, max_range);
-            ct[n * n_sample + n_no]->setResourceCap(max_resource);
-            n_no++;
-            ct[n * n_sample + n_no] = new CTLink(index_num, max_range);
-            ct[n * n_sample + n_no]->setResourceCap(max_resource);
+        unsigned int index_num = max_range / g_Index_Interval;
+        for(unsigned int i_repeatTimes = 0; i_repeatTimes < n_repeatTimes;
+                ++i_repeatTimes){
+            for(unsigned int i_multiple = 0; i_multiple < n_multiple;
+                    ++i_multiple){
+                unsigned int i_sample = 0;
+                // {repeatTime:0{sample:0{multiple:0~n}~n}~n}
+                ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
+                        + i_multiple] = new CArrayList(max_range, 1);
+                ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
+                        + i_multiple]->setResourceCap(max_resource);
+                i_sample++;
+                ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
+                        + i_multiple] = new CArrayList(max_range, 8);
+                ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
+                        + i_multiple]->setResourceCap(max_resource);
+                i_sample++;
+                ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
+                        + i_multiple] = new CILink(index_num, max_range);
+                ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
+                        + i_multiple]->setResourceCap(max_resource);
+                i_sample++;
+                ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
+                        + i_multiple] = new CTLink(index_num, max_range);
+                ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
+                        + i_multiple]->setResourceCap(max_resource);
+                i_sample++;
+            }
         }
 
-        // set temporary statistics variables
+        // set temporary step-by-step statistics variables
         unsigned int *t_SetTime = new unsigned int[n_sample];
         memset(t_SetTime, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_Accept = new unsigned int[n_sample];
         memset(t_Accept, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_Storage = new unsigned int[n_sample];
         memset(t_Storage, 0, n_sample * sizeof(unsigned int));
+        // min step-by-step statistics variables
         unsigned int *t_MinSetTime = new unsigned int[n_sample];
         memset(t_MinSetTime, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_MinAccept = new unsigned int[n_sample];
         memset(t_MinAccept, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_MinStorage = new unsigned int[n_sample];
         memset(t_MinStorage, 0, n_sample * sizeof(unsigned int));
+        // multiple step-by-step statistics variables
+        unsigned int *t_MultiMinSetTime = new unsigned int[n_sample];
+        memset(t_MultiMinSetTime, 0, n_sample * sizeof(unsigned int));
+        unsigned int *t_MultiMinAccept = new unsigned int[n_sample];
+        memset(t_MultiMinAccept, 0, n_sample * sizeof(unsigned int));
+        unsigned int *t_MultiMinStorage = new unsigned int[n_sample];
+        memset(t_MultiMinStorage, 0, n_sample * sizeof(unsigned int));
+        // out-circle multiple statistics variables
+        unsigned int *t_OutMultiMinSetTime = new unsigned int[n_sample];
+        memset(t_OutMultiMinSetTime, 0, n_sample * sizeof(unsigned int));
+        unsigned int *t_OutMultiMinAccept = new unsigned int[n_sample];
+        memset(t_OutMultiMinAccept, 0, n_sample * sizeof(unsigned int));
+        unsigned int *t_OutMultiMinStorage = new unsigned int[n_sample];
+        memset(t_OutMultiMinStorage, 0, n_sample * sizeof(unsigned int));
+        // total statistics variables
         unsigned int *t_TSetTime = new unsigned int[n_sample];
         memset(t_TSetTime, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_TAccept = new unsigned int[n_sample];
@@ -994,6 +1028,7 @@ void exMultiLinkTest(string filename) {
         unsigned int *t_TStorage = new unsigned int[n_sample];
         memset(t_TStorage, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_Total = new unsigned int[n_sample];
+        // accumulative statistics variables
         memset(t_Total, 0, n_sample * sizeof(unsigned int));
         unsigned int *t_nAccept = new unsigned int[n_sample];
         memset(t_nAccept, 0, n_sample * sizeof(unsigned int));
@@ -1011,7 +1046,6 @@ void exMultiLinkTest(string filename) {
         if(false){
             // pre-filled up if necessary
             unsigned int n_num = n_repeatTimes * n_sample;
-            unsigned int n_prefillup_num = 10000;
             if(n_prefillup_num > s_Request_Num){
                 n_prefillup_num = s_Request_Num;
             }
@@ -1029,65 +1063,104 @@ void exMultiLinkTest(string filename) {
             }
             oldTime = curTime;
         }
-        Sleep(5);
         for(unsigned int ocn = 0; ocn < outCircleNum; ocn++){
             // inner circle for different storage types;
-            for(unsigned int n_repeat = 0; n_repeat < n_repeatTimes;
-                    ++n_repeat){
-                for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-                    // release cpu before each loop
-                    // Sleep(5);
-                    curTime = oldTime;
-                    curCircleNum = startInnerCircle;
-                    for(; curCircleNum < endInnerCircle; curCircleNum++){
-                        if(curCircleNum >= s_Request_Num){
-                            cout << "ERROR!!" << endl;
-                            return;
-                        }
-                        // run and statistics
-                        curTime += interval[curCircleNum];
-                        timer->start();
-                        ct[n_repeat * n_sample + n_type]->setTime(curTime);
-                        timer->end();
-                        t_SetTime[n_type] += timer->getCounts();
-                        timer->start();
-                        flag = ct[n_repeat * n_sample + n_type]->accept(
-                                r[curCircleNum]);
-                        timer->end();
-                        t_Accept[n_type] += timer->getCounts();
-                        if(flag){
+            // for each circle, run multiple times with different
+            // requests: request[i_Request_Num*s_Request_Num+i_multiple]
+            // to get the average cost in average situation.
+            // release cpu before each loop
+            // Sleep(5);
+            curCircleNum = startInnerCircle;
+            for(; curCircleNum < endInnerCircle; curCircleNum++){
+                if(curCircleNum >= s_Request_Num){
+                    cout << "ERROR!!" << endl;
+                    return;
+                }
+                for(unsigned int i_multiple = 0; i_multiple < n_multiple;
+                        ++i_multiple){
+                    // run and statistics
+                    for(unsigned int i_sample = 0; i_sample < n_sample;
+                            ++i_sample){
+                        for(unsigned int i_repeatTimes = 0;
+                                i_repeatTimes < n_repeatTimes; ++i_repeatTimes){
+                            // FIXME: needs to reset curTime before each multiple.
+                            curTime = oldTime;
+                            // using same interval in each one of multiple
+                            curTime += interval[curCircleNum];
                             timer->start();
-                            ct[n_repeat * n_sample + n_type]->forceInsert(
-                                    r[curCircleNum]);
+                            ct[i_repeatTimes * n_sample * n_multiple
+                                    + i_sample * n_multiple + i_multiple]->setTime(
+                                    curTime);
                             timer->end();
-                            t_Storage[n_type] += timer->getCounts();
-                            // the accept time just add once
-                            if(n_repeat == 0){
-                                t_nAccept[n_type]++;
+                            t_SetTime[i_sample] = timer->getCounts();
+                            timer->start();
+                            flag =
+                                    ct[i_repeatTimes * n_sample * n_multiple
+                                            + i_sample * n_multiple + i_multiple]->accept(
+                                            r[curCircleNum * n_multiple
+                                                    + i_multiple]);
+                            timer->end();
+                            t_Accept[i_sample] = timer->getCounts();
+                            if(flag){
+                                timer->start();
+                                ct[i_repeatTimes * n_sample * n_multiple
+                                        + i_sample * n_multiple + i_multiple]->forceInsert(
+                                        r[curCircleNum * n_multiple
+                                                + i_multiple]);
+                                timer->end();
+                                t_Storage[i_sample] = timer->getCounts();
+                                // the accept time just add once
+                                if(i_repeatTimes == 0){
+                                    t_nAccept[i_sample]++;
+                                }
+                            }
+                            if(i_repeatTimes == 0){
+                                t_MinSetTime[i_sample] = t_SetTime[i_sample];
+                                t_MinAccept[i_sample] = t_Accept[i_sample];
+                                t_MinStorage[i_sample] = t_Storage[i_sample];
+                            }else{
+                                t_MinSetTime[i_sample] =
+                                        t_MinSetTime[i_sample]
+                                                < t_SetTime[i_sample] ? t_MinSetTime[i_sample] :
+                                                t_SetTime[i_sample];
+                                t_MinAccept[i_sample] =
+                                        t_MinAccept[i_sample]
+                                                < t_Accept[i_sample] ? t_MinAccept[i_sample] :
+                                                t_Accept[i_sample];
+                                t_MinStorage[i_sample] =
+                                        t_MinStorage[i_sample]
+                                                < t_Storage[i_sample] ? t_MinStorage[i_sample] :
+                                                t_Storage[i_sample];
                             }
                         }
-                    }
-                    curCircleNum = startInnerCircle;
-                    if(n_repeat != 0){
-                        t_MinSetTime[n_type] =
-                                t_MinSetTime[n_type] < t_SetTime[n_type] ? t_MinSetTime[n_type] :
-                                        t_SetTime[n_type];
-                        t_MinAccept[n_type] =
-                                t_MinAccept[n_type] < t_Accept[n_type] ? t_MinAccept[n_type] :
-                                        t_Accept[n_type];
-                        t_MinStorage[n_type] =
-                                t_MinStorage[n_type] < t_Storage[n_type] ? t_MinStorage[n_type] :
-                                        t_Storage[n_type];
-                    }else{
-                        t_MinSetTime[n_type] = t_SetTime[n_type];
-                        t_MinAccept[n_type] = t_Accept[n_type];
-                        t_MinStorage[n_type] = t_Storage[n_type];
+                        if(i_multiple == 0){
+                            t_MultiMinSetTime[i_sample] =
+                                    t_MinSetTime[i_sample];
+                            t_MultiMinAccept[i_sample] = t_MinAccept[i_sample];
+                            t_MultiMinStorage[i_sample] =
+                                    t_MinStorage[i_sample];
+                        }else{
+                            t_MultiMinSetTime[i_sample] +=
+                                    t_MinSetTime[i_sample];
+                            t_MultiMinAccept[i_sample] += t_MinAccept[i_sample];
+                            t_MultiMinStorage[i_sample] +=
+                                    t_MinStorage[i_sample];
+                        }
                     }
                 }
-                for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-                    t_SetTime[n_type] = 0;
-                    t_Accept[n_type] = 0;
-                    t_Storage[n_type] = 0;
+                oldTime = curTime;
+                for(unsigned int i_sample = 0; i_sample < n_sample; ++i_sample){
+                    t_MultiMinSetTime[i_sample] = t_MultiMinSetTime[i_sample]
+                            / n_multiple;
+                    t_MultiMinAccept[i_sample] = t_MultiMinAccept[i_sample]
+                            / n_multiple;
+                    t_MultiMinStorage[i_sample] = t_MultiMinStorage[i_sample]
+                            / n_multiple;
+                    t_OutMultiMinSetTime[i_sample] +=
+                            t_MultiMinSetTime[i_sample];
+                    t_OutMultiMinAccept[i_sample] += t_MultiMinAccept[i_sample];
+                    t_OutMultiMinStorage[i_sample] +=
+                            t_MultiMinStorage[i_sample];
                 }
             }
             // statistics process
@@ -1104,23 +1177,31 @@ void exMultiLinkTest(string filename) {
             ss.str("");
             stool->changeName(name) << n_round << g_TD_Up << ocn
                     << endInnerCircle;
-            for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-                stool->get() << t_MinSetTime[n_type] << t_MinAccept[n_type]
-                        << t_MinStorage[n_type] << t_nAccept[n_type]
-                        << t_MinSetTime[n_type] + t_MinAccept[n_type]
-                                + t_MinStorage[n_type];
+            for(unsigned int i_sample = 0; i_sample < n_sample; ++i_sample){
+                // outMultiMinXXX: the total average min XXX time of one inner circle.
+                // nAccept: the total accepted requests; nAccept/multiple: the average accepted requests for one multiple.
+                // at last, reset outMultiMinXXX.
+                stool->get() << t_OutMultiMinSetTime[i_sample]
+                        << t_OutMultiMinAccept[i_sample]
+                        << t_OutMultiMinStorage[i_sample]
+                        << t_nAccept[i_sample] / n_multiple
+                        << t_OutMultiMinSetTime[i_sample]
+                                + t_OutMultiMinAccept[i_sample]
+                                + t_OutMultiMinStorage[i_sample];
+                t_OutMultiMinSetTime[i_sample] = 0;
+                t_OutMultiMinAccept[i_sample] = 0;
+                t_OutMultiMinStorage[i_sample] = 0;
             }
             stool->get() << stool->endl;
             // set statistics variables
-            for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-                t_TSetTime[n_type] += t_MinSetTime[n_type];
-                t_TAccept[n_type] += t_MinAccept[n_type];
-                t_TStorage[n_type] += t_MinStorage[n_type];
-                t_Total[n_type] = t_TSetTime[n_type] + t_TAccept[n_type]
-                        + t_TStorage[n_type];
+            for(unsigned int i_sample = 0; i_sample < n_sample; ++i_sample){
+                t_TSetTime[i_sample] += t_MinSetTime[i_sample];
+                t_TAccept[i_sample] += t_MinAccept[i_sample];
+                t_TStorage[i_sample] += t_MinStorage[i_sample];
+                t_Total[i_sample] = t_TSetTime[i_sample] + t_TAccept[i_sample]
+                        + t_TStorage[i_sample];
             }
             // end the loop
-            oldTime = curTime;
             startInnerCircle = endInnerCircle;
             endInnerCircle =
                     endInnerCircle + s_Interval > s_Request_Num ? s_Request_Num :
