@@ -16,7 +16,6 @@ Generator::Generator() {
     td_down = 100;
     td_up = 100;
     interval = 100;
-    hp.setSeed(0);
 }
 
 Generator::~Generator() {
