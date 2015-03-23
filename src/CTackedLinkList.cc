@@ -558,8 +558,7 @@ void exStartPhaseTest(string filename) {
                                 timer->start();
                                 ct[i_repeatTimes * n_sample * n_multiple
                                         + i_sample * n_multiple + i_multiple]->forceInsert(
-                                        r[curCircleNum * n_multiple
-                                                + i_multiple]);
+                                        r[curCircleNum * n_multiple + i_multiple]);
                                 timer->end();
                                 t_Storage[i_sample] = timer->getCounts();
                                 // the accept time just add once
@@ -923,12 +922,13 @@ void exUnlanceTest(string filename) {
 void exMultiLinkTest(string filename) {
     // FIXME chenge the code
     // statistics parameters
-    unsigned int s_Interval = 1;
-    unsigned int s_Request_Num = 100;
+    unsigned int s_Interval = 100;
+    unsigned int s_Request_Num = 10000;
     // try to minimum sample error which is cause by the time slot of the process
     unsigned int n_repeatTimes = 5; // repeat times of each statistics;
     unsigned int n_sample = 4;  // the number of samples
-    unsigned int n_multiple = 100;
+    unsigned int n_multiple = 1;
+    unsigned int n_storageNum = 10;
     unsigned int n_prefillup_num = 10000;
     unsigned int n_TotalRequest_Num = s_Request_Num * n_multiple;
     // requests parameters
@@ -942,7 +942,7 @@ void exMultiLinkTest(string filename) {
     unsigned int g_Index_Interval = g_Interval_Avg * 4;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
-            * n_sample * n_multiple];
+            * n_sample * n_multiple * n_storageNum];
     ASMTimer* timer = ASMTimer::request();
     StatisticsRecordTools* stool = StatisticsRecordTools::request();
     stool->setDefaultDir("results");
@@ -965,30 +965,49 @@ void exMultiLinkTest(string filename) {
         unsigned int index_num = max_range / g_Index_Interval;
         for(unsigned int i_repeatTimes = 0; i_repeatTimes < n_repeatTimes;
                 ++i_repeatTimes){
-            for(unsigned int i_multiple = 0; i_multiple < n_multiple;
-                    ++i_multiple){
-                unsigned int i_sample = 0;
-                // {repeatTime:0{sample:0{multiple:0~n}~n}~n}
-                ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
-                        + i_multiple] = new CArrayList(max_range, 1);
-                ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
-                        + i_multiple]->setResourceCap(max_resource);
-                i_sample++;
-                ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
-                        + i_multiple] = new CArrayList(max_range, 8);
-                ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
-                        + i_multiple]->setResourceCap(max_resource);
-                i_sample++;
-                ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
-                        + i_multiple] = new CILink(index_num, max_range);
-                ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
-                        + i_multiple]->setResourceCap(max_resource);
-                i_sample++;
-                ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
-                        + i_multiple] = new CTLink(index_num, max_range);
-                ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
-                        + i_multiple]->setResourceCap(max_resource);
-                i_sample++;
+            for(unsigned int i_storageNum = 0; i_storageNum < n_storageNum;
+                    ++i_storageNum){
+                for(unsigned int i_multiple = 0; i_multiple < n_multiple;
+                        ++i_multiple){
+                    unsigned int i_sample = 0;
+                    // {repeatTime:0{sample:0{stroge:0{multiple:0~n}~n}~n}~n}
+                    ct[i_repeatTimes * n_sample * n_storageNum * n_multiple
+                            + i_sample * n_storageNum * n_multiple
+                            + i_storageNum * n_multiple + i_multiple] =
+                            new CArrayList(max_range, 1);
+                    ct[i_repeatTimes * n_sample * n_storageNum * n_multiple
+                            + i_sample * n_storageNum * n_multiple
+                            + i_storageNum * n_multiple + i_multiple]->setResourceCap(
+                            max_resource);
+                    i_sample++;
+                    ct[i_repeatTimes * n_sample * n_storageNum * n_multiple
+                            + i_sample * n_storageNum * n_multiple
+                            + i_storageNum * n_multiple + i_multiple] =
+                            new CArrayList(max_range, 8);
+                    ct[i_repeatTimes * n_sample * n_storageNum * n_multiple
+                            + i_sample * n_storageNum * n_multiple
+                            + i_storageNum * n_multiple + i_multiple]->setResourceCap(
+                            max_resource);
+                    i_sample++;
+                    ct[i_repeatTimes * n_sample * n_storageNum * n_multiple
+                            + i_sample * n_storageNum * n_multiple
+                            + i_storageNum * n_multiple + i_multiple] =
+                            new CILink(index_num, max_range);
+                    ct[i_repeatTimes * n_sample * n_storageNum * n_multiple
+                            + i_sample * n_storageNum * n_multiple
+                            + i_storageNum * n_multiple + i_multiple]->setResourceCap(
+                            max_resource);
+                    i_sample++;
+                    ct[i_repeatTimes * n_sample * n_storageNum * n_multiple
+                            + i_sample * n_storageNum * n_multiple
+                            + i_storageNum * n_multiple + i_multiple] =
+                            new CTLink(index_num, max_range);
+                    ct[i_repeatTimes * n_sample * n_storageNum * n_multiple
+                            + i_sample * n_storageNum * n_multiple
+                            + i_storageNum * n_multiple + i_multiple]->setResourceCap(
+                            max_resource);
+                    i_sample++;
+                }
             }
         }
 
@@ -1041,6 +1060,9 @@ void exMultiLinkTest(string filename) {
         unsigned int curCircleNum = 0;
         unsigned int oldTime = 0;
         unsigned int curTime = 0;
+        // temporary variables
+        BaseAdmissionController* testSuit = NULL;
+        Request testRequest;
         bool flag = false;
         // initial fill up phase
         if(false){
@@ -1078,40 +1100,50 @@ void exMultiLinkTest(string filename) {
                 }
                 for(unsigned int i_multiple = 0; i_multiple < n_multiple;
                         ++i_multiple){
-                    // run and statistics
+                    // using different requests
                     for(unsigned int i_sample = 0; i_sample < n_sample;
                             ++i_sample){
+                        // test different storage types
                         for(unsigned int i_repeatTimes = 0;
                                 i_repeatTimes < n_repeatTimes; ++i_repeatTimes){
-                            // FIXME: needs to reset curTime before each multiple.
+                            // run several times to get the min cost to avoid the error causing by cpu slot of system
                             curTime = oldTime;
                             // using same interval in each one of multiple
                             curTime += interval[curCircleNum];
-                            timer->start();
-                            ct[i_repeatTimes * n_sample * n_multiple
-                                    + i_sample * n_multiple + i_multiple]->setTime(
-                                    curTime);
-                            timer->end();
-                            t_SetTime[i_sample] = timer->getCounts();
-                            timer->start();
-                            flag =
-                                    ct[i_repeatTimes * n_sample * n_multiple
-                                            + i_sample * n_multiple + i_multiple]->accept(
-                                            r[curCircleNum * n_multiple
-                                                    + i_multiple]);
-                            timer->end();
-                            t_Accept[i_sample] = timer->getCounts();
-                            if(flag){
+                            // reset accept flag before each repeat
+                            bool f_hasBeenAccepted = false;
+                            for(unsigned int i_storageNum = 0;
+                                    i_storageNum < n_storageNum
+                                            && !f_hasBeenAccepted;
+                                    ++i_storageNum){
+                                // multiple links
+                                testSuit =
+                                        ct[i_repeatTimes * n_sample
+                                                * n_storageNum * n_multiple
+                                                + i_sample * n_storageNum
+                                                        * n_multiple
+                                                + i_storageNum * n_multiple
+                                                + i_multiple];
+                                testRequest = r[curCircleNum * n_multiple
+                                        + i_multiple];
                                 timer->start();
-                                ct[i_repeatTimes * n_sample * n_multiple
-                                        + i_sample * n_multiple + i_multiple]->forceInsert(
-                                        r[curCircleNum * n_multiple
-                                                + i_multiple]);
+                                testSuit->setTime(curTime);
                                 timer->end();
-                                t_Storage[i_sample] = timer->getCounts();
-                                // the accept time just add once
-                                if(i_repeatTimes == 0){
-                                    t_nAccept[i_sample]++;
+                                t_SetTime[i_sample] += timer->getCounts();
+                                timer->start();
+                                flag = testSuit->accept(testRequest);
+                                timer->end();
+                                t_Accept[i_sample] += timer->getCounts();
+                                if(flag){
+                                    f_hasBeenAccepted = true;
+                                    timer->start();
+                                    testSuit->forceInsert(testRequest);
+                                    timer->end();
+                                    t_Storage[i_sample] += timer->getCounts();
+                                    // the accept time just add once
+                                    if(i_repeatTimes == 0){
+                                        t_nAccept[i_sample]++;
+                                    }
                                 }
                             }
                             if(i_repeatTimes == 0){
@@ -1132,6 +1164,9 @@ void exMultiLinkTest(string filename) {
                                                 < t_Storage[i_sample] ? t_MinStorage[i_sample] :
                                                 t_Storage[i_sample];
                             }
+                            t_SetTime[i_sample] = 0;
+                            t_Accept[i_sample] = 0;
+                            t_Storage[i_sample] = 0;
                         }
                         if(i_multiple == 0){
                             t_MultiMinSetTime[i_sample] =
@@ -1282,7 +1317,7 @@ int main() {
     if(!flagArray[EX_UNBLANCE]){
         exUnlanceTest(flagStrArray[EX_UNBLANCE]);
     }
-    if(!flagArray[EX_MULTILINK]){
+    if(flagArray[EX_MULTILINK]){
         exMultiLinkTest(flagStrArray[EX_MULTILINK]);
     }
 }
