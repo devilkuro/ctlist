@@ -271,21 +271,23 @@ void exCommonTest(string filename) {
                             cout << "ERROR!!" << endl;
                             return;
                         }
+                        // using temporary variables to avoid index conculation
+                        BaseAdmissionController* testSuit = ct[n_repeat
+                                * n_sample + n_type];
+                        Request testRequest = r[curCircleNum];
                         // run and statistics
                         curTime += interval[curCircleNum];
                         timer->start();
-                        ct[n_repeat * n_sample + n_type]->setTime(curTime);
+                        testSuit->setTime(curTime);
                         timer->end();
                         t_SetTime[n_type] += timer->getCounts();
                         timer->start();
-                        flag = ct[n_repeat * n_sample + n_type]->accept(
-                                r[curCircleNum]);
+                        flag = testSuit->accept(testRequest);
                         timer->end();
                         t_Accept[n_type] += timer->getCounts();
                         if(flag){
                             timer->start();
-                            ct[n_repeat * n_sample + n_type]->forceInsert(
-                                    r[curCircleNum]);
+                            testSuit->forceInsert(testRequest);
                             timer->end();
                             t_Storage[n_type] += timer->getCounts();
                             // the accept time just add once
@@ -558,29 +560,26 @@ void exStartPhaseTest(string filename) {
                             ++i_sample){
                         for(unsigned int i_repeatTimes = 0;
                                 i_repeatTimes < n_repeatTimes; ++i_repeatTimes){
-                            // FIXME: needs to reset curTime before each multiple.
+                            // using temporary variables to avoid index conculation
+                            BaseAdmissionController* testSuit = ct[i_repeatTimes
+                                    * n_sample * n_multiple
+                                    + i_sample * n_multiple + i_multiple];
+                            Request testRequest = r[curCircleNum * n_multiple
+                                    + i_multiple];
                             curTime = oldTime;
                             // using same interval in each one of multiple
                             curTime += interval[curCircleNum];
                             timer->start();
-                            ct[i_repeatTimes * n_sample * n_multiple
-                                    + i_sample * n_multiple + i_multiple]->setTime(
-                                    curTime);
+                            testSuit->setTime(curTime);
                             timer->end();
                             t_SetTime[i_sample] = timer->getCounts();
                             timer->start();
-                            flag =
-                                    ct[i_repeatTimes * n_sample * n_multiple
-                                            + i_sample * n_multiple + i_multiple]->accept(
-                                            r[curCircleNum * n_multiple
-                                                    + i_multiple]);
+                            flag = testSuit->accept(testRequest);
                             timer->end();
                             t_Accept[i_sample] = timer->getCounts();
                             if(flag){
                                 timer->start();
-                                ct[i_repeatTimes * n_sample * n_multiple
-                                        + i_sample * n_multiple + i_multiple]->forceInsert(
-                                        r[curCircleNum * n_multiple + i_multiple]);
+                                testSuit->forceInsert(testRequest);
                                 timer->end();
                                 t_Storage[i_sample] = timer->getCounts();
                                 // the accept time just add once
@@ -770,7 +769,7 @@ void exUnlanceTest(string filename) {
         Helper hp;
         unsigned int generatedTime = 0;
         unsigned int m_dayTime = 86400;
-        double m_avgDensity = 3600/g_Interval_Avg;
+        double m_avgDensity = 3600 / g_Interval_Avg;
         unsigned int m_minDensity = 1;
         double m_curDensity = 0;
         for(unsigned int i = 0; i < s_Request_Num; i++){
@@ -871,21 +870,23 @@ void exUnlanceTest(string filename) {
                             cout << "ERROR!!" << endl;
                             return;
                         }
+                        // using temporary variables to avoid index conculation
+                        BaseAdmissionController* testSuit = ct[n_repeat
+                                * n_sample + n_type];
+                        Request testRequest = r[curCircleNum];
                         // run and statistics
                         curTime += interval[curCircleNum];
                         timer->start();
-                        ct[n_repeat * n_sample + n_type]->setTime(curTime);
+                        testSuit->setTime(curTime);
                         timer->end();
                         t_SetTime[n_type] += timer->getCounts();
                         timer->start();
-                        flag = ct[n_repeat * n_sample + n_type]->accept(
-                                r[curCircleNum]);
+                        flag = testSuit->accept(testRequest);
                         timer->end();
                         t_Accept[n_type] += timer->getCounts();
                         if(flag){
                             timer->start();
-                            ct[n_repeat * n_sample + n_type]->forceInsert(
-                                    r[curCircleNum]);
+                            testSuit->forceInsert(testRequest);
                             timer->end();
                             t_Storage[n_type] += timer->getCounts();
                             // the accept time just add once
@@ -927,7 +928,7 @@ void exUnlanceTest(string filename) {
                         << ",storage-" << n_type << ",naccept-" << n_type
                         << ",total-" << n_type << "";
             }
-            ss<<",0";
+            ss << ",0";
             name = ss.str();
             ss.str("");
             stool->changeName(name) << n_round << g_TD_Up << ocn
@@ -1145,9 +1146,6 @@ void exMultiLinkTest(string filename) {
         unsigned int curCircleNum = 0;
         unsigned int oldTime = 0;
         unsigned int curTime = 0;
-        // temporary variables
-        BaseAdmissionController* testSuit = NULL;
-        Request testRequest;
         bool flag = false;
         // initial fill up phase
         if(true){
@@ -1202,15 +1200,16 @@ void exMultiLinkTest(string filename) {
                                             && !f_hasBeenAccepted;
                                     ++i_storageNum){
                                 // multiple links
-                                testSuit =
+                                // using temporary variables to avoid index conculation
+                                BaseAdmissionController* testSuit =
                                         ct[i_repeatTimes * n_sample
                                                 * n_storageNum * n_multiple
                                                 + i_sample * n_storageNum
                                                         * n_multiple
                                                 + i_storageNum * n_multiple
                                                 + i_multiple];
-                                testRequest = r[curCircleNum * n_multiple
-                                        + i_multiple];
+                                Request testRequest = r[curCircleNum
+                                        * n_multiple + i_multiple];
                                 timer->start();
                                 testSuit->setTime(curTime);
                                 timer->end();
