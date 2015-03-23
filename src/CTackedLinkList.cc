@@ -144,7 +144,7 @@ void exDevelopTest() {
     }
     cout << "ct: " << t_total0 << "\t" << n_accetp0 << endl;
     cout << "ci: " << t_total1 << "\t" << n_accetp1 << endl;
-    delete interval;
+    delete[] interval;
     delete[] r;
     delete gn;
 }
@@ -370,8 +370,30 @@ void exCommonTest(string filename) {
                     << t_Total[n_type];
         }
         stool->get() << stool->endl;
+
+        // destruction
+        delete[] t_SetTime;
+        delete[] t_Accept;
+        delete[] t_Storage;
+        delete[] t_MinSetTime;
+        delete[] t_MinAccept;
+        delete[] t_MinStorage;
+        delete[] t_TSetTime;
+        delete[] t_TAccept;
+        delete[] t_TStorage;
+        delete[] t_Total;
+        delete[] t_nAccept;
     }
     stool->outputSeparate(filename + ".txt");
+    stool->clean();
+    // destruction
+    delete gn;
+    delete[] r;
+    delete[] interval;
+    for(unsigned int i = 0; i < n_repeatTimes * n_sample; ++i){
+        delete ct[i];
+    }
+    delete[] ct;
 }
 void exStartPhaseTest(string filename) {
     // FIXME chenge the code
@@ -676,8 +698,41 @@ void exStartPhaseTest(string filename) {
                     << t_Total[n_type];
         }
         stool->get() << stool->endl;
+        // destruction
+        // set temporary step-by-step statistics variables
+        delete[] t_SetTime;
+        delete[] t_Accept;
+        delete[] t_Storage;
+        // min step-by-step statistics variables
+        delete[] t_MinSetTime;
+        delete[] t_MinAccept;
+        delete[] t_MinStorage;
+        // multiple step-by-step statistics variables
+        delete[] t_MultiMinSetTime;
+        delete[] t_MultiMinAccept;
+        delete[] t_MultiMinStorage;
+        // out-circle multiple statistics variables
+        delete[] t_OutMultiMinSetTime;
+        delete[] t_OutMultiMinAccept;
+        delete[] t_OutMultiMinStorage;
+        // total statistics variables
+        delete[] t_TSetTime;
+        delete[] t_TAccept;
+        delete[] t_TStorage;
+        delete[] t_Total;
+        // accumulative statistics variables
+        delete[] t_nAccept;
     }
     stool->outputSeparate(filename + ".txt");
+    stool->clean();
+    // destruction
+    delete gn;
+    delete[] r;
+    delete[] interval;
+    for(unsigned int i = 0; i < n_repeatTimes * n_sample * n_multiple; ++i){
+        delete ct[i];
+    }
+    delete[] ct;
 }
 void exUnlanceTest(string filename) {
     // statistics parameters
@@ -691,9 +746,9 @@ void exUnlanceTest(string filename) {
     unsigned int g_BW_Up = 20;
     unsigned int g_TS_Down = 0;
     unsigned int g_TS_Up = 86400;
-    unsigned int g_TD_Down = 8;
-    unsigned int g_TD_Up = 4096;
-    unsigned int g_Interval_Avg = 3600 / 55;
+    unsigned int g_TD_Down = 1;
+    unsigned int g_TD_Up = 512;
+    unsigned int g_Interval_Avg = 50;
     unsigned int g_Index_Interval = g_Interval_Avg * 4;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
@@ -715,9 +770,8 @@ void exUnlanceTest(string filename) {
         Helper hp;
         unsigned int generatedTime = 0;
         unsigned int m_dayTime = 86400;
-        unsigned int m_minDensity = 10;
-        unsigned int m_maxDensity = 100;
-        double m_avgDensity = (m_minDensity + m_maxDensity) * 1.0 / 2;
+        double m_avgDensity = 3600/g_Interval_Avg;
+        unsigned int m_minDensity = 1;
         double m_curDensity = 0;
         for(unsigned int i = 0; i < s_Request_Num; i++){
             m_curDensity = m_avgDensity
@@ -781,7 +835,7 @@ void exUnlanceTest(string filename) {
         unsigned int curTime = 0;
         bool flag = false;
         // initial fill up phase
-        if(true){
+        if(false){
             // pre-filled up if necessary
             unsigned int n_num = n_repeatTimes * n_sample;
             unsigned int n_prefillup_num = 10000;
@@ -873,6 +927,7 @@ void exUnlanceTest(string filename) {
                         << ",storage-" << n_type << ",naccept-" << n_type
                         << ",total-" << n_type << "";
             }
+            ss<<",0";
             name = ss.str();
             ss.str("");
             stool->changeName(name) << n_round << g_TD_Up << ocn
@@ -916,8 +971,33 @@ void exUnlanceTest(string filename) {
                     << t_Total[n_type];
         }
         stool->get() << stool->endl;
+
+        // set temporary step-by-step statistics variables
+        delete[] t_SetTime;
+        delete[] t_Accept;
+        delete[] t_Storage;
+        // min step-by-step statistics variables
+        delete[] t_MinSetTime;
+        delete[] t_MinAccept;
+        delete[] t_MinStorage;
+        // total statistics variables
+        delete[] t_TSetTime;
+        delete[] t_TAccept;
+        delete[] t_TStorage;
+        // accumulative statistics variables
+        delete[] t_Total;
+        delete[] t_nAccept;
     }
     stool->outputSeparate(filename + ".txt");
+    stool->clean();
+    // destruction
+    delete gn;
+    delete[] r;
+    delete[] interval;
+    for(unsigned int i = 0; i < n_repeatTimes * n_sample; ++i){
+        delete ct[i];
+    }
+    delete[] ct;
 }
 void exMultiLinkTest(string filename) {
     // FIXME chenge the code
@@ -939,7 +1019,9 @@ void exMultiLinkTest(string filename) {
     unsigned int g_TD_Down = 1;
     unsigned int g_TD_Up = 512;
     unsigned int g_Interval_Avg = 50;
-    unsigned int g_Index_Interval = g_Interval_Avg * 4;
+    double d_resRadio = 0.1;
+    double d_minResRadio = 1.0;
+    unsigned int g_Index_Interval = g_Interval_Avg * 2 * n_storageNum;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample * n_multiple * n_storageNum];
@@ -949,13 +1031,16 @@ void exMultiLinkTest(string filename) {
     Generator* gn = new Generator();
     Request* r = new Request[n_TotalRequest_Num];
     unsigned int* interval = new unsigned int[n_TotalRequest_Num];
-    double r_radio = 1.0;
-    // run the experiment under n_round different settings : TD max~ 512,4096,32768
+    // run the experiment under n_round different settings :
+    /////////////config the experiment here//////////////
     for(int n_round = 0; n_round < 1; ++n_round){
         gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Down,
                 g_TD_Up, g_Interval_Avg);
         unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up / 6.17
-                / g_Interval_Avg * r_radio;
+                / g_Interval_Avg * d_resRadio;
+        if(max_resource < g_BW_Up * d_minResRadio){
+            max_resource = g_BW_Up * d_minResRadio;
+        }
         // set requests and the intervals
         for(unsigned int i = 0; i < n_TotalRequest_Num; i++){
             interval[i] = gn->getNext(&r[i]);
@@ -1065,9 +1150,9 @@ void exMultiLinkTest(string filename) {
         Request testRequest;
         bool flag = false;
         // initial fill up phase
-        if(false){
+        if(true){
             // pre-filled up if necessary
-            unsigned int n_num = n_repeatTimes * n_sample;
+            unsigned int n_num = n_repeatTimes * n_sample * n_storageNum;
             if(n_prefillup_num > s_Request_Num){
                 n_prefillup_num = s_Request_Num;
             }
@@ -1075,7 +1160,7 @@ void exMultiLinkTest(string filename) {
                 curTime = oldTime;
                 for(unsigned int n_pfup = 0; n_pfup < n_prefillup_num;
                         ++n_pfup){
-                    curTime += interval[n_pfup];
+                    curTime += interval[n_pfup] * n_storageNum;
                     ct[n]->setTime(curTime);
                     flag = ct[n]->accept(r[n_pfup]);
                     if(flag){
@@ -1259,8 +1344,42 @@ void exMultiLinkTest(string filename) {
                     << t_Total[n_type];
         }
         stool->get() << stool->endl;
+        // destruction
+        // set temporary step-by-step statistics variables
+        delete[] t_SetTime;
+        delete[] t_Accept;
+        delete[] t_Storage;
+        // min step-by-step statistics variables
+        delete[] t_MinSetTime;
+        delete[] t_MinAccept;
+        delete[] t_MinStorage;
+        // multiple step-by-step statistics variables
+        delete[] t_MultiMinSetTime;
+        delete[] t_MultiMinAccept;
+        delete[] t_MultiMinStorage;
+        // out-circle multiple statistics variables
+        delete[] t_OutMultiMinSetTime;
+        delete[] t_OutMultiMinAccept;
+        delete[] t_OutMultiMinStorage;
+        // total statistics variables
+        delete[] t_TSetTime;
+        delete[] t_TAccept;
+        delete[] t_TStorage;
+        // accumulative statistics variables
+        delete[] t_Total;
+        delete[] t_nAccept;
     }
     stool->outputSeparate(filename + ".txt");
+    stool->clean();
+    // destruction
+    delete gn;
+    delete[] r;
+    delete[] interval;
+    for(unsigned int i = 0;
+            i < n_repeatTimes * n_sample * n_multiple * n_storageNum; ++i){
+        delete ct[i];
+    }
+    delete[] ct;
 }
 int main() {
     enum ExperimentCode {
@@ -1314,10 +1433,10 @@ int main() {
     if(!flagArray[EX_START_PHASE]){
         exStartPhaseTest(flagStrArray[EX_START_PHASE]);
     }
-    if(!flagArray[EX_UNBLANCE]){
+    if(flagArray[EX_UNBLANCE]){
         exUnlanceTest(flagStrArray[EX_UNBLANCE]);
     }
-    if(flagArray[EX_MULTILINK]){
+    if(!flagArray[EX_MULTILINK]){
         exMultiLinkTest(flagStrArray[EX_MULTILINK]);
     }
 }
