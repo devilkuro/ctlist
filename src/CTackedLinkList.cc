@@ -405,7 +405,7 @@ void exStartPhaseTest(string filename) {
     // try to minimum sample error which is cause by the time slot of the process
     unsigned int n_repeatTimes = 10; // repeat times of each statistics;
     unsigned int n_sample = 4;  // the number of samples
-    unsigned int n_multiple = 100;
+    unsigned int n_multiple = 50;
     unsigned int n_prefillup_num = 10000;
     unsigned int n_TotalRequest_Num = s_Request_Num * n_multiple;
     // requests parameters
@@ -430,7 +430,7 @@ void exStartPhaseTest(string filename) {
     // run the experiment under n_round different settings : TD max~ 512,4096,32768
     for(int n_round = 0; n_round < 1; ++n_round){
         gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Down,
-                g_TD_Up, g_Interval_Avg, UINT_MAX);
+                g_TD_Up, g_Interval_Avg);
         unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up / 6.17
                 / g_Interval_Avg * r_radio;
         // set requests and the intervals
