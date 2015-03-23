@@ -65,7 +65,9 @@ double Helper::E_Rand(double Lamda) {
 }
 
 void Helper::setSeed(unsigned int seed) {
-    srand(seed);
+    if(seed != UINT_MAX){
+        srand(seed);
+    }
 }
 
 double Helper::F_Rand(double a, double b) {

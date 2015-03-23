@@ -403,7 +403,7 @@ void exStartPhaseTest(string filename) {
     unsigned int s_Interval = 1;
     unsigned int s_Request_Num = 100;
     // try to minimum sample error which is cause by the time slot of the process
-    unsigned int n_repeatTimes = 5; // repeat times of each statistics;
+    unsigned int n_repeatTimes = 10; // repeat times of each statistics;
     unsigned int n_sample = 4;  // the number of samples
     unsigned int n_multiple = 100;
     unsigned int n_prefillup_num = 10000;
@@ -430,7 +430,7 @@ void exStartPhaseTest(string filename) {
     // run the experiment under n_round different settings : TD max~ 512,4096,32768
     for(int n_round = 0; n_round < 1; ++n_round){
         gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Down,
-                g_TD_Up, g_Interval_Avg);
+                g_TD_Up, g_Interval_Avg, UINT_MAX);
         unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up / 6.17
                 / g_Interval_Avg * r_radio;
         // set requests and the intervals
@@ -748,7 +748,7 @@ void exUnlanceTest(string filename) {
     unsigned int g_TD_Down = 1;
     unsigned int g_TD_Up = 512;
     unsigned int g_Interval_Avg = 50;
-    unsigned int g_Index_Interval = g_Interval_Avg * 4;
+    unsigned int g_Index_Interval = g_Interval_Avg * 2;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample];
@@ -1429,10 +1429,10 @@ int main() {
     if(!flagArray[EX_COMMON_TEST]){
         exCommonTest(flagStrArray[EX_COMMON_TEST]);
     }
-    if(!flagArray[EX_START_PHASE]){
+    if( flagArray[EX_START_PHASE]){
         exStartPhaseTest(flagStrArray[EX_START_PHASE]);
     }
-    if(flagArray[EX_UNBLANCE]){
+    if(!flagArray[EX_UNBLANCE]){
         exUnlanceTest(flagStrArray[EX_UNBLANCE]);
     }
     if(!flagArray[EX_MULTILINK]){
