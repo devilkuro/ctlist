@@ -6,7 +6,7 @@
  */
 #include "common.h"
 #include "helper.h"
-#include "bplus.h"
+//#include "bplus.h"
 #include "ctlink.h"
 #include "CILink.h"
 #include "CArrayList.h"
@@ -16,6 +16,26 @@
 #include "StatisticsRecordTools.h"
 //#include "stdlib.h"
 using namespace Fanjing;
+/*
+ *
+    unsigned int g_BW_Down = 1;
+    unsigned int g_BW_Up = 20;
+    unsigned int g_TS_Down = 0;
+    unsigned int g_TS_Up = 604800;86400;
+    unsigned int g_TD_Down = 1;
+    unsigned int g_TD_Up = 32768;
+    unsigned int g_Interval_Avg = 50;
+    unsigned int g_Index_Interval = g_Interval_Avg * 2;
+ */
+static unsigned int DEFALUT_BW_DOWN = 1;
+static unsigned int DEFALUT_BW_UP = 20;
+static unsigned int DEFALUT_TS_DOWN = 1;
+static unsigned int DEFALUT_TS_UP = 604800;
+static unsigned int DEFALUT_TD_DOWN = 1;
+static unsigned int DEFALUT_TD_UP = 32768;
+static unsigned int DEFALUT_INTERVAL_AVG = 50;
+static unsigned int DEFALUT_INDEX_MULTIPLE = 2;
+static double globalRSfixedARRAY[6] = {3.5,13,28,40,35,21};
 
 template<class T> string m_toStr(T tmp) {
     stringstream ss;
@@ -156,13 +176,14 @@ void exCommonTest(string filename) {
     unsigned int n_repeatTimes = 5; // repeat times of each statistics;
     unsigned int n_sample = 4;  // the number of samples
     // requests parameters
-    unsigned int g_BW_Down = 1;
-    unsigned int g_BW_Up = 20;
-    unsigned int g_TS_Down = 0;
-    unsigned int g_TS_Up = 36000;
-    unsigned int g_TD_Down = 1;
-    unsigned int g_TD_Up = 512;
-    unsigned int g_Interval_Avg = 50;
+    unsigned int g_BW_Down = DEFALUT_BW_DOWN;
+    unsigned int g_BW_Up = DEFALUT_BW_UP;
+    unsigned int g_TS_Down = DEFALUT_TS_DOWN;
+    unsigned int g_TS_Up = DEFALUT_TS_UP;
+    unsigned int g_TD_Down = DEFALUT_TD_DOWN;
+    unsigned int g_TD_Up = DEFALUT_TD_UP;
+    unsigned int g_Interval_Avg = DEFALUT_INTERVAL_AVG;
+    unsigned int g_Index_Interval = g_Interval_Avg * DEFALUT_INDEX_MULTIPLE;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample];
@@ -173,11 +194,12 @@ void exCommonTest(string filename) {
     Request* r = new Request[s_Request_Num];
     unsigned int* interval = new unsigned int[s_Request_Num];
     double r_radio = 0.8;
+    g_TD_Up = 512;
     // run the experiment under n_round different settings : TD max~ 512,4096,32768
-    for(int n_round = 0; n_round < 3; ++n_round, g_TD_Down *= 8, g_TD_Up *= 8){
+    for(int n_round = 0; n_round < 3; ++n_round, g_TD_Up *= 8){
         gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Down,
                 g_TD_Up, g_Interval_Avg);
-        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up / 6.17
+        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up / globalRSfixedARRAY[n_round]
                 / g_Interval_Avg * r_radio;
         // set requests and the intervals
         for(unsigned int i = 0; i < s_Request_Num; i++){
@@ -185,13 +207,13 @@ void exCommonTest(string filename) {
         }
         // initialize the storages: 0~CArray,1~CArray8,2~CIlink,3~CTlink
         unsigned int max_range = g_TS_Up + g_TD_Up;
-        unsigned int index_num = max_range / g_Interval_Avg / 4;
+        unsigned int index_num = max_range / g_Index_Interval;
         for(unsigned int n = 0; n < n_repeatTimes; ++n){
             unsigned int n_no = 0;
-            ct[n * n_sample + n_no] = new CArrayList(max_range, 1);
+            ct[n * n_sample + n_no] = new CArrayList(max_range, 4);
             ct[n * n_sample + n_no]->setResourceCap(max_resource);
             n_no++;
-            ct[n * n_sample + n_no] = new CArrayList(max_range, 8);
+            ct[n * n_sample + n_no] = new CArrayList(max_range, 16);
             ct[n * n_sample + n_no]->setResourceCap(max_resource);
             n_no++;
             ct[n * n_sample + n_no] = new CILink(index_num, max_range);
@@ -409,14 +431,14 @@ void exStartPhaseTest(string filename) {
     unsigned int n_prefillup_num = 10000;
     unsigned int n_TotalRequest_Num = s_Request_Num * n_multiple;
     // requests parameters
-    unsigned int g_BW_Down = 1;
-    unsigned int g_BW_Up = 20;
-    unsigned int g_TS_Down = 0;
-    unsigned int g_TS_Up = 86400;
-    unsigned int g_TD_Down = 1;
-    unsigned int g_TD_Up = 512;
-    unsigned int g_Interval_Avg = 50;
-    unsigned int g_Index_Interval = g_Interval_Avg * 4;
+    unsigned int g_BW_Down = DEFALUT_BW_DOWN;
+    unsigned int g_BW_Up = DEFALUT_BW_UP;
+    unsigned int g_TS_Down = DEFALUT_TS_DOWN;
+    unsigned int g_TS_Up = DEFALUT_TS_UP;
+    unsigned int g_TD_Down = DEFALUT_TD_DOWN;
+    unsigned int g_TD_Up = DEFALUT_TD_UP;
+    unsigned int g_Interval_Avg = DEFALUT_INTERVAL_AVG;
+    unsigned int g_Index_Interval = g_Interval_Avg * DEFALUT_INDEX_MULTIPLE;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample * n_multiple];
@@ -431,7 +453,7 @@ void exStartPhaseTest(string filename) {
     for(int n_round = 0; n_round < 1; ++n_round){
         gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Down,
                 g_TD_Up, g_Interval_Avg);
-        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up / 6.17
+        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up / globalRSfixedARRAY[3]
                 / g_Interval_Avg * r_radio;
         // set requests and the intervals
         for(unsigned int i = 0; i < n_TotalRequest_Num; i++){
@@ -447,12 +469,12 @@ void exStartPhaseTest(string filename) {
                 unsigned int i_sample = 0;
                 // {repeatTime:0{sample:0{multiple:0~n}~n}~n}
                 ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
-                        + i_multiple] = new CArrayList(max_range, 1);
+                        + i_multiple] = new CArrayList(max_range, 4);
                 ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
                         + i_multiple]->setResourceCap(max_resource);
                 i_sample++;
                 ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
-                        + i_multiple] = new CArrayList(max_range, 8);
+                        + i_multiple] = new CArrayList(max_range, 16);
                 ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
                         + i_multiple]->setResourceCap(max_resource);
                 i_sample++;
@@ -741,14 +763,14 @@ void exUnlanceTest(string filename) {
     unsigned int n_repeatTimes = 10; // repeat times of each statistics;
     unsigned int n_sample = 4;  // the number of samples
     // requests parameters
-    unsigned int g_BW_Down = 1;
-    unsigned int g_BW_Up = 20;
-    unsigned int g_TS_Down = 0;
-    unsigned int g_TS_Up = 86400;
-    unsigned int g_TD_Down = 1;
-    unsigned int g_TD_Up = 512;
-    unsigned int g_Interval_Avg = 50;
-    unsigned int g_Index_Interval = g_Interval_Avg * 2;
+    unsigned int g_BW_Down = DEFALUT_BW_DOWN;
+    unsigned int g_BW_Up = DEFALUT_BW_UP;
+    unsigned int g_TS_Down = DEFALUT_TS_DOWN;
+    unsigned int g_TS_Up = DEFALUT_TS_UP;
+    unsigned int g_TD_Down = DEFALUT_TD_DOWN;
+    unsigned int g_TD_Up = DEFALUT_TD_UP;
+    unsigned int g_Interval_Avg = DEFALUT_INTERVAL_AVG;
+    unsigned int g_Index_Interval = g_Interval_Avg * DEFALUT_INDEX_MULTIPLE;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample];
@@ -763,7 +785,7 @@ void exUnlanceTest(string filename) {
     for(int n_round = 0; n_round < 1; ++n_round){
         gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Down,
                 g_TD_Up, g_Interval_Avg);
-        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up / 6.17
+        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up / globalRSfixedARRAY[4]
                 / g_Interval_Avg * r_radio;
         // set requests and the intervals
         Helper hp;
@@ -787,10 +809,10 @@ void exUnlanceTest(string filename) {
         unsigned int index_num = max_range / g_Index_Interval;
         for(unsigned int n = 0; n < n_repeatTimes; ++n){
             unsigned int n_no = 0;
-            ct[n * n_sample + n_no] = new CArrayList(max_range, 1);
+            ct[n * n_sample + n_no] = new CArrayList(max_range, 4);
             ct[n * n_sample + n_no]->setResourceCap(max_resource);
             n_no++;
-            ct[n * n_sample + n_no] = new CArrayList(max_range, 8);
+            ct[n * n_sample + n_no] = new CArrayList(max_range, 16);
             ct[n * n_sample + n_no]->setResourceCap(max_resource);
             n_no++;
             ct[n * n_sample + n_no] = new CILink(index_num, max_range);
@@ -1013,16 +1035,16 @@ void exMultiLinkTest(string filename) {
     unsigned int n_prefillup_num = 10000;
     unsigned int n_TotalRequest_Num = s_Request_Num * n_multiple;
     // requests parameters
-    unsigned int g_BW_Down = 1;
-    unsigned int g_BW_Up = 20;
-    unsigned int g_TS_Down = 0;
-    unsigned int g_TS_Up = 86400;
-    unsigned int g_TD_Down = 1;
-    unsigned int g_TD_Up = 512;
-    unsigned int g_Interval_Avg = 50;
+    unsigned int g_BW_Down = DEFALUT_BW_DOWN;
+    unsigned int g_BW_Up = DEFALUT_BW_UP;
+    unsigned int g_TS_Down = DEFALUT_TS_DOWN;
+    unsigned int g_TS_Up = DEFALUT_TS_UP;
+    unsigned int g_TD_Down = DEFALUT_TD_DOWN;
+    unsigned int g_TD_Up = DEFALUT_TD_UP;
+    unsigned int g_Interval_Avg = DEFALUT_INTERVAL_AVG;
+    unsigned int g_Index_Interval = g_Interval_Avg * DEFALUT_INDEX_MULTIPLE * n_storageNum;
     double d_resRadio = 0.1;
     double d_minResRadio = 1.0;
-    unsigned int g_Index_Interval = g_Interval_Avg * 2 * n_storageNum;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample * n_multiple * n_storageNum];
@@ -1037,7 +1059,7 @@ void exMultiLinkTest(string filename) {
     for(int n_round = 0; n_round < 1; ++n_round){
         gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Down,
                 g_TD_Up, g_Interval_Avg);
-        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up / 6.17
+        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up / globalRSfixedARRAY[5]
                 / g_Interval_Avg * d_resRadio;
         if(max_resource < g_BW_Up * d_minResRadio){
             max_resource = g_BW_Up * d_minResRadio;
@@ -1060,7 +1082,7 @@ void exMultiLinkTest(string filename) {
                     ct[i_repeatTimes * n_sample * n_storageNum * n_multiple
                             + i_sample * n_storageNum * n_multiple
                             + i_storageNum * n_multiple + i_multiple] =
-                            new CArrayList(max_range, 1);
+                            new CArrayList(max_range, 4);
                     ct[i_repeatTimes * n_sample * n_storageNum * n_multiple
                             + i_sample * n_storageNum * n_multiple
                             + i_storageNum * n_multiple + i_multiple]->setResourceCap(
@@ -1069,7 +1091,7 @@ void exMultiLinkTest(string filename) {
                     ct[i_repeatTimes * n_sample * n_storageNum * n_multiple
                             + i_sample * n_storageNum * n_multiple
                             + i_storageNum * n_multiple + i_multiple] =
-                            new CArrayList(max_range, 8);
+                            new CArrayList(max_range, 16);
                     ct[i_repeatTimes * n_sample * n_storageNum * n_multiple
                             + i_sample * n_storageNum * n_multiple
                             + i_storageNum * n_multiple + i_multiple]->setResourceCap(
@@ -1426,16 +1448,16 @@ int main() {
     if(!flagArray[EX_DEVELOP_TEST]){
         exDevelopTest();
     }
-    if(!flagArray[EX_COMMON_TEST]){
+    if(flagArray[EX_COMMON_TEST]){
         exCommonTest(flagStrArray[EX_COMMON_TEST]);
     }
-    if( flagArray[EX_START_PHASE]){
+    if(flagArray[EX_START_PHASE]){
         exStartPhaseTest(flagStrArray[EX_START_PHASE]);
     }
-    if(!flagArray[EX_UNBLANCE]){
+    if(flagArray[EX_UNBLANCE]){
         exUnlanceTest(flagStrArray[EX_UNBLANCE]);
     }
-    if(!flagArray[EX_MULTILINK]){
+    if(flagArray[EX_MULTILINK]){
         exMultiLinkTest(flagStrArray[EX_MULTILINK]);
     }
 }
