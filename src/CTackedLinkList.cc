@@ -18,25 +18,30 @@
 using namespace Fanjing;
 /*
  *
-    unsigned int g_BW_Down = 1;
-    unsigned int g_BW_Up = 20;
-    unsigned int g_TS_Down = 0;
-    unsigned int g_TS_Up = 604800;86400;
-    unsigned int g_TD_Down = 1;
-    unsigned int g_TD_Up = 32768;
-    unsigned int g_Interval_Avg = 50;
-    unsigned int g_Index_Interval = g_Interval_Avg * 2;
+ unsigned int g_BW_Down = 1;
+ unsigned int g_BW_Up = 20;
+ unsigned int g_TS_Down = 0;
+ unsigned int g_TS_Up = 604800; 86400;
+ unsigned int g_TD_Down = 1;
+ unsigned int g_TD_Up = 32768;
+ unsigned int g_Interval_Avg = 50;
+ unsigned int g_Index_Interval = g_Interval_Avg * 5;
  */
+static unsigned int DEFALUT_SLOT_SIZE0 = 1;
+static unsigned int DEFALUT_SLOT_SIZE1 = 8;
 static unsigned int DEFALUT_BW_DOWN = 1;
 static unsigned int DEFALUT_BW_UP = 20;
 static unsigned int DEFALUT_TS_DOWN = 1;
-static unsigned int DEFALUT_TS_UP = 604800;
+static unsigned int DEFALUT_TS_UP = 86400;
 static unsigned int DEFALUT_TD_DOWN = 1;
-static unsigned int DEFALUT_TD_UP = 32768;
-static unsigned int DEFALUT_INTERVAL_AVG = 50;
-static unsigned int DEFALUT_INDEX_MULTIPLE = 2;
-static double globalRSfixedARRAY[6] = {3.5,13,28,40,35,21};
-
+static unsigned int DEFALUT_TD_UP = 512;
+static unsigned int DEFALUT_INTERVAL_AVG = 75;
+static double DEFALUT_INDEX_MULTIPLE = 2;
+static double globalRSfixedARRAY[12] = {2.25,8.00,16.0,
+                                        1.00,   1,   1,
+                                        2.75,  10,  19,
+                                        0.43, 3.4,  19};
+static int DEFAULT_MAX_NROUND = 3;
 template<class T> string m_toStr(T tmp) {
     stringstream ss;
     ss << tmp;
@@ -196,11 +201,11 @@ void exCommonTest(string filename) {
     double r_radio = 0.8;
     g_TD_Up = 512;
     // run the experiment under n_round different settings : TD max~ 512,4096,32768
-    for(int n_round = 0; n_round < 3; ++n_round, g_TD_Up *= 8){
+    for(int n_round = 0; n_round < DEFAULT_MAX_NROUND; ++n_round, g_TD_Up *= 8){
         gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Down,
                 g_TD_Up, g_Interval_Avg);
-        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up / globalRSfixedARRAY[n_round]
-                / g_Interval_Avg * r_radio;
+        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up
+                / globalRSfixedARRAY[0 + n_round] / g_Interval_Avg * r_radio;
         // set requests and the intervals
         for(unsigned int i = 0; i < s_Request_Num; i++){
             interval[i] = gn->getNext(&r[i]);
@@ -210,10 +215,12 @@ void exCommonTest(string filename) {
         unsigned int index_num = max_range / g_Index_Interval;
         for(unsigned int n = 0; n < n_repeatTimes; ++n){
             unsigned int n_no = 0;
-            ct[n * n_sample + n_no] = new CArrayList(max_range, 4);
+            ct[n * n_sample + n_no] = new CArrayList(max_range,
+                    DEFALUT_SLOT_SIZE0);
             ct[n * n_sample + n_no]->setResourceCap(max_resource);
             n_no++;
-            ct[n * n_sample + n_no] = new CArrayList(max_range, 16);
+            ct[n * n_sample + n_no] = new CArrayList(max_range,
+                    DEFALUT_SLOT_SIZE1);
             ct[n * n_sample + n_no]->setResourceCap(max_resource);
             n_no++;
             ct[n * n_sample + n_no] = new CILink(index_num, max_range);
@@ -257,7 +264,7 @@ void exCommonTest(string filename) {
         unsigned int curTime = 0;
         bool flag = false;
         // initial fill up phase
-        if(false){
+        if(true){
             // pre-filled up if necessary
             unsigned int n_num = n_repeatTimes * n_sample;
             unsigned int n_prefillup_num = 10000;
@@ -393,6 +400,7 @@ void exCommonTest(string filename) {
                     << t_TStorage[n_type] << t_nAccept[n_type]
                     << t_Total[n_type];
         }
+        cout << "AcceptRatio:" << t_nAccept[3]*1.0 / s_Request_Num << endl;
         stool->get() << stool->endl;
 
         // destruction
@@ -407,6 +415,9 @@ void exCommonTest(string filename) {
         delete[] t_TStorage;
         delete[] t_Total;
         delete[] t_nAccept;
+        for(unsigned int i = 0; i < n_repeatTimes * n_sample; ++i){
+            delete ct[i];
+        }
     }
     stool->outputSeparate(filename + ".txt");
     stool->clean();
@@ -414,9 +425,6 @@ void exCommonTest(string filename) {
     delete gn;
     delete[] r;
     delete[] interval;
-    for(unsigned int i = 0; i < n_repeatTimes * n_sample; ++i){
-        delete ct[i];
-    }
     delete[] ct;
 }
 void exStartPhaseTest(string filename) {
@@ -450,11 +458,11 @@ void exStartPhaseTest(string filename) {
     unsigned int* interval = new unsigned int[n_TotalRequest_Num];
     double r_radio = 1.0;
     // run the experiment under n_round different settings : TD max~ 512,4096,32768
-    for(int n_round = 0; n_round < 1; ++n_round){
+    for(int n_round = 0; n_round < DEFAULT_MAX_NROUND; ++n_round, g_TD_Up *= 8){
         gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Down,
                 g_TD_Up, g_Interval_Avg);
-        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up / globalRSfixedARRAY[3]
-                / g_Interval_Avg * r_radio;
+        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up
+                / globalRSfixedARRAY[3 + n_round] / g_Interval_Avg * r_radio;
         // set requests and the intervals
         for(unsigned int i = 0; i < n_TotalRequest_Num; i++){
             interval[i] = gn->getNext(&r[i]);
@@ -469,12 +477,14 @@ void exStartPhaseTest(string filename) {
                 unsigned int i_sample = 0;
                 // {repeatTime:0{sample:0{multiple:0~n}~n}~n}
                 ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
-                        + i_multiple] = new CArrayList(max_range, 4);
+                        + i_multiple] = new CArrayList(max_range,
+                        DEFALUT_SLOT_SIZE0);
                 ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
                         + i_multiple]->setResourceCap(max_resource);
                 i_sample++;
                 ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
-                        + i_multiple] = new CArrayList(max_range, 16);
+                        + i_multiple] = new CArrayList(max_range,
+                        DEFALUT_SLOT_SIZE1);
                 ct[i_repeatTimes * n_sample * n_multiple + i_sample * n_multiple
                         + i_multiple]->setResourceCap(max_resource);
                 i_sample++;
@@ -718,6 +728,7 @@ void exStartPhaseTest(string filename) {
                     << t_TStorage[n_type] << t_nAccept[n_type]
                     << t_Total[n_type];
         }
+        cout << "AcceptRatio:" << t_nAccept[3]*1.0 / s_Request_Num << endl;
         stool->get() << stool->endl;
         // destruction
         // set temporary step-by-step statistics variables
@@ -743,6 +754,9 @@ void exStartPhaseTest(string filename) {
         delete[] t_Total;
         // accumulative statistics variables
         delete[] t_nAccept;
+        for(unsigned int i = 0; i < n_repeatTimes * n_sample * n_multiple; ++i){
+            delete ct[i];
+        }
     }
     stool->outputSeparate(filename + ".txt");
     stool->clean();
@@ -750,9 +764,6 @@ void exStartPhaseTest(string filename) {
     delete gn;
     delete[] r;
     delete[] interval;
-    for(unsigned int i = 0; i < n_repeatTimes * n_sample * n_multiple; ++i){
-        delete ct[i];
-    }
     delete[] ct;
 }
 void exUnlanceTest(string filename) {
@@ -782,11 +793,11 @@ void exUnlanceTest(string filename) {
     unsigned int* interval = new unsigned int[s_Request_Num];
     double r_radio = 1;
     // run the experiment under n_round different settings : TD max~ 512,4096,32768
-    for(int n_round = 0; n_round < 1; ++n_round){
+    for(int n_round = 0; n_round < DEFAULT_MAX_NROUND; ++n_round, g_TD_Up *= 8){
         gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Down,
                 g_TD_Up, g_Interval_Avg);
-        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up / globalRSfixedARRAY[4]
-                / g_Interval_Avg * r_radio;
+        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up
+                / globalRSfixedARRAY[6 + n_round] / g_Interval_Avg * r_radio;
         // set requests and the intervals
         Helper hp;
         unsigned int generatedTime = 0;
@@ -809,10 +820,12 @@ void exUnlanceTest(string filename) {
         unsigned int index_num = max_range / g_Index_Interval;
         for(unsigned int n = 0; n < n_repeatTimes; ++n){
             unsigned int n_no = 0;
-            ct[n * n_sample + n_no] = new CArrayList(max_range, 4);
+            ct[n * n_sample + n_no] = new CArrayList(max_range,
+                    DEFALUT_SLOT_SIZE0);
             ct[n * n_sample + n_no]->setResourceCap(max_resource);
             n_no++;
-            ct[n * n_sample + n_no] = new CArrayList(max_range, 16);
+            ct[n * n_sample + n_no] = new CArrayList(max_range,
+                    DEFALUT_SLOT_SIZE1);
             ct[n * n_sample + n_no]->setResourceCap(max_resource);
             n_no++;
             ct[n * n_sample + n_no] = new CILink(index_num, max_range);
@@ -856,7 +869,7 @@ void exUnlanceTest(string filename) {
         unsigned int curTime = 0;
         bool flag = false;
         // initial fill up phase
-        if(false){
+        if(true){
             // pre-filled up if necessary
             unsigned int n_num = n_repeatTimes * n_sample;
             unsigned int n_prefillup_num = 10000;
@@ -993,6 +1006,7 @@ void exUnlanceTest(string filename) {
                     << t_TStorage[n_type] << t_nAccept[n_type]
                     << t_Total[n_type];
         }
+        cout << "AcceptRatio:" << t_nAccept[3]*1.0 / s_Request_Num << endl;
         stool->get() << stool->endl;
 
         // set temporary step-by-step statistics variables
@@ -1010,6 +1024,9 @@ void exUnlanceTest(string filename) {
         // accumulative statistics variables
         delete[] t_Total;
         delete[] t_nAccept;
+        for(unsigned int i = 0; i < n_repeatTimes * n_sample; ++i){
+            delete ct[i];
+        }
     }
     stool->outputSeparate(filename + ".txt");
     stool->clean();
@@ -1017,9 +1034,6 @@ void exUnlanceTest(string filename) {
     delete gn;
     delete[] r;
     delete[] interval;
-    for(unsigned int i = 0; i < n_repeatTimes * n_sample; ++i){
-        delete ct[i];
-    }
     delete[] ct;
 }
 void exMultiLinkTest(string filename) {
@@ -1042,9 +1056,10 @@ void exMultiLinkTest(string filename) {
     unsigned int g_TD_Down = DEFALUT_TD_DOWN;
     unsigned int g_TD_Up = DEFALUT_TD_UP;
     unsigned int g_Interval_Avg = DEFALUT_INTERVAL_AVG;
-    unsigned int g_Index_Interval = g_Interval_Avg * DEFALUT_INDEX_MULTIPLE * n_storageNum;
+    unsigned int g_Index_Interval = g_Interval_Avg * DEFALUT_INDEX_MULTIPLE
+            * n_storageNum;
     double d_resRadio = 0.1;
-    double d_minResRadio = 1.0;
+    double d_minResRadio = 0.1;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample * n_multiple * n_storageNum];
@@ -1056,11 +1071,11 @@ void exMultiLinkTest(string filename) {
     unsigned int* interval = new unsigned int[n_TotalRequest_Num];
     // run the experiment under n_round different settings :
     /////////////config the experiment here//////////////
-    for(int n_round = 0; n_round < 1; ++n_round){
+    for(int n_round = 0; n_round < DEFAULT_MAX_NROUND; ++n_round, g_TD_Up *= 8){
         gn->setGenerator(g_BW_Down, g_BW_Up, g_TS_Down, g_TS_Up, g_TD_Down,
                 g_TD_Up, g_Interval_Avg);
-        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up / globalRSfixedARRAY[5]
-                / g_Interval_Avg * d_resRadio;
+        unsigned int max_resource = (g_BW_Down + g_BW_Up) / 2 * g_TD_Up
+                / globalRSfixedARRAY[9 + n_round] / g_Interval_Avg * d_resRadio;
         if(max_resource < g_BW_Up * d_minResRadio){
             max_resource = g_BW_Up * d_minResRadio;
         }
@@ -1082,7 +1097,7 @@ void exMultiLinkTest(string filename) {
                     ct[i_repeatTimes * n_sample * n_storageNum * n_multiple
                             + i_sample * n_storageNum * n_multiple
                             + i_storageNum * n_multiple + i_multiple] =
-                            new CArrayList(max_range, 4);
+                            new CArrayList(max_range, DEFALUT_SLOT_SIZE0);
                     ct[i_repeatTimes * n_sample * n_storageNum * n_multiple
                             + i_sample * n_storageNum * n_multiple
                             + i_storageNum * n_multiple + i_multiple]->setResourceCap(
@@ -1091,7 +1106,7 @@ void exMultiLinkTest(string filename) {
                     ct[i_repeatTimes * n_sample * n_storageNum * n_multiple
                             + i_sample * n_storageNum * n_multiple
                             + i_storageNum * n_multiple + i_multiple] =
-                            new CArrayList(max_range, 16);
+                            new CArrayList(max_range, DEFALUT_SLOT_SIZE1);
                     ct[i_repeatTimes * n_sample * n_storageNum * n_multiple
                             + i_sample * n_storageNum * n_multiple
                             + i_storageNum * n_multiple + i_multiple]->setResourceCap(
@@ -1364,6 +1379,7 @@ void exMultiLinkTest(string filename) {
                     << t_TStorage[n_type] << t_nAccept[n_type]
                     << t_Total[n_type];
         }
+        cout << "AcceptRatio:" << t_nAccept[3]*1.0 / s_Request_Num << endl;
         stool->get() << stool->endl;
         // destruction
         // set temporary step-by-step statistics variables
@@ -1389,6 +1405,10 @@ void exMultiLinkTest(string filename) {
         // accumulative statistics variables
         delete[] t_Total;
         delete[] t_nAccept;
+        for(unsigned int i = 0;
+                i < n_repeatTimes * n_sample * n_multiple * n_storageNum; ++i){
+            delete ct[i];
+        }
     }
     stool->outputSeparate(filename + ".txt");
     stool->clean();
@@ -1396,10 +1416,6 @@ void exMultiLinkTest(string filename) {
     delete gn;
     delete[] r;
     delete[] interval;
-    for(unsigned int i = 0;
-            i < n_repeatTimes * n_sample * n_multiple * n_storageNum; ++i){
-        delete ct[i];
-    }
     delete[] ct;
 }
 int main() {
@@ -1439,6 +1455,7 @@ int main() {
     }
 
 // for test
+    bool b_run = true;
     if(!flagArray[EX_ASM_TEST]){
         exASMTest();
     }
@@ -1448,17 +1465,48 @@ int main() {
     if(!flagArray[EX_DEVELOP_TEST]){
         exDevelopTest();
     }
-    if(flagArray[EX_COMMON_TEST]){
+    if(b_run&&flagArray[EX_COMMON_TEST]){
         exCommonTest(flagStrArray[EX_COMMON_TEST]);
     }
-    if(flagArray[EX_START_PHASE]){
+    if(b_run&&flagArray[EX_START_PHASE]){
         exStartPhaseTest(flagStrArray[EX_START_PHASE]);
     }
-    if(flagArray[EX_UNBLANCE]){
+    if(b_run&&flagArray[EX_UNBLANCE]){
         exUnlanceTest(flagStrArray[EX_UNBLANCE]);
     }
-    if(flagArray[EX_MULTILINK]){
+    if(b_run&&flagArray[EX_MULTILINK]){
         exMultiLinkTest(flagStrArray[EX_MULTILINK]);
+    }
+    // 2.25,8,16,1,2.75,0.225
+    if(!b_run){
+        for(double var = 0; var < 0; var+=0.25){
+            globalRSfixedARRAY[0] = var;    // 2.25
+            globalRSfixedARRAY[1] = var;    // 8
+            globalRSfixedARRAY[2] = var;    // 16
+            cout << "EX_COMMON_TEST:" << var << endl;
+            exCommonTest(flagStrArray[EX_COMMON_TEST]);
+        }
+        for(double var = 0; var < 0; ++var){
+            globalRSfixedARRAY[3] = var;    // 1
+            globalRSfixedARRAY[4] = var;    // 1
+            globalRSfixedARRAY[5] = var;    // 1
+            cout << "EX_START_PHASE:" << var << endl;
+            exStartPhaseTest(flagStrArray[EX_START_PHASE]);
+        }
+        for(double var = 19; var < 22; var+=1){
+            globalRSfixedARRAY[6] = var;    // 2.75
+            globalRSfixedARRAY[7] = var;    // 10
+            globalRSfixedARRAY[8] = var;    // 19
+            cout << "EX_UNBLANCE:" << var << endl;
+            exUnlanceTest(flagStrArray[EX_UNBLANCE]);
+        }
+        for(double var = 19; var < 22; var+=1){
+            globalRSfixedARRAY[9] = var;  // 0.43
+            globalRSfixedARRAY[10] = var;  // 3.4
+            globalRSfixedARRAY[11] = var;  // 19
+            cout << "EX_MULTILINK:" << var << endl;
+            exMultiLinkTest(flagStrArray[EX_MULTILINK]);
+        }
     }
 }
 
