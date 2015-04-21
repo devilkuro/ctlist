@@ -30,7 +30,7 @@ using namespace Fanjing;
 static unsigned int DEFALUT_SLOT_SIZE0 = 1;
 static unsigned int DEFALUT_SLOT_SIZE1 = 8;
 static unsigned int DEFALUT_BW_DOWN = 1;
-static unsigned int DEFALUT_BW_UP = 20;
+static unsigned int DEFALUT_BW_UP = 200;
 static unsigned int DEFALUT_TS_DOWN = 1;
 static unsigned int DEFALUT_TS_UP = 86400;
 static unsigned int DEFALUT_TD_DOWN = 1;
