@@ -76,9 +76,11 @@ DWORD WINAPI RecordFor5(LPVOID tmp) {
 }
 string dbl2Str(double dou, int precision = -1, bool useSignOfPercent = false) {
     stringstream ss;
+    ss.setf(std::ios::fixed);
     if(precision >= 0){
-        ss.setf(std::ios::fixed);
         ss.precision(precision);
+    }else{
+        ss.precision(0);
     }
     if(useSignOfPercent){
         ss << dou * 100;
@@ -89,13 +91,14 @@ string dbl2Str(double dou, int precision = -1, bool useSignOfPercent = false) {
     }
 }
 
+string dbl2Pcent(double dou, int precision = 2) {
+    return dbl2Str(dou, precision, true);
+}
+
 string statistics2Str(double dou0, double dou1, int precision = 2) {
     return dbl2Str(dou0) + ":(" + dbl2Pcent(dou0 / dou1) + ")";
 }
 
-string dbl2Pcent(double dou, int precision = 2) {
-    return dbl2Str(dou, precision, true);
-}
 
 void exASMTest() {
     ASMTimer* at = ASMTimer::request();
