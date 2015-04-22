@@ -74,23 +74,29 @@ DWORD WINAPI RecordFor5(LPVOID tmp) {
     }
     return 0;
 }
-string dbl2Str(double dou, int precision = 0, bool useSignOfPercent = false) {
+string dbl2Str(double dou, int precision = -1, bool useSignOfPercent = false) {
     stringstream ss;
     if(precision >= 0){
         ss.setf(std::ios::fixed);
         ss.precision(precision);
     }
-    if (useSignOfPercent) {
-        ss << dou*100;
-        return ss.str()+"%";
+    if(useSignOfPercent){
+        ss << dou * 100;
+        return ss.str() + "%";
     }else{
         ss << dou;
         return ss.str();
     }
 }
-string dbl2Pcent(double dou, int precision = 0){
-    return dbl2Str(dou,precision,true);
+
+string statistics2Str(double dou0, double dou1, int precision = 2) {
+    return dbl2Str(dou0) + ":(" + dbl2Pcent(dou0 / dou1) + ")";
 }
+
+string dbl2Pcent(double dou, int precision = 2) {
+    return dbl2Str(dou, precision, true);
+}
+
 void exASMTest() {
     ASMTimer* at = ASMTimer::request();
     at->start();
@@ -413,10 +419,11 @@ void exCommonTest(string filename) {
         ss.str("");
         stool->changeName(name) << n_round << g_TD_Up;
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-            stool->get() << dbl2Pcent(t_TSetTime[n_type] / (1.0 * t_Total[n_type]))
-                    << dbl2Pcent(t_TAccept[n_type] / (1.0 * t_Total[n_type]))
-                    << dbl2Pcent(t_TStorage[n_type] / (1.0 * t_Total[n_type]))
-                    << dbl2Pcent(t_nAccept[n_type] / (1.0 * s_Request_Num))
+            stool->get()
+                    << statistics2Str(t_TSetTime[n_type] ,(1.0 * t_Total[n_type]))
+                    << statistics2Str(t_TAccept[n_type] , (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_TStorage[n_type] , (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_nAccept[n_type] , (1.0 * s_Request_Num))
                     << t_Total[n_type];
         }
         cout << "AcceptRatio:" << t_nAccept[3] * 1.0 / s_Request_Num << endl;
@@ -743,10 +750,13 @@ void exStartPhaseTest(string filename) {
         ss.str("");
         stool->changeName(name) << n_round << g_TD_Up;
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-            stool->get() << dbl2Pcent(t_TSetTime[n_type] / (1.0 * t_Total[n_type]))
-                    << dbl2Pcent(t_TAccept[n_type] / (1.0 * t_Total[n_type]))
-                    << dbl2Pcent(t_TStorage[n_type] / (1.0 * t_Total[n_type]))
-                    << dbl2Pcent(t_nAccept[n_type] / (1.0 * s_Request_Num))
+            stool->get()
+                    << statistics2Str(t_TSetTime[n_type] , (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_TAccept[n_type] , (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_TStorage[n_type] , (1.0 * t_Total[n_type]))
+                    << statistics2Str(
+                            t_nAccept[n_type]
+                                    , (n_multiple * 1.0 * s_Request_Num))
                     << t_Total[n_type];
         }
         cout << "AcceptRatio:" << t_nAccept[3] * 1.0 / s_Request_Num << endl;
@@ -1023,10 +1033,11 @@ void exUnlanceTest(string filename) {
         ss.str("");
         stool->changeName(name) << n_round << g_TD_Up;
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-            stool->get() << dbl2Pcent(t_TSetTime[n_type] / (1.0 * t_Total[n_type]))
-                    << dbl2Pcent(t_TAccept[n_type] / (1.0 * t_Total[n_type]))
-                    << dbl2Pcent(t_TStorage[n_type] / (1.0 * t_Total[n_type]))
-                    << dbl2Pcent(t_nAccept[n_type] / (1.0 * s_Request_Num))
+            stool->get()
+                    << statistics2Str(t_TSetTime[n_type] , (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_TAccept[n_type] , (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_TStorage[n_type] , (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_nAccept[n_type] , (1.0 * s_Request_Num))
                     << t_Total[n_type];
         }
         cout << "AcceptRatio:" << t_nAccept[3] * 1.0 / s_Request_Num << endl;
@@ -1401,10 +1412,11 @@ void exMultiLinkTest(string filename) {
         ss.str("");
         stool->changeName(name) << n_round << g_TD_Up;
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-            stool->get() << dbl2Pcent(t_TSetTime[n_type] / (1.0 * t_Total[n_type]))
-                    << dbl2Pcent(t_TAccept[n_type] / (1.0 * t_Total[n_type]))
-                    << dbl2Pcent(t_TStorage[n_type] / (1.0 * t_Total[n_type]))
-                    << dbl2Pcent(t_nAccept[n_type] / (1.0 * s_Request_Num))
+            stool->get()
+                    << statistics2Str(t_TSetTime[n_type] , (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_TAccept[n_type] , (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_TStorage[n_type] , (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_nAccept[n_type] , (1.0 * s_Request_Num))
                     << t_Total[n_type];
         }
         cout << "AcceptRatio:" << t_nAccept[3] * 1.0 / s_Request_Num << endl;
