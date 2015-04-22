@@ -74,6 +74,23 @@ DWORD WINAPI RecordFor5(LPVOID tmp) {
     }
     return 0;
 }
+string dbl2Str(double dou, int precision = 0, bool useSignOfPercent = false) {
+    stringstream ss;
+    if(precision > 0){
+        ss.setf(std::ios::fixed);
+        ss.precision(precision);
+    }
+    if (useSignOfPercent) {
+        ss << dou*100;
+        return ss.str()+"%";
+    }else{
+        ss << dou;
+        return ss.str();
+    }
+}
+string dbl2Pcent(double dou, int precision = 2){
+    return dbl2Str(dou,precision,true);
+}
 void exASMTest() {
     ASMTimer* at = ASMTimer::request();
     at->start();
@@ -396,11 +413,13 @@ void exCommonTest(string filename) {
         ss.str("");
         stool->changeName(name) << n_round << g_TD_Up;
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-            stool->get() << t_TSetTime[n_type]/(1.0*t_Total[n_type]) << t_TAccept[n_type]/(1.0*t_Total[n_type])
-                    << t_TStorage[n_type] /(1.0*t_Total[n_type])<< t_nAccept[n_type]/ (1.0*s_Request_Num)
+            stool->get() << dbl2Pcent(t_TSetTime[n_type] / (1.0 * t_Total[n_type]))
+                    << dbl2Pcent(t_TAccept[n_type] / (1.0 * t_Total[n_type]))
+                    << dbl2Pcent(t_TStorage[n_type] / (1.0 * t_Total[n_type]))
+                    << dbl2Pcent(t_nAccept[n_type] / (1.0 * s_Request_Num))
                     << t_Total[n_type];
         }
-        cout << "AcceptRatio:" << t_nAccept[3]*1.0 / s_Request_Num << endl;
+        cout << "AcceptRatio:" << t_nAccept[3] * 1.0 / s_Request_Num << endl;
         stool->get() << stool->endl;
 
         // destruction
@@ -724,11 +743,13 @@ void exStartPhaseTest(string filename) {
         ss.str("");
         stool->changeName(name) << n_round << g_TD_Up;
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-            stool->get() << t_TSetTime[n_type] /(1.0*t_Total[n_type])<< t_TAccept[n_type]/(1.0*t_Total[n_type])
-                    << t_TStorage[n_type] /(1.0*t_Total[n_type])<< t_nAccept[n_type]/ (1.0*s_Request_Num)
+            stool->get() << dbl2Pcent(t_TSetTime[n_type] / (1.0 * t_Total[n_type]))
+                    << dbl2Pcent(t_TAccept[n_type] / (1.0 * t_Total[n_type]))
+                    << dbl2Pcent(t_TStorage[n_type] / (1.0 * t_Total[n_type]))
+                    << dbl2Pcent(t_nAccept[n_type] / (1.0 * s_Request_Num))
                     << t_Total[n_type];
         }
-        cout << "AcceptRatio:" << t_nAccept[3]*1.0 / s_Request_Num << endl;
+        cout << "AcceptRatio:" << t_nAccept[3] * 1.0 / s_Request_Num << endl;
         stool->get() << stool->endl;
         // destruction
         // set temporary step-by-step statistics variables
@@ -1002,11 +1023,13 @@ void exUnlanceTest(string filename) {
         ss.str("");
         stool->changeName(name) << n_round << g_TD_Up;
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-            stool->get() << t_TSetTime[n_type]/(1.0*t_Total[n_type]) << t_TAccept[n_type]/(1.0*t_Total[n_type])
-                    << t_TStorage[n_type]/(1.0*t_Total[n_type]) << t_nAccept[n_type]/ (1.0*s_Request_Num)
+            stool->get() << dbl2Pcent(t_TSetTime[n_type] / (1.0 * t_Total[n_type]))
+                    << dbl2Pcent(t_TAccept[n_type] / (1.0 * t_Total[n_type]))
+                    << dbl2Pcent(t_TStorage[n_type] / (1.0 * t_Total[n_type]))
+                    << dbl2Pcent(t_nAccept[n_type] / (1.0 * s_Request_Num))
                     << t_Total[n_type];
         }
-        cout << "AcceptRatio:" << t_nAccept[3]*1.0 / s_Request_Num << endl;
+        cout << "AcceptRatio:" << t_nAccept[3] * 1.0 / s_Request_Num << endl;
         stool->get() << stool->endl;
 
         // set temporary step-by-step statistics variables
@@ -1378,11 +1401,13 @@ void exMultiLinkTest(string filename) {
         ss.str("");
         stool->changeName(name) << n_round << g_TD_Up;
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-            stool->get() << t_TSetTime[n_type]/(1.0*t_Total[n_type]) << t_TAccept[n_type]/(1.0*t_Total[n_type])
-                    << t_TStorage[n_type]/(1.0*t_Total[n_type]) << t_nAccept[n_type]/ (1.0*s_Request_Num)
+            stool->get() << dbl2Pcent(t_TSetTime[n_type] / (1.0 * t_Total[n_type]))
+                    << dbl2Pcent(t_TAccept[n_type] / (1.0 * t_Total[n_type]))
+                    << dbl2Pcent(t_TStorage[n_type] / (1.0 * t_Total[n_type]))
+                    << dbl2Pcent(t_nAccept[n_type] / (1.0 * s_Request_Num))
                     << t_Total[n_type];
         }
-        cout << "AcceptRatio:" << t_nAccept[3]*1.0 / s_Request_Num << endl;
+        cout << "AcceptRatio:" << t_nAccept[3] * 1.0 / s_Request_Num << endl;
         stool->get() << stool->endl;
         // destruction
         // set temporary step-by-step statistics variables
@@ -1457,32 +1482,34 @@ int main() {
         }
     }
 
+    double a = 12.32124214;
+    cout << dbl2Str(a, 2) << endl;
 // for test
     bool b_run = true;
-    if(!flagArray[EX_ASM_TEST]){
+    if(false && !flagArray[EX_ASM_TEST]){
         exASMTest();
     }
-    if(!flagArray[EX_HELPER_TEST]){
+    if(false && !flagArray[EX_HELPER_TEST]){
         exHelperTest();
     }
-    if(!flagArray[EX_DEVELOP_TEST]){
+    if(false && !flagArray[EX_DEVELOP_TEST]){
         exDevelopTest();
     }
-    if(b_run&&flagArray[EX_COMMON_TEST]){
+    if(b_run && flagArray[EX_COMMON_TEST]){
         exCommonTest(flagStrArray[EX_COMMON_TEST]);
     }
-    if(b_run&&flagArray[EX_START_PHASE]){
+    if(b_run && flagArray[EX_START_PHASE]){
         exStartPhaseTest(flagStrArray[EX_START_PHASE]);
     }
-    if(b_run&&flagArray[EX_UNBLANCE]){
+    if(b_run && flagArray[EX_UNBLANCE]){
         exUnlanceTest(flagStrArray[EX_UNBLANCE]);
     }
-    if(b_run&&flagArray[EX_MULTILINK]){
+    if(b_run && flagArray[EX_MULTILINK]){
         exMultiLinkTest(flagStrArray[EX_MULTILINK]);
     }
     // 2.25,8,16,1,2.75,0.225
     if(!b_run){
-        for(double var = 0; var < 0; var+=0.25){
+        for(double var = 0; var < 0; var += 0.25){
             globalRSfixedARRAY[0] = var;    // 2.25
             globalRSfixedARRAY[1] = var;    // 8
             globalRSfixedARRAY[2] = var;    // 16
@@ -1496,14 +1523,14 @@ int main() {
             cout << "EX_START_PHASE:" << var << endl;
             exStartPhaseTest(flagStrArray[EX_START_PHASE]);
         }
-        for(double var = 19; var < 22; var+=1){
+        for(double var = 19; var < 22; var += 1){
             globalRSfixedARRAY[6] = var;    // 2.75
             globalRSfixedARRAY[7] = var;    // 10
             globalRSfixedARRAY[8] = var;    // 19
             cout << "EX_UNBLANCE:" << var << endl;
             exUnlanceTest(flagStrArray[EX_UNBLANCE]);
         }
-        for(double var = 19; var < 22; var+=1){
+        for(double var = 19; var < 22; var += 1){
             globalRSfixedARRAY[9] = var;  // 0.43
             globalRSfixedARRAY[10] = var;  // 3.4
             globalRSfixedARRAY[11] = var;  // 19
