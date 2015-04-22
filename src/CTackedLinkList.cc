@@ -76,7 +76,7 @@ DWORD WINAPI RecordFor5(LPVOID tmp) {
 }
 string dbl2Str(double dou, int precision = 0, bool useSignOfPercent = false) {
     stringstream ss;
-    if(precision > 0){
+    if(precision >= 0){
         ss.setf(std::ios::fixed);
         ss.precision(precision);
     }
@@ -88,7 +88,7 @@ string dbl2Str(double dou, int precision = 0, bool useSignOfPercent = false) {
         return ss.str();
     }
 }
-string dbl2Pcent(double dou, int precision = 2){
+string dbl2Pcent(double dou, int precision = 0){
     return dbl2Str(dou,precision,true);
 }
 void exASMTest() {
