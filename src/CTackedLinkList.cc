@@ -1312,6 +1312,7 @@ void exMultiLinkTest(string filename) {
                             / n_multiple;
                     t_MultiMinStorage[i_sample] = t_MultiMinStorage[i_sample]
                             / n_multiple;
+                    // outMultiMinXXX: the total average MinXXX time of one total inner circle.
                     t_OutMultiMinSetTime[i_sample] +=
                             t_MultiMinSetTime[i_sample];
                     t_OutMultiMinAccept[i_sample] += t_MultiMinAccept[i_sample];
@@ -1320,6 +1321,16 @@ void exMultiLinkTest(string filename) {
                 }
             }
             // statistics process
+            // set statistics variables
+            for(unsigned int i_sample = 0; i_sample < n_sample; ++i_sample){
+                // outMultiMinXXX: the total average MinXXX time of one total inner circle.
+                // TXXX: the finaly total time cost.
+                t_TSetTime[i_sample] += t_OutMultiMinSetTime[i_sample];
+                t_TAccept[i_sample] += t_OutMultiMinAccept[i_sample];
+                t_TStorage[i_sample] += t_OutMultiMinStorage[i_sample];
+                t_Total[i_sample] = t_TSetTime[i_sample] + t_TAccept[i_sample]
+                        + t_TStorage[i_sample];
+            }
             stringstream ss;
             string name;
             ss << "cost of ocn rounds-" << g_TD_Up
@@ -1334,7 +1345,7 @@ void exMultiLinkTest(string filename) {
             stool->changeName(name) << n_round << g_TD_Up << ocn
                     << endInnerCircle;
             for(unsigned int i_sample = 0; i_sample < n_sample; ++i_sample){
-                // outMultiMinXXX: the total average min XXX time of one inner circle.
+                // outMultiMinXXX: the total average MinXXX time of one total inner circle.
                 // nAccept: the total accepted requests; nAccept/multiple: the average accepted requests for one multiple.
                 // at last, reset outMultiMinXXX.
                 stool->get() << t_OutMultiMinSetTime[i_sample]
@@ -1349,14 +1360,6 @@ void exMultiLinkTest(string filename) {
                 t_OutMultiMinStorage[i_sample] = 0;
             }
             stool->get() << stool->endl;
-            // set statistics variables
-            for(unsigned int i_sample = 0; i_sample < n_sample; ++i_sample){
-                t_TSetTime[i_sample] += t_MinSetTime[i_sample];
-                t_TAccept[i_sample] += t_MinAccept[i_sample];
-                t_TStorage[i_sample] += t_MinStorage[i_sample];
-                t_Total[i_sample] = t_TSetTime[i_sample] + t_TAccept[i_sample]
-                        + t_TStorage[i_sample];
-            }
             // end the loop
             startInnerCircle = endInnerCircle;
             endInnerCircle =
