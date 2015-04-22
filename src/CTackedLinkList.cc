@@ -396,8 +396,8 @@ void exCommonTest(string filename) {
         ss.str("");
         stool->changeName(name) << n_round << g_TD_Up;
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-            stool->get() << t_TSetTime[n_type] << t_TAccept[n_type]
-                    << t_TStorage[n_type] << t_nAccept[n_type]
+            stool->get() << t_TSetTime[n_type]/(1.0*t_Total[n_type]) << t_TAccept[n_type]/(1.0*t_Total[n_type])
+                    << t_TStorage[n_type] /(1.0*t_Total[n_type])<< t_nAccept[n_type]/ (1.0*s_Request_Num)
                     << t_Total[n_type];
         }
         cout << "AcceptRatio:" << t_nAccept[3]*1.0 / s_Request_Num << endl;
@@ -724,8 +724,8 @@ void exStartPhaseTest(string filename) {
         ss.str("");
         stool->changeName(name) << n_round << g_TD_Up;
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-            stool->get() << t_TSetTime[n_type] << t_TAccept[n_type]
-                    << t_TStorage[n_type] << t_nAccept[n_type]
+            stool->get() << t_TSetTime[n_type] /(1.0*t_Total[n_type])<< t_TAccept[n_type]/(1.0*t_Total[n_type])
+                    << t_TStorage[n_type] /(1.0*t_Total[n_type])<< t_nAccept[n_type]/ (1.0*s_Request_Num)
                     << t_Total[n_type];
         }
         cout << "AcceptRatio:" << t_nAccept[3]*1.0 / s_Request_Num << endl;
@@ -1002,8 +1002,8 @@ void exUnlanceTest(string filename) {
         ss.str("");
         stool->changeName(name) << n_round << g_TD_Up;
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-            stool->get() << t_TSetTime[n_type] << t_TAccept[n_type]
-                    << t_TStorage[n_type] << t_nAccept[n_type]
+            stool->get() << t_TSetTime[n_type]/(1.0*t_Total[n_type]) << t_TAccept[n_type]/(1.0*t_Total[n_type])
+                    << t_TStorage[n_type]/(1.0*t_Total[n_type]) << t_nAccept[n_type]/ (1.0*s_Request_Num)
                     << t_Total[n_type];
         }
         cout << "AcceptRatio:" << t_nAccept[3]*1.0 / s_Request_Num << endl;
@@ -1378,8 +1378,8 @@ void exMultiLinkTest(string filename) {
         ss.str("");
         stool->changeName(name) << n_round << g_TD_Up;
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
-            stool->get() << t_TSetTime[n_type] << t_TAccept[n_type]
-                    << t_TStorage[n_type] << t_nAccept[n_type]
+            stool->get() << t_TSetTime[n_type]/(1.0*t_Total[n_type]) << t_TAccept[n_type]/(1.0*t_Total[n_type])
+                    << t_TStorage[n_type]/(1.0*t_Total[n_type]) << t_nAccept[n_type]/ (1.0*s_Request_Num)
                     << t_Total[n_type];
         }
         cout << "AcceptRatio:" << t_nAccept[3]*1.0 / s_Request_Num << endl;
