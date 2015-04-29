@@ -96,9 +96,9 @@ string dbl2Pcent(double dou, int precision = 2) {
 }
 
 string statistics2Str(double dou0, double dou1, int precision = 2) {
-    return dbl2Str(dou0) + ":(" + dbl2Pcent(dou0 / dou1) + ")";
+    return dbl2Str(dou0) + "(" + dbl2Pcent(dou0 / dou1) + ")";
+    //return dbl2Str(dou0);
 }
-
 
 void exASMTest() {
     ASMTimer* at = ASMTimer::request();
@@ -1080,6 +1080,7 @@ void exMultiLinkTest(string filename) {
     unsigned int s_Request_Num = 10000;
     // try to minimum sample error which is cause by the time slot of the process
     unsigned int n_repeatTimes = 5; // repeat times of each statistics;
+                                    // to get the minimum cost as the final cost.
     unsigned int n_sample = 4;  // the number of samples
     unsigned int n_multiple = 1;
     unsigned int n_storageNum = 10;
@@ -1223,24 +1224,54 @@ void exMultiLinkTest(string filename) {
         bool flag = false;
         // initial fill up phase
         if(true){
+            // FIXME the pre-filled up process is different in multilink test
             // pre-filled up if necessary
-            unsigned int n_num = n_repeatTimes * n_sample * n_storageNum;
             if(n_prefillup_num > s_Request_Num){
                 n_prefillup_num = s_Request_Num;
             }
-            for(unsigned int n = 0; n < n_num; ++n){
-                curTime = oldTime;
-                for(unsigned int n_pfup = 0; n_pfup < n_prefillup_num;
-                        ++n_pfup){
-                    curTime += interval[n_pfup] * n_storageNum;
-                    ct[n]->setTime(curTime);
-                    flag = ct[n]->accept(r[n_pfup]);
-                    if(flag){
-                        ct[n]->forceInsert(r[n_pfup]);
+            for(int i_prefillup_num = 0; i_prefillup_num < n_prefillup_num;
+                    ++i_prefillup_num){
+                for(unsigned int i_multiple = 0; i_multiple < n_multiple;
+                        ++i_multiple){
+                    // using different requests sets
+                    for(unsigned int i_sample = 0; i_sample < n_sample;
+                            ++i_sample){
+                        // test different storage types
+                        for(unsigned int i_repeatTimes = 0;
+                                i_repeatTimes < n_repeatTimes; ++i_repeatTimes){
+                            // run several times to get the min cost to avoid the error causing by cpu slot of system
+                            curTime = oldTime;
+                            // using same interval in each one of multiple
+                            curTime += interval[i_prefillup_num];
+                            // reset accept flag before each repeat
+                            bool f_hasBeenAccepted = false;
+                            for(unsigned int i_storageNum = 0;
+                                    i_storageNum < n_storageNum
+                                            && !f_hasBeenAccepted;
+                                    ++i_storageNum){
+                                // multiple links
+                                // using temporary variables to avoid index conculation
+                                BaseAdmissionController* testSuit =
+                                        ct[i_repeatTimes * n_sample
+                                                * n_storageNum * n_multiple
+                                                + i_sample * n_storageNum
+                                                        * n_multiple
+                                                + i_storageNum * n_multiple
+                                                + i_multiple];
+                                Request testRequest = r[i_prefillup_num
+                                        * n_multiple + i_multiple];
+                                testSuit->setTime(curTime);
+                                flag = testSuit->accept(testRequest);
+                                if(flag){
+                                    f_hasBeenAccepted = true;
+                                    testSuit->forceInsert(testRequest);
+                                }
+                            }
+                        }
                     }
                 }
+                oldTime = curTime;
             }
-            oldTime = curTime;
         }
         for(unsigned int ocn = 0; ocn < outCircleNum; ocn++){
             // inner circle for different storage types;
@@ -1257,7 +1288,7 @@ void exMultiLinkTest(string filename) {
                 }
                 for(unsigned int i_multiple = 0; i_multiple < n_multiple;
                         ++i_multiple){
-                    // using different requests
+                    // using different requests sets
                     for(unsigned int i_sample = 0; i_sample < n_sample;
                             ++i_sample){
                         // test different storage types
@@ -1416,10 +1447,13 @@ void exMultiLinkTest(string filename) {
         stool->changeName(name) << n_round << g_TD_Up;
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
             stool->get()
-                    << statistics2Str(t_TSetTime[n_type] , (1.0 * t_Total[n_type]))
-                    << statistics2Str(t_TAccept[n_type] , (1.0 * t_Total[n_type]))
-                    << statistics2Str(t_TStorage[n_type] , (1.0 * t_Total[n_type]))
-                    << statistics2Str(t_nAccept[n_type] , (1.0 * s_Request_Num))
+                    << statistics2Str(t_TSetTime[n_type],
+                            (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_TAccept[n_type],
+                            (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_TStorage[n_type],
+                            (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_nAccept[n_type], (1.0 * s_Request_Num))
                     << t_Total[n_type];
         }
         cout << "AcceptRatio:" << t_nAccept[3] * 1.0 / s_Request_Num << endl;
