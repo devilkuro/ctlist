@@ -8,10 +8,9 @@
 #include "BaseAdmissionController.h"
 
 BaseAdmissionController::BaseAdmissionController() {
-    // TODO Auto-generated constructor stub
-
+    // Do nothing
 }
 
 BaseAdmissionController::~BaseAdmissionController() {
-    // TODO Auto-generated destructor stub
+    // Do nothing
 }

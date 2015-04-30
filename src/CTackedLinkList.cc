@@ -96,8 +96,8 @@ string dbl2Pcent(double dou, int precision = 2) {
 }
 
 string statistics2Str(double dou0, double dou1, int precision = 2) {
-    return dbl2Str(dou0) + "(" + dbl2Pcent(dou0 / dou1) + ")";
-    //return dbl2Str(dou0);
+    //return dbl2Str(dou0) + "(" + dbl2Pcent(dou0 / dou1) + ")";
+    return dbl2Str(dou0);
 }
 
 void exASMTest() {
@@ -457,7 +457,7 @@ void exCommonTest(string filename) {
     delete[] ct;
 }
 void exStartPhaseTest(string filename) {
-    // FIXME chenge the code
+    // FIXMEED chenge the code
     // statistics parameters
     unsigned int s_Interval = 1;
     unsigned int s_Request_Num = 100;
@@ -712,7 +712,7 @@ void exStartPhaseTest(string filename) {
             stool->changeName(name) << n_round << g_TD_Up << ocn
                     << endInnerCircle;
             for(unsigned int i_sample = 0; i_sample < n_sample; ++i_sample){
-                // outMultiMinXXX: the total average min XXX time of one inner circle.
+                // outMultiMinXXX: the total average min??? time of one inner circle.
                 // nAccept: the total accepted requests; nAccept/multiple: the average accepted requests for one multiple.
                 // at last, reset outMultiMinXXX.
                 stool->get() << t_OutMultiMinSetTime[i_sample]
@@ -1074,7 +1074,7 @@ void exUnlanceTest(string filename) {
     delete[] ct;
 }
 void exMultiLinkTest(string filename) {
-    // FIXME chenge the code
+    // FIXMEED chenge the code
     // statistics parameters
     unsigned int s_Interval = 100;
     unsigned int s_Request_Num = 10000;
@@ -1224,12 +1224,12 @@ void exMultiLinkTest(string filename) {
         bool flag = false;
         // initial fill up phase
         if(true){
-            // FIXME the pre-filled up process is different in multilink test
+            // FIXMEED the pre-filled up process is different in multilink test
             // pre-filled up if necessary
             if(n_prefillup_num > s_Request_Num){
                 n_prefillup_num = s_Request_Num;
             }
-            for(int i_prefillup_num = 0; i_prefillup_num < n_prefillup_num;
+            for(unsigned int i_prefillup_num = 0; i_prefillup_num < n_prefillup_num;
                     ++i_prefillup_num){
                 for(unsigned int i_multiple = 0; i_multiple < n_multiple;
                         ++i_multiple){
