@@ -39,8 +39,8 @@ static unsigned int DEFALUT_INTERVAL_AVG = 75;
 static double DEFALUT_INDEX_MULTIPLE = 2;
 static double globalRSfixedARRAY[12] = {2.25,8.00,16.0,
                                         1.00,   1,   1,
-                                        2.75,  10,  19,
-                                        0.43, 3.4,  19};
+                                        2.75,  10,  19.8,
+                                        0.43, 3.4,  19.8};
 static int DEFAULT_MAX_NROUND = 3;
 template<class T> string m_toStr(T tmp) {
     stringstream ss;
@@ -96,8 +96,8 @@ string dbl2Pcent(double dou, int precision = 2) {
 }
 
 string statistics2Str(double dou0, double dou1, int precision = 2) {
-    //return dbl2Str(dou0) + "(" + dbl2Pcent(dou0 / dou1) + ")";
-    return dbl2Str(dou0);
+    return dbl2Str(dou0) + "(" + dbl2Pcent(dou0 / dou1) + ")";
+    //return dbl2Str(dou0);
 }
 
 void exASMTest() {
@@ -215,6 +215,9 @@ void exCommonTest(string filename) {
     unsigned int g_TD_Up = DEFALUT_TD_UP;
     unsigned int g_Interval_Avg = DEFALUT_INTERVAL_AVG;
     unsigned int g_Index_Interval = g_Interval_Avg * DEFALUT_INDEX_MULTIPLE;
+    cout << "g_Index_Interval;"<<g_Index_Interval<<endl;
+    cout << "g_Interval_Avg;"<<g_Interval_Avg<<endl;
+    cout << "nodesPerIndex;"<<g_Index_Interval*1.0/g_Interval_Avg<<endl;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample];
@@ -476,6 +479,9 @@ void exStartPhaseTest(string filename) {
     unsigned int g_TD_Up = DEFALUT_TD_UP;
     unsigned int g_Interval_Avg = DEFALUT_INTERVAL_AVG;
     unsigned int g_Index_Interval = g_Interval_Avg * DEFALUT_INDEX_MULTIPLE;
+    cout << "g_Index_Interval;"<<g_Index_Interval<<endl;
+    cout << "g_Interval_Avg;"<<g_Interval_Avg<<endl;
+    cout << "nodesPerIndex;"<<g_Index_Interval*1.0/g_Interval_Avg<<endl;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample * n_multiple];
@@ -816,6 +822,9 @@ void exUnlanceTest(string filename) {
     unsigned int g_TD_Up = DEFALUT_TD_UP;
     unsigned int g_Interval_Avg = DEFALUT_INTERVAL_AVG;
     unsigned int g_Index_Interval = g_Interval_Avg * DEFALUT_INDEX_MULTIPLE;
+    cout << "g_Index_Interval;"<<g_Index_Interval<<endl;
+    cout << "g_Interval_Avg;"<<g_Interval_Avg<<endl;
+    cout << "nodesPerIndex;"<<g_Index_Interval*1.0/g_Interval_Avg<<endl;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample];
@@ -1008,7 +1017,7 @@ void exUnlanceTest(string filename) {
                         << t_MinSetTime[n_type] + t_MinAccept[n_type]
                                 + t_MinStorage[n_type];
             }
-            stool->get() << curTime << stool->endl;
+            stool->get() << (curTime - oldTime) / s_Interval << stool->endl;
             // set statistics variables
             for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
                 t_TSetTime[n_type] += t_MinSetTime[n_type];
@@ -1096,6 +1105,9 @@ void exMultiLinkTest(string filename) {
     unsigned int g_Interval_Avg = DEFALUT_INTERVAL_AVG;
     unsigned int g_Index_Interval = g_Interval_Avg * DEFALUT_INDEX_MULTIPLE
             * n_storageNum;
+    cout << "g_Index_Interval;"<<g_Index_Interval<<endl;
+    cout << "g_Interval_Avg;"<<g_Interval_Avg<<endl;
+    cout << "nodesPerIndex;"<<g_Index_Interval*1.0/g_Interval_Avg<<endl;
     double d_resRadio = 0.1;
     double d_minResRadio = 0.1;
     // initialize the test units
@@ -1331,6 +1343,8 @@ void exMultiLinkTest(string filename) {
                                     t_Storage[i_sample] += timer->getCounts();
                                     // the accept time just add once
                                     if(i_repeatTimes == 0){
+                                        cout<<"multilink accepted storage No.: "<< i_storageNum <<endl;
+                                        cout<<"r.td:r.bw\t"<<testRequest.td<<":"<<testRequest.bw<<endl;
                                         t_nAccept[i_sample]++;
                                     }
                                 }
@@ -1572,14 +1586,14 @@ int main() {
             cout << "EX_START_PHASE:" << var << endl;
             exStartPhaseTest(flagStrArray[EX_START_PHASE]);
         }
-        for(double var = 19; var < 22; var += 1){
+        for(double var = 19; var < 20; var += 0.1){
             globalRSfixedARRAY[6] = var;    // 2.75
             globalRSfixedARRAY[7] = var;    // 10
             globalRSfixedARRAY[8] = var;    // 19
             cout << "EX_UNBLANCE:" << var << endl;
             exUnlanceTest(flagStrArray[EX_UNBLANCE]);
         }
-        for(double var = 19; var < 22; var += 1){
+        for(double var = 19; var < 20; var += 0.1){
             globalRSfixedARRAY[9] = var;  // 0.43
             globalRSfixedARRAY[10] = var;  // 3.4
             globalRSfixedARRAY[11] = var;  // 19
