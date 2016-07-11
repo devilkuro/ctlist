@@ -5,15 +5,15 @@
  *      Author: Fanjing
  */
 
-#ifndef __FANJING_GLOBALSTATISTICSUNIT_H_
-#define __FANJING_GLOBALSTATISTICSUNIT_H_
+#ifndef __FANJING_STATISTICSRECORDUNIT_H_
+#define __FANJING_STATISTICSRECORDUNIT_H_
 
 #include <string>
 using namespace std;
 /**
  *
  * usage:
- *  do not use this class, use gs instead
+ *  do not use this class, use StatisticsRecordTools
  */
 namespace Fanjing {
 class StatisticsRecordUnit {

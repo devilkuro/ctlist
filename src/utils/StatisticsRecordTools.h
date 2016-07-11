@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __FANJING_GLOBALSTATISTICS_H_
-#define __FANJING_GLOBALSTATISTICS_H_
+#ifndef __FANJING_STATISTICSRECORDTOOLS_H_
+#define __FANJING_STATISTICSRECORDTOOLS_H_
 
 #include <map>
 #include <list>
@@ -25,27 +25,36 @@
 #include <iostream>
 #include <sstream>
 #include "StatisticsRecordUnit.h"
+//#include "cmessage.h"
 
 namespace Fanjing {
-typedef std::list<StatisticsRecordUnit*> GlobalStatisticsList;
-typedef std::map<string, GlobalStatisticsList*> GlobalStatisticsMap;
+typedef std::list<StatisticsRecordUnit*> StatisticsRecordUnitList;
+typedef std::map<string, StatisticsRecordUnitList*> GlobalStatisticsMap;
 /**
  *
  * usage:
- *  gs.changeName(name)<<value0<<value1<<...<<valueN<<gs.endl;
+ *  gs.changeName(name[,title])<<value0<<value1<<...<<valueN<<gs.endl;
  *  or
- *  gs.changeName(name);
+ *  gs.changeName(name[,title]);
  *  gs.get()<<value0;
  *  gs.get()<<value1;
  *  ...
  *  gs.get()<<valueN;
  *  gs.get()<<gs.endl;
+ *
+ *  out:
+ *  name:title
+ *  value0,value1,value2,...
+ *  value0,value1,value2,...
+ *  value0,value1,value2,...
  */
 
 class StatisticsRecordTools {
 public:
     typedef void* gs_eofType;
 public:
+    bool recordWhenTerminate;
+
     static StatisticsRecordTools * request();
     static void release();
 
@@ -72,6 +81,8 @@ public:
     virtual void finish();
 
     static gs_eofType endl;
+    std::map<string, double> dblMap;
+    //std::map<string, cMessage*> msgMap;
 protected:
     GlobalStatisticsMap globalStatisticsMap;
     std::map<string, string> titleMap;
@@ -83,7 +94,6 @@ private:
     StatisticsRecordTools();
     virtual ~StatisticsRecordTools();
 
-    string getValidFileName(string name);
     string getFileName(string name);
     string getSuffix(string name);
     string getTitleFromName(string name);
