@@ -13,7 +13,7 @@
 #include "Generator.h"
 #include "PreciseTimer.h"
 #include "ASMTimer.h"
-#include "StatisticsRecordTools.h"
+#include "RecordTools.h"
 //#include "stdlib.h"
 using namespace Fanjing;
 /*
@@ -222,7 +222,7 @@ void exCommonTest(string filename) {
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample];
     ASMTimer* timer = ASMTimer::request();
-    StatisticsRecordTools* stool = StatisticsRecordTools::request();
+    RecordTools* stool = RecordTools::request();
     stool->setDefaultDir("results");
     Generator* gn = new Generator();
     Request* r = new Request[s_Request_Num];
@@ -486,7 +486,7 @@ void exStartPhaseTest(string filename) {
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample * n_multiple];
     ASMTimer* timer = ASMTimer::request();
-    StatisticsRecordTools* stool = StatisticsRecordTools::request();
+    RecordTools* stool = RecordTools::request();
     stool->setDefaultDir("results");
     Generator* gn = new Generator();
     Request* r = new Request[n_TotalRequest_Num];
@@ -829,7 +829,7 @@ void exUnlanceTest(string filename) {
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample];
     ASMTimer* timer = ASMTimer::request();
-    StatisticsRecordTools* stool = StatisticsRecordTools::request();
+    RecordTools* stool = RecordTools::request();
     stool->setDefaultDir("results");
     Generator* gn = new Generator();
     Request* r = new Request[s_Request_Num];
@@ -1114,7 +1114,7 @@ void exMultiLinkTest(string filename) {
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample * n_multiple * n_storageNum];
     ASMTimer* timer = ASMTimer::request();
-    StatisticsRecordTools* stool = StatisticsRecordTools::request();
+    RecordTools* stool = RecordTools::request();
     stool->setDefaultDir("results");
     Generator* gn = new Generator();
     Request* r = new Request[n_TotalRequest_Num];

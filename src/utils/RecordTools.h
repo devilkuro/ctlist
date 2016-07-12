@@ -24,12 +24,12 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include "StatisticsRecordUnit.h"
-//#include "cmessage.h"
 
+//#include "RecordUnit.h"
+//#include "cmessage.h"
+using std::map;
+using std::string;
 namespace Fanjing {
-typedef std::list<StatisticsRecordUnit*> StatisticsRecordUnitList;
-typedef std::map<string, StatisticsRecordUnitList*> GlobalStatisticsMap;
 /**
  *
  * usage:
@@ -49,24 +49,66 @@ typedef std::map<string, StatisticsRecordUnitList*> GlobalStatisticsMap;
  *  value0,value1,value2,...
  */
 
-class StatisticsRecordTools {
+class RecordTools {
+protected:
+    class RecordUnit {
+    public:
+        RecordUnit(int size);
+        virtual ~RecordUnit();
+    public:
+        enum UnitType {
+            UNIT_TYPE_ERROR = -1,
+            UNIT_TYPE_INT = 0,
+            UNIT_TYPE_UINT32,
+            UNIT_TYPE_UINT64,
+            UNIT_TYPE_DOUBLE,
+            UNIT_TYPE_STRING
+        };
+        struct DataUnit {
+            UnitType type;
+            union {
+                int intData;
+                double douData;
+                uint32_t uint32Data;
+                uint64_t uint64Data;
+            };
+            string strData;
+            string toString();
+        };
+    public:
+        int getDataType(int index);
+        void setData(double data, int index);
+        void setData(int data, int index);
+        void setData(uint32_t data, int index);
+        void setData(uint64_t data, int index);
+        void setData(string data, int index);
+        int getSize() const;
+        string toString();
+
+    private:
+        int size;       // read only, it must be set at initialize phase.
+        DataUnit *data;   // statistics data
+    };
+
+    typedef std::list<RecordUnit*> RecordUnitList;
+    typedef std::map<string, RecordUnitList*> RecordListMap;
 public:
     typedef void* gs_eofType;
 public:
     bool recordWhenTerminate;
 
-    static StatisticsRecordTools * request();
+    static RecordTools * request();
     static void release();
 
-    StatisticsRecordTools& operator<<(gs_eofType& e);
-    StatisticsRecordTools& operator<<(double num);
-    StatisticsRecordTools& operator<<(int num);
-    StatisticsRecordTools& operator<<(unsigned int num);
-    StatisticsRecordTools& operator<<(uint64_t num);
-    StatisticsRecordTools& operator<<(string str);
+    RecordTools& operator<<(gs_eofType& e);
+    RecordTools& operator<<(double num);
+    RecordTools& operator<<(int num);
+    RecordTools& operator<<(unsigned int num);
+    RecordTools& operator<<(uint64_t num);
+    RecordTools& operator<<(string str);
 
-    StatisticsRecordTools& changeName(string name, string title = "");
-    StatisticsRecordTools& get();
+    RecordTools& changeName(string name, string title = "");
+    RecordTools& get();
 
     void setDefaultDir(string dir);
     void eof();
@@ -84,15 +126,15 @@ public:
     std::map<string, double> dblMap;
     //std::map<string, cMessage*> msgMap;
 protected:
-    GlobalStatisticsMap globalStatisticsMap;
-    std::map<string, string> titleMap;
-    std::list<StatisticsRecordUnit::DataUnit> unitData;
+    RecordListMap m_recordListMap;
+    std::map<string, string> m_titleMap;
+    std::list<RecordUnit::DataUnit> m_unitData;
     string m_name;
     string m_default_dir_name;
 private:
-    static StatisticsRecordTools* ptr_singleton;
-    StatisticsRecordTools();
-    virtual ~StatisticsRecordTools();
+    static RecordTools* ptr_singleton;
+    RecordTools();
+    virtual ~RecordTools();
 
     string getFileName(string name);
     string getSuffix(string name);
