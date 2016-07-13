@@ -14,6 +14,7 @@
 #include "PreciseTimer.h"
 #include "ASMTimer.h"
 #include "RecordTools.h"
+#include "StringHelper.h"
 //#include "stdlib.h"
 using namespace Fanjing;
 /*
@@ -37,10 +38,19 @@ static unsigned int DEFALUT_TD_DOWN = 1;
 static unsigned int DEFALUT_TD_UP = 512;
 static unsigned int DEFALUT_INTERVAL_AVG = 75;
 static double DEFALUT_INDEX_MULTIPLE = 2;
-static double globalRSfixedARRAY[12] = {2.25,8.00,16.0,
-                                        1.00,   1,   1,
-                                        2.75,  10,  19.8,
-                                        0.43, 3.4,  19.8};
+static double globalRSfixedARRAY[12] = {
+        2.25,
+        8.00,
+        16.0,
+        1.00,
+        1,
+        1,
+        2.75,
+        10,
+        19.8,
+        0.43,
+        3.4,
+        19.8 };
 static int DEFAULT_MAX_NROUND = 3;
 template<class T> string m_toStr(T tmp) {
     stringstream ss;
@@ -215,9 +225,9 @@ void exCommonTest(string filename) {
     unsigned int g_TD_Up = DEFALUT_TD_UP;
     unsigned int g_Interval_Avg = DEFALUT_INTERVAL_AVG;
     unsigned int g_Index_Interval = g_Interval_Avg * DEFALUT_INDEX_MULTIPLE;
-    cout << "g_Index_Interval;"<<g_Index_Interval<<endl;
-    cout << "g_Interval_Avg;"<<g_Interval_Avg<<endl;
-    cout << "nodesPerIndex;"<<g_Index_Interval*1.0/g_Interval_Avg<<endl;
+    cout << "g_Index_Interval;" << g_Index_Interval << endl;
+    cout << "g_Interval_Avg;" << g_Interval_Avg << endl;
+    cout << "nodesPerIndex;" << g_Index_Interval * 1.0 / g_Interval_Avg << endl;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample];
@@ -380,8 +390,7 @@ void exCommonTest(string filename) {
             // statistics process
             stringstream ss;
             string name;
-            ss << "cost of ocn rounds-" << g_TD_Up
-                    << ":n_round,limit,outCircleNum(ocn),round(endInnerCircle)";
+            ss << "n_round,limit,outCircleNum(ocn),round(endInnerCircle)";
             for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
                 ss << ",settime-" << n_type << ",accept-" << n_type
                         << ",storage-" << n_type << ",naccept-" << n_type
@@ -389,7 +398,10 @@ void exCommonTest(string filename) {
             }
             name = ss.str();
             ss.str("");
-            stool->changeName(name) << n_round << g_TD_Up << ocn
+            string fileSuffix;
+            fileSuffix = fileSuffix + "cost of ocn rounds"
+                    + Fanjing::StringHelper::int2str(g_TD_Up);
+            stool->changeName(fileSuffix, name) << n_round << g_TD_Up << ocn
                     << endInnerCircle;
             for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
                 stool->get() << t_MinSetTime[n_type] << t_MinAccept[n_type]
@@ -415,7 +427,7 @@ void exCommonTest(string filename) {
         }
         stringstream ss;
         string name;
-        ss << "finally cost until n_round:n_round,g_TD_Limit";
+        ss << "n_round,g_TD_Limit";
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
             ss << ",settime-" << n_type << ",accept-" << n_type << ",storage-"
                     << n_type << ",naccept-" << n_type << ",total-" << n_type
@@ -423,13 +435,17 @@ void exCommonTest(string filename) {
         }
         name = ss.str();
         ss.str("");
-        stool->changeName(name) << n_round << g_TD_Up;
+        stool->changeName("finally cost until n_round", name) << n_round
+                << g_TD_Up;
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
             stool->get()
-                    << statistics2Str(t_TSetTime[n_type] ,(1.0 * t_Total[n_type]))
-                    << statistics2Str(t_TAccept[n_type] , (1.0 * t_Total[n_type]))
-                    << statistics2Str(t_TStorage[n_type] , (1.0 * t_Total[n_type]))
-                    << statistics2Str(t_nAccept[n_type] , (1.0 * s_Request_Num))
+                    << statistics2Str(t_TSetTime[n_type],
+                            (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_TAccept[n_type],
+                            (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_TStorage[n_type],
+                            (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_nAccept[n_type], (1.0 * s_Request_Num))
                     << t_Total[n_type];
         }
         cout << "AcceptRatio:" << t_nAccept[3] * 1.0 / s_Request_Num << endl;
@@ -448,6 +464,9 @@ void exCommonTest(string filename) {
         delete[] t_Total;
         delete[] t_nAccept;
         for(unsigned int i = 0; i < n_repeatTimes * n_sample; ++i){
+            if(i == 2||i == 3){
+                cout << ct[i]->Output() << endl;
+            }
             delete ct[i];
         }
     }
@@ -479,9 +498,9 @@ void exStartPhaseTest(string filename) {
     unsigned int g_TD_Up = DEFALUT_TD_UP;
     unsigned int g_Interval_Avg = DEFALUT_INTERVAL_AVG;
     unsigned int g_Index_Interval = g_Interval_Avg * DEFALUT_INDEX_MULTIPLE;
-    cout << "g_Index_Interval;"<<g_Index_Interval<<endl;
-    cout << "g_Interval_Avg;"<<g_Interval_Avg<<endl;
-    cout << "nodesPerIndex;"<<g_Index_Interval*1.0/g_Interval_Avg<<endl;
+    cout << "g_Index_Interval;" << g_Index_Interval << endl;
+    cout << "g_Interval_Avg;" << g_Interval_Avg << endl;
+    cout << "nodesPerIndex;" << g_Index_Interval * 1.0 / g_Interval_Avg << endl;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample * n_multiple];
@@ -760,12 +779,14 @@ void exStartPhaseTest(string filename) {
         stool->changeName(name) << n_round << g_TD_Up;
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
             stool->get()
-                    << statistics2Str(t_TSetTime[n_type] , (1.0 * t_Total[n_type]))
-                    << statistics2Str(t_TAccept[n_type] , (1.0 * t_Total[n_type]))
-                    << statistics2Str(t_TStorage[n_type] , (1.0 * t_Total[n_type]))
-                    << statistics2Str(
-                            t_nAccept[n_type]
-                                    , (n_multiple * 1.0 * s_Request_Num))
+                    << statistics2Str(t_TSetTime[n_type],
+                            (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_TAccept[n_type],
+                            (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_TStorage[n_type],
+                            (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_nAccept[n_type],
+                            (n_multiple * 1.0 * s_Request_Num))
                     << t_Total[n_type];
         }
         cout << "AcceptRatio:" << t_nAccept[3] * 1.0 / s_Request_Num << endl;
@@ -822,9 +843,9 @@ void exUnlanceTest(string filename) {
     unsigned int g_TD_Up = DEFALUT_TD_UP;
     unsigned int g_Interval_Avg = DEFALUT_INTERVAL_AVG;
     unsigned int g_Index_Interval = g_Interval_Avg * DEFALUT_INDEX_MULTIPLE;
-    cout << "g_Index_Interval;"<<g_Index_Interval<<endl;
-    cout << "g_Interval_Avg;"<<g_Interval_Avg<<endl;
-    cout << "nodesPerIndex;"<<g_Index_Interval*1.0/g_Interval_Avg<<endl;
+    cout << "g_Index_Interval;" << g_Index_Interval << endl;
+    cout << "g_Interval_Avg;" << g_Interval_Avg << endl;
+    cout << "nodesPerIndex;" << g_Index_Interval * 1.0 / g_Interval_Avg << endl;
     // initialize the test units
     BaseAdmissionController** ct = new BaseAdmissionController*[n_repeatTimes
             * n_sample];
@@ -1046,10 +1067,13 @@ void exUnlanceTest(string filename) {
         stool->changeName(name) << n_round << g_TD_Up;
         for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
             stool->get()
-                    << statistics2Str(t_TSetTime[n_type] , (1.0 * t_Total[n_type]))
-                    << statistics2Str(t_TAccept[n_type] , (1.0 * t_Total[n_type]))
-                    << statistics2Str(t_TStorage[n_type] , (1.0 * t_Total[n_type]))
-                    << statistics2Str(t_nAccept[n_type] , (1.0 * s_Request_Num))
+                    << statistics2Str(t_TSetTime[n_type],
+                            (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_TAccept[n_type],
+                            (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_TStorage[n_type],
+                            (1.0 * t_Total[n_type]))
+                    << statistics2Str(t_nAccept[n_type], (1.0 * s_Request_Num))
                     << t_Total[n_type];
         }
         cout << "AcceptRatio:" << t_nAccept[3] * 1.0 / s_Request_Num << endl;
@@ -1105,9 +1129,9 @@ void exMultiLinkTest(string filename) {
     unsigned int g_Interval_Avg = DEFALUT_INTERVAL_AVG;
     unsigned int g_Index_Interval = g_Interval_Avg * DEFALUT_INDEX_MULTIPLE
             * n_storageNum;
-    cout << "g_Index_Interval;"<<g_Index_Interval<<endl;
-    cout << "g_Interval_Avg;"<<g_Interval_Avg<<endl;
-    cout << "nodesPerIndex;"<<g_Index_Interval*1.0/g_Interval_Avg<<endl;
+    cout << "g_Index_Interval;" << g_Index_Interval << endl;
+    cout << "g_Interval_Avg;" << g_Interval_Avg << endl;
+    cout << "nodesPerIndex;" << g_Index_Interval * 1.0 / g_Interval_Avg << endl;
     double d_resRadio = 0.1;
     double d_minResRadio = 0.1;
     // initialize the test units
@@ -1241,8 +1265,8 @@ void exMultiLinkTest(string filename) {
             if(n_prefillup_num > s_Request_Num){
                 n_prefillup_num = s_Request_Num;
             }
-            for(unsigned int i_prefillup_num = 0; i_prefillup_num < n_prefillup_num;
-                    ++i_prefillup_num){
+            for(unsigned int i_prefillup_num = 0;
+                    i_prefillup_num < n_prefillup_num; ++i_prefillup_num){
                 for(unsigned int i_multiple = 0; i_multiple < n_multiple;
                         ++i_multiple){
                     // using different requests sets
@@ -1343,8 +1367,12 @@ void exMultiLinkTest(string filename) {
                                     t_Storage[i_sample] += timer->getCounts();
                                     // the accept time just add once
                                     if(i_repeatTimes == 0){
-                                        cout<<"multilink accepted storage No.: "<< i_storageNum <<endl;
-                                        cout<<"r.td:r.bw\t"<<testRequest.td<<":"<<testRequest.bw<<endl;
+                                        cout
+                                                << "multilink accepted storage No.: "
+                                                << i_storageNum << endl;
+                                        cout << "r.td:r.bw\t" << testRequest.td
+                                                << ":" << testRequest.bw
+                                                << endl;
                                         t_nAccept[i_sample]++;
                                     }
                                 }
@@ -1547,8 +1575,9 @@ int main() {
 
     double a = 12.32124214;
     cout << dbl2Str(a, 2) << endl;
-// for test
+    // for test
     bool b_run = true;
+    string prefixStr = "./results/";
     if(false && !flagArray[EX_ASM_TEST]){
         exASMTest();
     }
@@ -1561,13 +1590,13 @@ int main() {
     if(b_run && flagArray[EX_COMMON_TEST]){
         exCommonTest(flagStrArray[EX_COMMON_TEST]);
     }
-    if(b_run && flagArray[EX_START_PHASE]){
+    if(false && flagArray[EX_START_PHASE]){
         exStartPhaseTest(flagStrArray[EX_START_PHASE]);
     }
-    if(b_run && flagArray[EX_UNBLANCE]){
+    if(false && flagArray[EX_UNBLANCE]){
         exUnlanceTest(flagStrArray[EX_UNBLANCE]);
     }
-    if(b_run && flagArray[EX_MULTILINK]){
+    if(false && flagArray[EX_MULTILINK]){
         exMultiLinkTest(flagStrArray[EX_MULTILINK]);
     }
     // 2.25,8,16,1,2.75,0.225

@@ -18,6 +18,7 @@ public:
     virtual bool forceInsert(Request request) = 0;
     virtual bool insert(Request request) = 0;
     virtual void setResourceCap(unsigned int maxResource) = 0;
+    virtual bool Output(); // display the link list.
 };
 
 #endif /* BASEADMISSIONCONTROLLER_H_ */

@@ -6,6 +6,8 @@
  */
 
 #include "ctlink.h"
+#include "RecordTools.h"
+#include "StringHelper.h"
 CTLink::CTLink() {
     initCTLink(256, 4096);
 }
@@ -171,7 +173,7 @@ bool CTLink::cleanTack(unsigned int n) {
     // the start node of next tack tack[next].node;
     // change the judgment statement from t < et to temp!=tack[next].node.
     // edited at 1311291157: do not delete the first node in the tack. this node will be used as the temporary tack node.
-    for(CTNode* temp = tack[loc].node->next; temp!=nextTackNode;){
+    for(CTNode* temp = tack[loc].node->next; temp != nextTackNode;){
         temp = temp->next;
         delete (temp->pre);
     }
@@ -202,10 +204,30 @@ unsigned int CTLink::getTackLoc(unsigned int t) {
 }
 
 bool CTLink::Output() {
-    cout << "CTLINK:DISPLAY." << endl;
+    cout << "CTLINK:DISPLAY..." << endl;
+    int n = 0;
+    unsigned int recordTime = 0;
+    unsigned int recordInterval = CT_MAX_RESERVE_TIME/20;
+    string strname = "ctlinkDensity_"
+            + Fanjing::StringHelper::int2str(CT_TACK_ARRAY_SIZE);
+    CTNode* start = tack[(getTackLoc(iCurrentTime) + CT_TACK_ARRAY_SIZE - 1)
+            % CT_TACK_ARRAY_SIZE].node;
     for(CTNode* temp = tack[(getTackLoc(iCurrentTime) + CT_TACK_ARRAY_SIZE - 1)
             % CT_TACK_ARRAY_SIZE].node; temp != NULL; temp = temp->next){
-        cout << "rs: " << temp->t << ", " << temp->rs << endl;
+        ++n;
+        while(temp->t > recordInterval && start->t < temp->t - recordInterval){
+            start = start->next;
+            --n;
+        }
+        if(temp->t > recordTime){
+            if(recordTime > 0){
+                Fanjing::RecordTools::request()->changeName(strname,
+                        "time\tnum") << recordTime << n
+                        << Fanjing::RecordTools::endl;
+            }
+            recordTime = (temp->t / recordInterval + 1) * recordInterval;
+        }
+        // cout << "rs: " << temp->t << ", " << temp->rs << endl;
     }
     return true;
 }
@@ -272,5 +294,5 @@ bool CTLink::forceInsert(Request request) {
 }
 
 void CTLink::setResourceCap(unsigned int maxResource) {
-	iMaxResource = maxResource;
+    iMaxResource = maxResource;
 }

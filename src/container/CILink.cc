@@ -6,6 +6,8 @@
  */
 
 #include "CILink.h"
+#include "StringHelper.h"
+#include "RecordTools.h"
 
 CILink::CILink() {
     initCILink(100, MAX);
@@ -42,8 +44,27 @@ bool CILink::insert(Request r) {
 
 bool CILink::Output() {
     cout << "CILINK:DISPLAY." << endl;
+    int n = 0;
+    unsigned int recordTime = 0;
+    unsigned int recordInterval = CI_MAX_RESERVE_TIME/20;
+    string strname = "cilinkDensity_"
+            + Fanjing::StringHelper::int2str(CI_INDEX_ARRAY_SIZE);
+    CINode* start = head;
     for(CINode* temp = head; temp != NULL; temp = temp->next){
-        cout << "rs: " << temp->t << ", " << temp->rs << endl;
+        ++n;
+        while(temp->t > recordInterval && start->t < temp->t - recordInterval){
+            start = start->next;
+            --n;
+        }
+        if(temp->t > recordTime){
+            if(recordTime > 0){
+                Fanjing::RecordTools::request()->changeName(strname,
+                        "time\tnum") << recordTime << n
+                        << Fanjing::RecordTools::endl;
+            }
+            recordTime = (temp->t / recordInterval + 1) * recordInterval;
+        }
+//        cout << "rs: " << temp->t << ", " << temp->rs << endl;
     }
     return true;
 }

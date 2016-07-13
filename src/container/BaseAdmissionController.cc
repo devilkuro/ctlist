@@ -14,3 +14,7 @@ BaseAdmissionController::BaseAdmissionController() {
 BaseAdmissionController::~BaseAdmissionController() {
     // Do nothing
 }
+
+bool BaseAdmissionController::Output() {
+    return false;
+}
