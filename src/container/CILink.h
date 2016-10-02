@@ -34,7 +34,8 @@ public:
     unsigned int iMaxResource; //stands for the max available resource.
 public:
     virtual void setTime(unsigned int t); //set the current time.
-    virtual bool accept(Request r); //to judge whether the request r can be accecpted or not
+    //to judge whether the request r can be accecpted or not
+    virtual bool accept(Request r);
     virtual bool forceInsert(Request r);
     virtual bool insert(Request r); //return true if success.
     virtual void setResourceCap(unsigned int maxResource);

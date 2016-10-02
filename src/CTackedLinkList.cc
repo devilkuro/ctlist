@@ -450,6 +450,13 @@ void exCommonTest(string filename) {
         }
         cout << "AcceptRatio:" << t_nAccept[3] * 1.0 / s_Request_Num << endl;
         stool->get() << stool->endl;
+        string filePrefix = "totalCost_";
+        for(unsigned int n_type = 0; n_type < n_sample; ++n_type){
+            stool->changeName(
+                    filePrefix + Fanjing::StringHelper::dbl2str(g_TD_Up, 2)
+                            +"_"+ Fanjing::StringHelper::int2str(n_type),
+                    "type\tcost") << n_type << t_Total[n_type] << stool->endl;
+        }
 
         // destruction
         delete[] t_SetTime;
@@ -464,7 +471,7 @@ void exCommonTest(string filename) {
         delete[] t_Total;
         delete[] t_nAccept;
         for(unsigned int i = 0; i < n_repeatTimes * n_sample; ++i){
-            if(i == 2||i == 3){
+            if(i == 2 || i == 3){
                 cout << ct[i]->Output() << endl;
             }
             delete ct[i];
