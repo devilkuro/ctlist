@@ -30,7 +30,7 @@ CILink::~CILink() {
 
 bool CILink::insert(Request r) {
     // accept judgment.
-    if(r.td == 0){
+    if(r.duration == 0){
         return true;
     }
 
@@ -123,8 +123,8 @@ bool CILink::accept(Request r) {
     CINode* temp;
     unsigned int indexLoc;
 
-    st = iCurrentTime + r.ts;
-    et = st + r.td;
+    st = iCurrentTime + r.start;
+    et = st + r.duration;
     // FIXME_fixed: need to be confirmed twice. > or >=
     if(et > iCurrentTime + CI_MAX_RESERVE_TIME){
         return false;
@@ -160,13 +160,13 @@ bool CILink::accept(Request r) {
     // make the request accepted wrong.
     // Fix the FIXME_fixed at 2015-3-16
     if(temp->next == NULL){
-        if(temp->rs + r.bw > iMaxResource){
+        if(temp->rs + r.value > iMaxResource){
             return false;
         }
     }
     while(temp->next != NULL){
         // if the resource if not enough, return NULL.
-        if(temp->rs + r.bw > iMaxResource){
+        if(temp->rs + r.value > iMaxResource){
             return false;
         }
         // if the next node is after the end time, break out.
@@ -233,8 +233,8 @@ bool CILink::cleanIndex(unsigned int n) {
 }
 
 bool CILink::forceInsert(Request r) {
-    unsigned int st = iCurrentTime + r.ts;
-    unsigned int et = st + r.td;
+    unsigned int st = iCurrentTime + r.start;
+    unsigned int et = st + r.duration;
 
     CINode* start = insertNode(st, pre2st);
     if(pre2et->t < start->t){
@@ -243,7 +243,7 @@ bool CILink::forceInsert(Request r) {
         insertNode(et, pre2et);
     }
     for(; start->t < et; start = start->next){
-        start->rs = start->rs + r.bw;
+        start->rs = start->rs + r.value;
     }
     return true;
 }

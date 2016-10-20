@@ -125,19 +125,19 @@ bool Bplus::Insert(Request a) {
     struct BNode *p, *q, *t, *l, *tmp;
     int nowtd, i, j;
 
-    r = Search(a.ts);
+    r = Search(a.start);
     //accept control
-    nowtd = a.td;
+    nowtd = a.duration;
     p = r.ptr;
     i = r.i;
     int flag = 0; //If flag == 1, request a is ending up before node r.ptr. If else, request a will continue in node r.ptr.
     if(r.tag == 3){
         if(i != 0){
-            if(p->record[i - 1] + a.bw > RMAX)
+            if(p->record[i - 1] + a.value > RMAX)
                 return false;
             else if(true){
-                if(nowtd > (p->key[i] - (int)a.ts))
-                    nowtd -= (p->key[i] - a.ts);
+                if(nowtd > (p->key[i] - (int)a.start))
+                    nowtd -= (p->key[i] - a.start);
                 else
                     flag = 1;
             }
@@ -145,11 +145,11 @@ bool Bplus::Insert(Request a) {
             q = first;
             while(q->next != p)
                 q = q->next;
-            if(q->record[q->keynum - 1] + a.bw > RMAX)
+            if(q->record[q->keynum - 1] + a.value > RMAX)
                 return false;
             else{
-                if(nowtd > (p->key[i] - (int)a.ts))
-                    nowtd -= (p->key[i] - a.ts);
+                if(nowtd > (p->key[i] - (int)a.start))
+                    nowtd -= (p->key[i] - a.start);
                 else
                     flag = 1;
             }
@@ -157,19 +157,19 @@ bool Bplus::Insert(Request a) {
     }
     if((r.tag == 3 && flag == 0) || r.tag == 2){
         while(nowtd){
-            while(nowtd && i < p->keynum - 1 && p->record[i] + a.bw <= RMAX){
+            while(nowtd && i < p->keynum - 1 && p->record[i] + a.value <= RMAX){
                 if(nowtd > p->key[i + 1] - p->key[i])
                     nowtd -= p->key[i + 1] - p->key[i];
                 else
                     nowtd = 0;
                 i++;
             }
-            if(nowtd && p->record[i] + a.bw > RMAX)
+            if(nowtd && p->record[i] + a.value > RMAX)
                 return false;
             if(nowtd && i == p->keynum - 1){
                 if(p->next){
                     q = p->next;
-                    if(p->record[p->keynum - 1] + a.bw <= RMAX){
+                    if(p->record[p->keynum - 1] + a.value <= RMAX){
                         if(nowtd > q->key[0] - p->key[p->keynum - 1]){
                             nowtd -= q->key[0] - p->key[p->keynum - 1];
                             p = q;
@@ -190,10 +190,10 @@ bool Bplus::Insert(Request a) {
         p = new BNode;
         p->keynum = 3;
         p->key[0] = 0;
-        p->key[1] = a.ts;
-        p->key[2] = a.ts + a.td;
+        p->key[1] = a.start;
+        p->key[2] = a.start + a.duration;
         p->record[0] = 0;
-        p->record[1] = a.bw;
+        p->record[1] = a.value;
         p->record[2] = 0;
         p->ptr[0] = p->ptr[1] = p->ptr[2] = NULL;
         p->next = NULL;
@@ -217,12 +217,12 @@ bool Bplus::Insert(Request a) {
 
         if(r.tag == 2) // the insert point is already exist
                 {
-            nowtd = a.td;
+            nowtd = a.duration;
             p = r.ptr; //the result node return from the search function
             i = r.i; // start postion
         }else //this key is not exist , insert this key into the returned node.
         {
-            nowtd = a.td;
+            nowtd = a.duration;
             p = r.ptr;
             i = r.i;
             if(r.tag == 1) //the search key is bigger than every exist key in this tree
@@ -230,11 +230,11 @@ bool Bplus::Insert(Request a) {
                 tmp = root;
                 while(tmp->ptr[0]) //tmp is an inner node
                 {
-                    tmp->key[tmp->keynum - 1] = a.ts;
+                    tmp->key[tmp->keynum - 1] = a.start;
                     tmp = tmp->ptr[tmp->keynum - 1];
                 }
                 p = tmp;
-                p->key[p->keynum] = a.ts;
+                p->key[p->keynum] = a.start;
                 p->record[p->keynum] = p->record[p->keynum - 1];
                 p->ptr[p->keynum] = NULL;
                 i = p->keynum;
@@ -245,7 +245,7 @@ bool Bplus::Insert(Request a) {
                     p->record[j + 1] = p->record[j];
                     p->ptr[j + 1] = p->ptr[j];
                 }
-                p->key[i] = a.ts;
+                p->key[i] = a.start;
                 if(i != 0)
                     p->record[i] = p->record[i - 1];
                 else{
@@ -305,7 +305,7 @@ bool Bplus::Insert(Request a) {
         while(nowtd){
             if(q){
                 if(nowtd >= p->key[i] - q->key[q->keynum - 1]){
-                    q->record[q->keynum - 1] += a.bw;
+                    q->record[q->keynum - 1] += a.value;
                     nowtd -= (p->key[i] - q->key[q->keynum - 1]);
                 }else // i don't know the exact meaning of this comment, please refer to the chinese edition.
                 {
@@ -315,10 +315,10 @@ bool Bplus::Insert(Request a) {
                         p->record[j + 1] = p->record[j];
                         p->ptr[j + 1] = p->ptr[j];
                     }
-                    p->key[0] = a.ts + a.td;
+                    p->key[0] = a.start + a.duration;
                     p->record[0] = q->record[q->keynum - 1];
                     p->ptr[0] = NULL;
-                    q->record[q->keynum - 1] += a.bw;
+                    q->record[q->keynum - 1] += a.value;
                     p->keynum++;
 
                     if(p->keynum > m)
@@ -328,7 +328,7 @@ bool Bplus::Insert(Request a) {
 
             while(nowtd > 0 && i < p->keynum - 1
                     && nowtd >= p->key[i + 1] - p->key[i]){
-                p->record[i] += a.bw;
+                p->record[i] += a.value;
                 nowtd -= (p->key[i + 1] - p->key[i]);
                 i++;
             }
@@ -342,15 +342,15 @@ bool Bplus::Insert(Request a) {
                 }else //i don't know the exact meaning of this comment, please refer to the chinese edition.
                 {
                     nowtd = 0;
-                    p->key[p->keynum] = a.ts + a.td;
+                    p->key[p->keynum] = a.start + a.duration;
                     p->record[p->keynum] = p->record[p->keynum - 1];
                     p->ptr[p->keynum] = NULL;
-                    p->record[p->keynum - 1] += a.bw;
+                    p->record[p->keynum - 1] += a.value;
                     p->keynum++;
 
                     tmp = p->parent;
                     while(tmp){
-                        tmp->key[tmp->keynum - 1] = a.ts + a.td;
+                        tmp->key[tmp->keynum - 1] = a.start + a.duration;
                         tmp = tmp->parent;
                     }
 
@@ -365,10 +365,10 @@ bool Bplus::Insert(Request a) {
                     p->record[j + 1] = p->record[j];
                     p->ptr[j + 1] = p->ptr[j];
                 }
-                p->key[i + 1] = a.ts + a.td;
+                p->key[i + 1] = a.start + a.duration;
                 p->record[i + 1] = p->record[i];
                 p->ptr[i + 1] = NULL;
-                p->record[i] += a.bw;
+                p->record[i] += a.value;
                 p->keynum++;
 
                 if(p->keynum > m)

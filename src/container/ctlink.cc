@@ -54,7 +54,7 @@ void CTLink::setTime(unsigned int t) {
 
 bool CTLink::insert(Request request) {
     // accept judgment.
-    if(request.td == 0){
+    if(request.duration == 0){
         return true;
     }
 
@@ -77,8 +77,8 @@ bool CTLink::accept(Request request) {
     unsigned int st, et; // st stands for the start time of this request, et stands for the end time.
     CTNode* temp = NULL; // temp is used as temp node to mark the search start.
     unsigned int tackLoc; // used to store the loc of tack and index, if there is an index.
-    st = iCurrentTime + request.ts;
-    et = st + request.td;
+    st = iCurrentTime + request.start;
+    et = st + request.duration;
     if(et > iCurrentTime + CT_MAX_RESERVE_TIME){ // request r is out of range.
         return false;
     }
@@ -98,11 +98,11 @@ bool CTLink::accept(Request request) {
     // Update at 1310012249: node->rs decides the resource after node->t
     // so if the rs of which node from the last one before st to last one before et is more than r.bw, request r can be accepted.
     // update at 1310201505: change the algorithmic logic to fix a bug that temp can be pointed to NULL.
-    if(temp->pre->rs + request.bw > iMaxResource){
+    if(temp->pre->rs + request.value > iMaxResource){
         return false;
     }
     while(temp->t < et){
-        if(temp->rs + request.bw > iMaxResource){
+        if(temp->rs + request.value > iMaxResource){
             return false;
         }
         temp = temp->next;
@@ -207,7 +207,7 @@ bool CTLink::Output() {
     cout << "CTLINK:DISPLAY..." << endl;
     int n = 0;
     unsigned int recordTime = 0;
-    unsigned int recordInterval = CT_MAX_RESERVE_TIME/20;
+    unsigned int recordInterval = CT_MAX_RESERVE_TIME / 20;
     string strname = "ctlinkDensity_"
             + Fanjing::StringHelper::int2str(CT_TACK_ARRAY_SIZE);
     CTNode* start = tack[(getTackLoc(iCurrentTime) + CT_TACK_ARRAY_SIZE - 1)
@@ -278,8 +278,8 @@ void CTLink::initCTLink(unsigned int tnum, unsigned int max) {
 
 bool CTLink::forceInsert(Request request) {
     // if accepted, modify the resource of each node.
-    unsigned int st = iCurrentTime + request.ts;
-    unsigned int et = st + request.td;
+    unsigned int st = iCurrentTime + request.start;
+    unsigned int et = st + request.duration;
     // select the start point.
     CTNode* start = insertNode(st, next2st);
     // find the next node to the et node.
@@ -288,7 +288,7 @@ bool CTLink::forceInsert(Request request) {
     insertNode(et, next2et);
     // after insertion of the node et, the node before et can be modified.
     for(; start->t < et; start = start->next){
-        start->rs = start->rs + request.bw;
+        start->rs = start->rs + request.value;
     }
     return true;
 }

@@ -59,7 +59,7 @@ bool CTILink::setTime(unsigned int time) {
 
 bool CTILink::insert(Request request) {
     // accept judgment.
-    if(request.td == 0){
+    if(request.duration == 0){
         return true;
     }
     CTINode* loc = accept(request);
@@ -68,8 +68,8 @@ bool CTILink::insert(Request request) {
         return false;
     }else{
         // if accepted, modify the resource of each node.
-        unsigned int st = iCurrentTime + request.ts;
-        unsigned int et = st + request.td;
+        unsigned int st = iCurrentTime + request.start;
+        unsigned int et = st + request.duration;
         // select the start point.
         CTINode* temp = insertNode(st, loc);
         CTINode* start = temp;
@@ -81,7 +81,7 @@ bool CTILink::insert(Request request) {
         insertNode(et, temp);
         // after insertion of the node et, the node before et can be modified.
         for(temp = start; temp->t < et; temp = temp->next){
-            temp->rs = temp->rs + request.bw;
+            temp->rs = temp->rs + request.value;
         }
     }
     return true;
@@ -95,8 +95,8 @@ CTINode* CTILink::accept(Request r) {
     unsigned int st, et; // st stands for the start time of this request, et stands for the end time.
     CTINode* result, *temp; // result is used to store the result node. temp is used as temp node to mark the search start.
     unsigned int tackLoc, indexLoc; // used to store the loc of tack and index, if there is an index.
-    st = iCurrentTime + r.ts;
-    et = st + r.td;
+    st = iCurrentTime + r.start;
+    et = st + r.duration;
 
     tackLoc = getTackLoc(st);
     if(et > iCurrentTime + CTI_MAX_RESERVE_TIME) // request r is out of range.
@@ -120,11 +120,11 @@ CTINode* CTILink::accept(Request r) {
     // Update at 1310012249: node->rs decides the resource after node->t
     // so if the rs of which node from the last one before st to last one before et is more than r.bw, request r can be accepted.
     // update at 1310201505: change the algorithmic logic to fix a bug that temp can be pointed to NULL.
-    if(temp->pre->rs + r.bw > iMaxResource){
+    if(temp->pre->rs + r.value > iMaxResource){
         return NULL;
     }
     while(temp->t < et){
-        if(temp->rs + r.bw > iMaxResource){
+        if(temp->rs + r.value > iMaxResource){
             return NULL;
         }
         temp = temp->next;

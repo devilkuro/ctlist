@@ -36,8 +36,8 @@ bool Generator::output(const char* fileName, unsigned int t) {
         interval = this->getNext(&rq);
 #ifdef GN_OUT_DEBUG
         if (i % 100000 == 0 && DEBUG){
-            cout << "write:: Request(" << rq.bw << " , " << rq.ts << " , "
-            << rq.td << " ):" << interval << endl;
+            cout << "write:: Request(" << rq.value << " , " << rq.start << " , "
+            << rq.duration << " ):" << interval << endl;
         }
 #endif
         memcpy(buff + i * size, &interval, sizeof(double));
@@ -53,13 +53,13 @@ bool Generator::output(const char* fileName, unsigned int t) {
 }
 
 unsigned int Generator::getNext(Request* rq) {
-    rq->bw = hp.U_Randint(bw_down, bw_up);
-    rq->ts = hp.U_Randint(ts_down, ts_up);
+    rq->value = hp.U_Randint(bw_down, bw_up);
+    rq->start = hp.U_Randint(ts_down, ts_up);
     // rq->td = (unsigned int) hp.E_Rand(1.0 / td_ave) % td_limit;
-    rq->td = (unsigned int) hp.F_Rand(td_down,td_up);
+    rq->duration = (unsigned int) hp.F_Rand(td_down,td_up);
     // fixed at 201503161648.
-    if(rq->td<1){
-        rq->td = 1;
+    if(rq->duration<1){
+        rq->duration = 1;
     }
     return (unsigned int) hp.P_Rand(interval);
 }

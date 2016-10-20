@@ -14,34 +14,34 @@ Array::Array(int n) {
 bool Array::Insert(Request r) {
     unsigned int i, end;
 
-    end = t + r.ts + r.td;
+    end = t + r.start + r.duration;
     //进行接纳控制
-    i = t + r.ts;
-    if(r.td > N)
+    i = t + r.start;
+    if(r.duration > N)
         return false;
-    while(i < end && i < N && p[i] + r.bw <= MAX){
+    while(i < end && i < N && p[i] + r.value <= MAX){
         i++;
     }
-    if(p[i] + r.bw > MAX){
+    if(p[i] + r.value > MAX){
         return false;
     }else if(i >= N){
-        while(i < end && p[i - N] + r.bw <= MAX){
+        while(i < end && p[i - N] + r.value <= MAX){
             i++;
         }
-        if(p[i - N] + r.bw > MAX){
+        if(p[i - N] + r.value > MAX){
             return false;
         }
     }
 
     sumA++;
-    i = t + r.ts;
+    i = t + r.start;
     while(i < end && i < N){
-        p[i] += r.bw;
+        p[i] += r.value;
         i++;
     }
     if(i >= N){
         while(i < end){
-            p[i - N] += r.bw;
+            p[i - N] += r.value;
             i++;
         }
     }

@@ -150,7 +150,7 @@ void exDevelopTest() {
     for(int i = 0; i < 100000; i++){
         interval[i] = gn->getNext(&r[i]);
     }
-    cout << r[1000].bw << endl;
+    cout << r[1000].value << endl;
     for(int n = 0; n < 2; ++n){
         Sleep(50);
         //t_total = 0;
@@ -1377,8 +1377,8 @@ void exMultiLinkTest(string filename) {
                                         cout
                                                 << "multilink accepted storage No.: "
                                                 << i_storageNum << endl;
-                                        cout << "r.td:r.bw\t" << testRequest.td
-                                                << ":" << testRequest.bw
+                                        cout << "r.td:r.bw\t" << testRequest.duration
+                                                << ":" << testRequest.value
                                                 << endl;
                                         t_nAccept[i_sample]++;
                                     }
